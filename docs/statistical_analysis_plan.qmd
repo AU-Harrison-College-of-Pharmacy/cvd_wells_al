@@ -99,13 +99,56 @@ Now, let's start simulating a dataset that will look something like this.
 library(tidyverse)
 library(tigris)
 library(sf)
+library(tidycensus)
 
 set.seed(65434)
-cbgs <- block_groups(state = "AL", cb = TRUE, year = 2000)
+cbgs <- block_groups(state = "AL", cb = TRUE, year = 2020) %>%
+  janitor::clean_names() %>%
+  rename(census_block_group = geoid)
+
+# Some of the death location residence codes are NOT ALABAMA. So you need to check for that. You should exclude deaths that are not in AL.
+# Some of the CBGs are in scientific notation (starting in row 11663 of the excel and csv files and seeming to go 12717)
+adph_primary <- read_csv("/Volumes/Projects/usgs_cvd_wells_al/data/raw/2016-2019CensusBlockGroupPrimaryCOD.CSV",
+                         col_types = c("c", "c", "i", "i", "i", "i")) %>%
+  janitor::clean_names() %>%
+  rename() %>%
+  mutate(cbg_included_by_adph = 1,
+         census_block_group = as.character(census_block_group),
+         census_block_group = paste0("0", census_block_group))  # The ADPH data is missing the leading '0' that is usually associated with a state FIPS code ('01' for Alabama)
+
+cbg_age_populations <- get_decennial(geography = "cbg", 
+                                     state = "AL",
+                                     variables = c("P12_015N", "P12_016N", "P12_017N", "P12_018N", "P12_019N", "P12_020N", "P12_021N", "P12_022N", "P12_023N", "P12_024N", "P12_025N",
+                                                   "P12_039N", "P12_040N", "P12_041N", "P12_042N", "P12_043N", "P12_044N", "P12_045N", "P12_046N", "P12_047N", "P12_048N", "P12_049N"),
+                                     sumfile = "dhc")
+
+df_age_populations <- cbg_age_populations %>%
+  mutate(age_group = case_when(
+    variable %in% c("P12_015N", "P12_016N", "P12_039N", "P12_040N") ~ "45 - 54 yrs",
+    variable %in% c("P12_017N", "P12_018N", "P12_019N", "P12_041N", "P12_042N", "P12_043N") ~ "55 - 64 yrs",
+    variable %in% c("P12_020N", "P12_021N", "P12_022N", "P12_044N", "P12_045N", "P12_046N") ~ "65 - 74 yrs",
+    variable %in% c("P12_023N", "P12_024N", "P12_025N", "P12_047N", "P12_048N", "P12_049N") ~ "75 or over"
+  )) %>%
+  group_by(GEOID, age_group) %>%
+  summarise(
+    population_estimate = sum(value)
+  ) %>%
+  rename(census_block_group = GEOID) %>%
+  ungroup()
+
+df <- left_join(cbgs, adph_primary,
+                by = "census_block_group") %>%
+  mutate(cbg_included_by_adph = if_else(is.na(cbg_included_by_adph), 0, cbg_included_by_adph)) %>%
+  left_join(., df_age_populations,
+            by = c("census_block_group", "age_group"))
+
+df_adph_included <- filter(df, cbg_included_by_adph == 1) %>%
+  as_tibble() %>%
+  select(census_block_group, age_group, hypertensive_deaths, ischemic_deaths, stroke_cerebrovascular_deaths, diabetes_deaths, population_estimate, geometry)
 
 # Now we will create a simulated dataset
 cbgs_analysis <- cbgs %>%
-  mutate(fips = str_c(COUNTY, TRACT, BLKGROUP)) %>%
+  mutate(fips = str_c(countyfp, tractce, blkgrpce)) %>%
   group_by(fips) %>%
   mutate(
     rurality = sample(seq(1, 9), 1, replace = TRUE), # Generate random RUCA codes
@@ -209,6 +252,21 @@ Now, how do we do constrained multiple imputation with `Amelia`? Here is a basic
 ```{r, message = FALSE}
 library(Amelia)
 
+bds_df <- matrix(c(2, 1, 5,
+                   3, 1, 5,
+                   4, 1, 5,
+                   5, 1, 5), 
+                 nrow = 4, 
+                 ncol = 3, 
+                 byrow = TRUE)
+
+a_df <- amelia(as.data.frame(df_adph_included) %>%
+                 mutate(age_group = as_factor(age_group) %>% fct_relevel("45 - 54 yrs", "55 - 64 yrs", "65 - 74 yrs", "75 or over") %>% as.ordered() %>% as.integer()) %>%
+                 dplyr::select(-geometry),
+               m = 60,
+               idvars = c("census_block_group"),
+               bounds = bds_df)
+
 bds <- matrix(c(1, 1, 4), nrow = 1, ncol = 3)
 a_wells <- amelia(as.data.frame(select(cbgs_analysis, suppressed_y, c_wells, population, age_group, rural, fips)),
                  m = 50,
@@ -224,6 +282,19 @@ And then we can re-fit the models on the imputed data.
 
 ```{r}
 library(lme4)
+
+f_imputed <- lapply(1:2, function(i){
+  f <- glmer(round(hypertensive_deaths) ~ (1 | census_block_group) + age_group + offset(log(p)),
+             family = poisson(link = "log"),
+             data = a_df$imputations[[i]] %>% filter(!(census_block_group %in% c("010730027011", "010810406031"))) %>% # These two census block groups have population of 0, which was throwing off the model. So we are excluding them. %>%
+               mutate(age_group = as_factor(age_group),
+                      p = population_estimate * 5),  # These deaths are aggregating over a certain number of years, so we are multiplying the population by the number of years to reflect the real population at risk for that many deaths. This number may be corrected later. It's currently yielding approximately the correct rates.
+             glmerControl(optimizer = "bobyqa", optCtrl = list(maxfun = 500000))
+             )
+})
+
+
+
 imputed_models <- lapply(1:10, function(i){
   f <- glmer(suppressed_y ~ (1 | fips) + rural + c_wells + age_group + offset(log(population)),
               family = poisson(link = "log"),
@@ -240,8 +311,19 @@ Here is how we might report the results:
 
 ```{r}
 library(ggeffects)
+
+p_hypertensive <- lapply(f_imputed, predict_response, terms = c("age_group", "census_block_group"),
+                               condition = c(p = 100000),
+                         type = "re") %>%
+  pool_predictions()
+
+p_hypertensive %>% plot()
+
+p_hypertensive_cbgs <- lapply(f_imputed, predict_response, terms = c("age_group"),
+                               condition = c(p = 100000))
+
 predictions_ischemic <- lapply(imputed_models, predict_response, terms = c("c_wells [0, 1]"),
-                               condition = c(population = 100000, rural = 1, age_group = "65 plus")) %>%
+                               condition = c(p = 100000, rural = 1, age_group = "65 plus")) %>%
   pool_predictions()
 
 predictions_ischemic
