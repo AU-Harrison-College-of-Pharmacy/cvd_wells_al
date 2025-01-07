@@ -1,5 +1,310 @@
 ---
-title: "Untitled"
-format: html
-editor: visual
+title: "Statistical analysis plan: Rates of private well use and cardiovascular disease mortality in Alabama"
+date: "now"
+format: 
+  typst: default
+  docx: default
+bibliography: references.bib
+execute: 
+  error: false
 ---
+
+# Why are we doing this study?
+
+The [*overarching objective*]{.underline} of this research project is to determine how much well water use rates in Census block groups (CBGs) may be related to cardiovascular disease (CVD) mortality in those CBGs in Alabama. Our rationale for pursuing this objective is that CVD mortality is a major public health concern in Alabama, and the contribution of private well drinking water contamination to CVD mortality is not well understood. Because CVD mortality is generally more common in rural areas of Alabama, and some of these rural areas have higher rates of private well use, contamination of drinking water among those with private wells may contribute to geographic variation in Alabama’s rates of CVD mortality.
+
+# Research questions/objectives
+
+1.  Among CBGs in Alabama, what is the relationship between the age-standardized mortality rate of each CVD outcome (Ischemic Heart Disease, Hypertensive Heart Diseases, and Stroke/Cerebrovascular diseases) per 100,000 residents and the proportion of private well users, adjusted for rurality?
+2.  How much does the relationship in Objective #1 vary by geologic region (Highland Rim, Cumberland Plateau, Alabama Valley and Ridge, Piedmont Upland, and East Gulf Coastal Plain)?
+3.  How much does the relationship in Objective #1 vary by percent agricultural land use?
+
+## Causal model
+
+```{=typst}
+
+#figure(caption: "Directed Acyclic Graph (DAG) for hypothesized relationships between key variables for Objective 1",
+        image("grant_application/dag.png", width: 80%))
+```
+# Data story
+
+-   **CVD mortality data by CBG** - The CVD mortality counts (Ischemic Heart Disease, Hypertensive Heart Diseases, and Stroke/Cerebrovascular Diseases) will be obtained via a data request from the Alabama Department of Public Health (ADPH). The Center for Health Statistics (CHS) collects, stores, and performs analysis on official vital records for the state of Alabama. The public facing portal can be found [**here**](https://dph1.adph.state.al.us/csc/vs/Query/Mortality/MortalityQryYear.htm). Causes of death are ascertained by the medical personnel completing the death certificate. (A possible blank example of AL death certificate can be found [**here**.](https://www.alabamapublichealth.gov/edrs/assets/sampledeathcertificate.pdf) There are rules about who fills out the death certificate, and the person could be the attending physician, a medical examiner, or a coroner, with preference for the attending physician. As far as I can tell, the medical personnel filling out the certificate writing down the causes of death, and then ADPH would assign the ICD-10 code based on the description in the death certificate. We are using data from 1999 and later because that is when cause of death began using the International Classification of Diseases Version 10 coding system. We are limiting to years before 2020 in order to reduce the impact of the COVID-19 pandemic on the mortality rates. The three CVD outcomes are based on the following ICD-10 codes: I20 - I25 (Ischemic Heart Disease); I11 and I13 (Hypertensive Heart Disease or Heart and Renal Disease); and I60 - I69 (Stroke \[Cerebrovascular Diseases\]). We will obtain the data for CBG x year x age subgroups. ADPH will suppress any counts of deaths that are in the range \[1,5\] in order to improve the confidentiality of the data.
+-   **Percent of population in a CBG served by private domestic wells in 2020** - We will download the data for CBGs using the "% Served" checkbox and the "Show Table" button from [**this website**](https://experience.arcgis.com/experience/be9006c30a2148f595693066441fb8eb/page/Map/). The data at this website is a new data release for 2020, based off methods that were estimated for 2010 data.[@murray2021] The methods use data from the 1990 Census, which was the last time the Census asked about water use in the home. The methods assume that the relationship between density of well use and density of housing units remained constant from 1990 to 2020. Then the data providers calculated the percent change in housing units from 1990 to 2020 (based on decennial Census results) at the CBG level to estimate the number of homes served by private wells in 2020. The account for changing geometries of CBGs from 1990 to 2020, the authors used something called the dasymetric method, which converts 1990 population density within CBGs into a raster, then overlays that raster on top of 2020 CBG geometries. Or something like that. Somehow population density change is also taken into account.
+-   **Percent land cover by CBG in 2021 -** We will obtain the data from [**this website**](https://www.mrlc.gov/viewer/). Specifically, we will use the 2021 CONUS land cover and download the data for Alabama only by uploading a shapefile for the state of Alabama (cartographic boundary) obtained from the 2020 Census using the `tigris::states()` function in `R`. Data is provided on a 30 m $x$ 30 m grid with a legend in a `.tiff` file format. We will consider pixels with a value of 81 (Pasture/Hay) or 82 (Cultivated Crops) as agricultural land use. We will calculate the proportion of pixels in a given CBG that have agricultural land use.
+-   **Geologic region of a CBG** - We will use the map of physiographic regions of Alabama.[@Ebersole2019-hx] But, we are having a hard time locating that report just cited that the map [**here**](https://www.ogb.alabama.gov/img/Geological/PhysiographicMap.jpg) came from. *Helen will handle this*.
+-   **Rurality of a CBG** - We will use Rural-Urban Commuting Area (RUCA) codes from the USDA Economic Research Service, which can be downloaded [**here**](https://www.ers.usda.gov/data-products/rural-urban-commuting-area-codes/). These RUCA codes are integers from 1 (most urban) to 10 (most rural) for Census tracts in 1990, 2000, and 2010. Census tracts are the next-largest Census geometry above CBGs, so all CBGs fall within exactly one Census tract. We will assign the RUCA code for the tract to each CBG that falls within that tract. *Helen will handle this*.
+-   **Population counts for CBGs in Alabama for 2000, 2010, and 2020** These counts will be obtained from the decennial census using the `tidycensus` package in `R`.
+
+# Key variables
+
+## Outcomes
+
+-   Number of deaths from ischemic heart disease in a given CBG and year
+-   Number of deaths from hypertensive heart disease in a given CBG and year
+-   Number of deaths from cerebrovascular diseases/stroke in a given CBG and year
+
+## Exposures
+
+-   Percent of population served by domestic wells in a given CBG in 2020
+
+## Other covariates of interest
+
+-   Potential confounders: rurality
+-   Offset: estimated population of given CBG in given year
+-   Effect modifiers: geologic region, percent land cover in 2021
+-   Predictors of outcome: age group
+
+# Statistical analysis strategy
+
+Overall strategy:
+
+-   Fit models in the Bayesian paradigm
+-   Summarize results and their uncertainty with posterior means and 95% credible intervals
+-   Account for suppressed values of deaths ($[1,5]$) by using multiple imputation via the `Amelia` package, which easily does constrained imputation between certain values.
+-   Data analysis will begin with exploratory data analysis to identify general distributions and potential errors in the dataset.
+-   When estimating associations with an exposure, we will check with all levels of the exposure occur within all crossed strata of the covariates. This check will ensure appropriate covariate overlap.
+
+## Research question 1
+
+### Model and estimand
+
+```{=typst}
+$ "Ischemic Heart Disease Deaths"_("ijk") ~ "Poisson"(lambda_("ijk")) $
+$ ln(lambda_("ijk")) = beta_0 + "CBG"_i + W_("i")beta_1 + R_i beta_2 + bold(Y)_("ij") bold(beta)_3 + bold(A)_("ijk") bold(beta)_4 + ln("population"_("ijk")) $
+$ "CBG" ~ N(0, sigma_C) $
+
+/ $"CBG"_i$: the $i^("th")$ Census block group 
+/ $W_("i")$: the proportion of the population estimated to be using private wells in the $i^("th")$ Census block group
+/ $R_i$: the rurality of the $i^("th")$ Census block group
+/ $bold(Y)_("ij")$: the set of indicator terms for year (1999 - 2019), treated as a categorical variable
+/ $bold(A)_("ijk")$: the age group, treated as a categorical variable
+/ $"population"_("ijk")$: the residential population of the $i^("th")$ Census block group in the $j^("th")$ year in the $k^("th")$ age group
+```
+
+The target estimand is $\beta_1$. 
+
+### Fake data simulation and analysis
+
+The dataset will look something like
+
+| cbg          | year | age_group | population | cbg_rurality | proportion_well_users | ischemic_deaths |
+|-----------|-----------|-----------|-----------|-----------|-----------|-----------|
+| 010810407002 | 2019 | 15 - 24   | 600        | 1            | 0.005                 | 0               |
+| 010810407002 | 2019 | 25 - 44   | 1000       | 1            | 0.005                 | 3               |
+| 010810407002 | 2019 | 45 - 64   | 1200       | 1            | 0.005                 | 10              |
+
+Now, let's start simulating a dataset that will look something like this. 
+
+```{r, message = FALSE}
+library(tidyverse)
+library(tigris)
+library(sf)
+
+set.seed(65434)
+cbgs <- block_groups(state = "AL", cb = TRUE, year = 2000)
+
+# Now we will create a simulated dataset
+cbgs_analysis <- cbgs %>%
+  mutate(fips = str_c(COUNTY, TRACT, BLKGROUP)) %>%
+  group_by(fips) %>%
+  mutate(
+    rurality = sample(seq(1, 9), 1, replace = TRUE), # Generate random RUCA codes
+    private_well_percentage = if_else(rurality < 7, runif(1, 0, 0.4), runif(1, 0.25, 0.9)) %>% round(2), # For a CBG generate a prevalence of private well usage, with more rural areas having a 
+    rural = if_else(rurality < 7, 0, 1),
+    re = rnorm(1, 0, 0.5)  # generate the random intercept for each CBG
+    ) %>%
+  
+  
+  crossing(year = seq(1999, 2019)) %>%  # Create combo of CBG x year
+  crossing(age_group = c("Under 15", "15 - 24", "25 - 44", "45 - 64", "65 plus")) %>%  # Create combo of CBG x year x age_group
+  mutate(id = seq(1, nrow(.))) %>%
+  group_by(id) %>%
+  mutate(population = runif(1, 20, 800) %>% round(),
+         ischemic_death_expected_per_100k = case_when(
+           age_group == "15 - 24" ~ exp((re + private_well_percentage * 0.1 + 1 + rural * 0.2)),
+           age_group == "Under 15" ~ exp((re + private_well_percentage * 0.1 + rural * 0.2)),
+           age_group == "25 - 44" ~ exp((re + private_well_percentage * 0.1 + 3 + rural * 0.2)),
+           age_group == "45 - 64" ~ exp((re + private_well_percentage * 0.1 + 4.5 + rural * 0.2)),
+           age_group == "65 plus" ~ exp((re + private_well_percentage * 0.1 + 6 + rural * 0.2))
+         ),
+         observed_ischemic_deaths = rpois(1, ischemic_death_expected_per_100k * population / 100000)
+  ) %>%
+  ungroup() %>%
+  mutate(age_group = as_factor(age_group) %>% fct_relevel("Under 15"),
+         rurality = as_factor(rurality),
+         c_wells = scale(private_well_percentage),
+         censored_y = if_else(observed_ischemic_deaths < 5, "left", "none"),
+         suppressed_y = if_else(observed_ischemic_deaths < 5 & observed_ischemic_deaths != 0, NA_integer_, observed_ischemic_deaths)
+  )
+```
+
+Let's fit the Frequentist version of the model first. It takes about 60 seconds.
+
+```{r}
+library(lme4)
+
+f <- glmer(observed_ischemic_deaths ~ (1 | fips) + rural + c_wells + age_group + offset(log(population)),
+              family = poisson(link = "log"),
+              data = cbgs_analysis,
+           glmerControl(optimizer = "bobyqa", optCtrl = list(maxfun = 500000)))
+
+summary(f)
+```
+
+This model does a very good job of capturing all of the parameter estimates. We had to center and scale private well use in order to estimate it well, just since a proportion has such a restricted range for a covariate.
+
+```{r}
+library(modelr)
+
+add_predictions(data = cbgs_analysis, model = f, type = "response") %>% 
+  ggplot(aes(x = observed_ischemic_deaths, y = pred)) + 
+  geom_point()
+```
+
+```{r}
+library(ggeffects)
+
+ggpredict(f, terms = c("c_wells"), condition = c(population = 100000)) %>%
+  plot()
+```
+
+```{r}
+p_expected <- add_predictions(data = filter(cbgs_analysis, age_group == "65 plus"), model = f, type = "response") %>% 
+  ggplot() +
+  geom_sf(aes(geometry = geometry, fill = pred / population * 100000), color = "light gray", linewidth = 0.05) +
+  theme_void() +
+  scale_fill_viridis_c()
+
+p_observed <- filter(cbgs_analysis, age_group == "65 plus") %>% 
+  ggplot() +
+  geom_sf(aes(geometry = geometry, fill = observed_ischemic_deaths / population * 100000), color = "light gray", linewidth = 0.05) +
+  theme_void() +
+  scale_fill_viridis_c()
+
+library(patchwork)
+p_expected / p_observed +
+  plot_annotation(title = "Predicted and observed rates by CBG for those 65 and older")
+```
+
+We can also use `INLA`, since it is a fast approximation to full Bayesian inference and is naturally built to model further spatial relationships, should we wish to pursue that. The model from `rstanarm` takes approximately 2 hours to run, given the large number of groups (\~3,300). Even though we may end up using `rstanarm` in the end, for model development `INLA` is a more practical choice.
+
+```{r}
+# Fit a Bayesian multilevel model using INLA
+library(INLA)
+formula <- observed_ischemic_deaths ~ f(fips, model = "iid") + age_group + c_wells + rural + offset(log(population))
+
+f_inla <- inla(
+  formula,
+  data = cbgs_analysis,
+  family = "poisson"
+)
+
+summary(f_inla)
+```
+
+This is the model we will use, combined with the `Amelia` package for constrained multiple imputation of suppressed counts, to fit the Bayesian models.
+
+Now, how do we do constrained multiple imputation with `Amelia`? Here is a basic example we will run. In this example, we will impute missing values for `suppressed_y`, which is the 1st column in the modified dataset below (after we apply the `select()` function). We know that missing values for observed deaths must be between 1 and 4, so we set the boundaries for the imputed values. We then list a bunch of variables that we **don't** want to use in the imputation model, such as the `geometry` of the CBG or `fips` codes, which don't carry any useful information.
+
+```{r, message = FALSE}
+library(Amelia)
+
+bds <- matrix(c(1, 1, 4), nrow = 1, ncol = 3)
+a_wells <- amelia(as.data.frame(select(cbgs_analysis, suppressed_y, c_wells, population, age_group, rural, fips)),
+                 m = 50,
+                 idvars = c("age_group", "fips"),
+                 bounds = bds,
+                 ncpus = 10)
+
+a_wells <- transform(a_wells,
+                     suppressed_y = round(suppressed_y))
+```
+
+And then we can re-fit the models on the imputed data.
+
+```{r}
+library(lme4)
+imputed_models <- lapply(1:10, function(i){
+  f <- glmer(suppressed_y ~ (1 | fips) + rural + c_wells + age_group + offset(log(population)),
+              family = poisson(link = "log"),
+              data = a_wells$imputations[[i]],
+           glmerControl(optimizer = "bobyqa", optCtrl = list(maxfun = 500000)))
+})
+
+map(imputed_models, ~fixef(.)[3]) %>% unlist() %>% mean()
+```
+
+We are getting very similar estimates as when we do have the full observations of the counts, so this method should work very well for the type of data that we have.
+
+Here is how we might report the results:
+
+```{r}
+library(ggeffects)
+predictions_ischemic <- lapply(imputed_models, predict_response, terms = c("c_wells [0, 1]"),
+                               condition = c(population = 100000, rural = 1, age_group = "65 plus")) %>%
+  pool_predictions()
+
+predictions_ischemic
+
+predictions_ischemic %>% plot()
+```
+
+We estimate about 5 - 7 more events per 100,000 among those 65 plus in a rural area with, say, 52% prevalence of well users vs. 30% prevalence of well users. We would estimate the rate ratio 52% prevalence of well users vs. 30% to be 
+
+```{r}
+map(imputed_models, ~fixef(.)[3]) %>% unlist() %>% mean() %>% exp() %>% round(digits = 2)
+```
+
+## Research question 2
+
+### Model and estimand
+
+```{=typst}
+$ "Ischemic Heart Disease Deaths"_("ijk") ~ "Poisson"(lambda_("ijk")) $
+$ ln(lambda_("ijk")) = beta_0 + "CBG"_i + W_("i")beta_1 + R_i beta_2 + bold(Y)_("ij") bold(beta)_3 + bold(A)_("ijk") bold(beta)_4 + bold("Region")_i bold(beta)_5 + W_("i") "x " bold("Region")_i bold(beta)_6 + ln("population"_("ijk")) $
+$ "CBG" ~ N(0, sigma_C) $
+
+/ $"CBG"_i$: the $i^("th")$ Census block group 
+/ $W_("i")$: the proportion of the population estimated to be using private wells in the $i^("th")$ Census block group
+/ $R_i$: the rurality of the $i^("th")$ Census block group
+/ $bold(Y)_("ij")$: the set of indicator terms for year (1999 - 2019), treated as a categorical variable
+/ $bold(A)_("ijk")$: the age group, treated as a categorical variable
+/ $bold("Region")_i$: the physiographic region of AL (5 levels)
+/ $"population"_("ijk")$: the residential population of the $i^("th")$ Census block group in the $j^("th")$ year in the $k^("th")$ age group
+```
+
+The estimands of interest are the $\mathbf{\beta}_6$, which we can assess as a group to see whether any of them fall outside a reasonable range of "no interaction". We have simulated the parameter for the centered and scaled version of well use percentage to be indicate a 1 standard deviation higher rate of well use to be associated with a ~1.5% higher rate of CVD mortality, keeping all other covariates constant. Assuming that this 1.5% higher rate is the average across all physiographic regions, what would we consider a meaningful deviation from this average? Perhaps a rate that is below 1% higher or more than 2% higher would be meaningful? In that case, we can use the posterior distributions from the INLA models to calculate the probability that at least 1 of the $\mathbf{\beta}_6$ (the log rate ratios) from the fitted model is less than 0.01 or greater than 0.02. This probability would be $1 - P[\textrm{all are }0.01 - 0.02]$, so it should be fairly easy to calculate. 
+
+## Research Question 3
+
+### Model and estimand
+
+```{=typst}
+$ "Ischemic Heart Disease Deaths"_("ijk") ~ "Poisson"(lambda_("ijk")) $
+$ ln(lambda_("ijk")) = beta_0 + "CBG"_i + W_("i")beta_1 + R_i beta_2 + bold(Y)_("ij") bold(beta)_3 + bold(A)_("ijk") bold(beta)_4 + L_i beta_5 + W_("i") "x " L_i beta_6 + ln("population"_("ijk")) $
+$ "CBG" ~ N(0, sigma_C) $
+
+/ $"CBG"_i$: the $i^("th")$ Census block group 
+/ $W_("i")$: the proportion of the population estimated to be using private wells in the $i^("th")$ Census block group
+/ $R_i$: the rurality of the $i^("th")$ Census block group
+/ $bold(Y)_("ij")$: the set of indicator terms for year (1999 - 2019), treated as a categorical variable
+/ $bold(A)_("ijk")$: the age group, treated as a categorical variable
+/ $L_i$: the percent agricultural land use
+/ $"population"_("ijk")$: the residential population of the $i^("th")$ Census block group in the $j^("th")$ year in the $k^("th")$ age group
+```
+
+The estimand of interest is the $\beta_6$, which we can assess to see if it falls outside a reasonable range of "no interaction". We have simulated the parameter for the centered and scaled version of well use percentage to be indicate a 1 standard deviation higher rate of well use to be associated with a ~1.5% higher rate of CVD mortality, keeping all other covariates constant. We would likely want to center and scale the percent agricultural land use variable, too. Assuming that this 1.5% higher rate is the average across all values of percent agricultural land use, what would we consider a meaningful deviation from this average? Perhaps a rate that is below 1% higher or more than 2% higher would be meaningful for a 1 standard deviation change in percent agricultural land use? In that case, we can use the posterior distributions from the INLA models to calculate the probability that $\beta_6$ (the log rate ratio) from the fitted model is less than 0.01 or greater than 0.02. This probability would be fairly easy to calculate using the posterior distributions. 
+
+## Missing data
+
+-   While we do not anticipate missing covariate values, we will evaluate the presence of it using summary statistics (`Hmisc::describe()`) and functions from the `naniar` package to identify common combinations of missing values.
+
+# Decisions
+
+| Decision | Date | Decision owner |
+|----------|------|----------------|
+|          |      |                |
+|          |      |                |
+|          |      |                |
+
+# References

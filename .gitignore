@@ -1,3 +1,4 @@
+
 *.doc*
 *.pdf
 *.png
@@ -16,3 +17,10 @@ figs/
 *.rdx
 *.jpg
 *.jpeg
+.Rproj.user
+.Rhistory
+.RData
+.Ruserdata
+figs/
+*.docx
+*.html
