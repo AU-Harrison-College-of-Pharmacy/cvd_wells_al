@@ -1,4 +1,3 @@
-
 *.doc*
 *.pdf
 *.png
@@ -24,3 +23,5 @@ figs/
 figs/
 *.docx
 *.html
+data/
+output/
