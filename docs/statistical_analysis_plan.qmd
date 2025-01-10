@@ -28,7 +28,7 @@ The [*overarching objective*]{.underline} of this research project is to determi
 ```
 # Data story
 
--   **CVD mortality data by CBG** - The CVD mortality counts (Ischemic Heart Disease, Hypertensive Heart Diseases, and Stroke/Cerebrovascular Diseases) will be obtained via a data request from the Alabama Department of Public Health (ADPH). The Center for Health Statistics (CHS) collects, stores, and performs analysis on official vital records for the state of Alabama. The public facing portal can be found [**here**](https://dph1.adph.state.al.us/csc/vs/Query/Mortality/MortalityQryYear.htm). Causes of death are ascertained by the medical personnel completing the death certificate. (A possible blank example of AL death certificate can be found [**here**.](https://www.alabamapublichealth.gov/edrs/assets/sampledeathcertificate.pdf) There are rules about who fills out the death certificate, and the person could be the attending physician, a medical examiner, or a coroner, with preference for the attending physician. As far as I can tell, the medical personnel filling out the certificate writing down the causes of death, and then ADPH would assign the ICD-10 code based on the description in the death certificate. We are using data from 1999 and later because that is when cause of death began using the International Classification of Diseases Version 10 coding system. We are limiting to years before 2020 in order to reduce the impact of the COVID-19 pandemic on the mortality rates. The three CVD outcomes are based on the following ICD-10 codes: I20 - I25 (Ischemic Heart Disease); I11 and I13 (Hypertensive Heart Disease or Heart and Renal Disease); and I60 - I69 (Stroke \[Cerebrovascular Diseases\]). We will obtain the data for CBG x year x age subgroups. ADPH will suppress any counts of deaths that are in the range \[1,5\] in order to improve the confidentiality of the data.
+-   **CVD mortality data by CBG** - The CVD mortality counts (Ischemic Heart Disease, Hypertensive Heart Diseases, and Stroke/Cerebrovascular Diseases) will be obtained via a data request from the Alabama Department of Public Health (ADPH). The Center for Health Statistics (CHS) collects, stores, and performs analysis on official vital records for the state of Alabama. The public facing portal can be found [**here**](https://dph1.adph.state.al.us/csc/vs/Query/Mortality/MortalityQryYear.htm). Causes of death are ascertained by the medical personnel completing the death certificate. (A possible blank example of AL death certificate can be found [**here**.](https://www.alabamapublichealth.gov/edrs/assets/sampledeathcertificate.pdf) There are rules about who fills out the death certificate, and the person could be the attending physician, a medical examiner, or a coroner, with preference for the attending physician. As far as I can tell, the medical personnel filling out the certificate writing down the causes of death, and then ADPH would assign the ICD-10 code based on the description in the death certificate. We are using data from 1999 and later because that is when cause of death began using the International Classification of Diseases Version 10 coding system. We are limiting to years before 2020 in order to reduce the impact of the COVID-19 pandemic on the mortality rates. The three CVD outcomes are based on the following ICD-10 codes: I20 - I25 (Ischemic Heart Disease); I11 and I13 (Hypertensive Heart Disease or Heart and Renal Disease); and I60 - I69 (Stroke \[Cerebrovascular Diseases\]). We will obtain the data for CBG x year x age subgroups. ADPH will suppress any counts of deaths that are in the range \[1,5\] in order to improve the confidentiality of the data. We obtained deaths by location of *residence*, so some deaths included in the file are not from residents of AL. Likewise, we will also miss deaths for AL residents who died in another state.
 -   **Percent of population in a CBG served by private domestic wells in 2020** - We will download the data for CBGs using the "% Served" checkbox and the "Show Table" button from [**this website**](https://experience.arcgis.com/experience/be9006c30a2148f595693066441fb8eb/page/Map/). The data at this website is a new data release for 2020, based off methods that were estimated for 2010 data.[@murray2021] The methods use data from the 1990 Census, which was the last time the Census asked about water use in the home. The methods assume that the relationship between density of well use and density of housing units remained constant from 1990 to 2020. Then the data providers calculated the percent change in housing units from 1990 to 2020 (based on decennial Census results) at the CBG level to estimate the number of homes served by private wells in 2020. The account for changing geometries of CBGs from 1990 to 2020, the authors used something called the dasymetric method, which converts 1990 population density within CBGs into a raster, then overlays that raster on top of 2020 CBG geometries. Or something like that. Somehow population density change is also taken into account.
 -   **Percent land cover by CBG in 2021 -** We will obtain the data from [**this website**](https://www.mrlc.gov/viewer/). Specifically, we will use the 2021 CONUS land cover and download the data for Alabama only by uploading a shapefile for the state of Alabama (cartographic boundary) obtained from the 2020 Census using the `tigris::states()` function in `R`. Data is provided on a 30 m $x$ 30 m grid with a legend in a `.tiff` file format. We will consider pixels with a value of 81 (Pasture/Hay) or 82 (Cultivated Crops) as agricultural land use. We will calculate the proportion of pixels in a given CBG that have agricultural land use.
 -   **Geologic region of a CBG** - We will use the map of physiographic regions of Alabama.[@Ebersole2019-hx] But, we are having a hard time locating that report just cited that the map [**here**](https://www.ogb.alabama.gov/img/Geological/PhysiographicMap.jpg) came from. *Helen will handle this*.
@@ -99,13 +99,60 @@ Now, let's start simulating a dataset that will look something like this.
 library(tidyverse)
 library(tigris)
 library(sf)
+library(tidycensus)
 
 set.seed(65434)
-cbgs <- block_groups(state = "AL", cb = TRUE, year = 2000)
+cbgs <- block_groups(state = "AL", cb = TRUE, year = 2020) %>%
+  janitor::clean_names() %>%
+  rename(census_block_group = geoid)
+
+# Some of the death location residence codes are NOT ALABAMA. So you need to check for that. You should exclude deaths that are not in AL.
+# Some of the CBGs are in scientific notation (starting in row 11663 of the excel and csv files and seeming to go 12717)
+adph_primary <- read_csv("/Volumes/Projects/usgs_cvd_wells_al/data/raw/2024-01-10/2016-2019CensusBlockGroupPrimaryCOD2.csv",
+                         col_types = c("c", "c", "i", "i", "i", "i")) %>%
+  janitor::clean_names() %>%
+  mutate(cbg_included_by_adph = 1,
+         census_block_group = as.character(census_block_group)) %>%
+  filter(str_starts(census_block_group, "01"))  # some deaths in Alabama were for residents of other states. keeping only CBGs in AL.
+
+# Test that all CBGs have length 12. Test should return a tibble with 0 rows.
+adph_primary %>% mutate(l = str_length(census_block_group)) %>% filter(l != 12)
+
+cbg_age_populations <- get_decennial(geography = "cbg", 
+                                     state = "AL",
+                                     variables = c("P12_015N", "P12_016N", "P12_017N", "P12_018N", "P12_019N", "P12_020N", "P12_021N", "P12_022N", "P12_023N", "P12_024N", "P12_025N",
+                                                   "P12_039N", "P12_040N", "P12_041N", "P12_042N", "P12_043N", "P12_044N", "P12_045N", "P12_046N", "P12_047N", "P12_048N", "P12_049N"),
+                                     sumfile = "dhc")
+
+df_age_populations <- cbg_age_populations %>%
+  mutate(age_group = case_when(
+    variable %in% c("P12_015N", "P12_016N", "P12_039N", "P12_040N") ~ "45 - 54 yrs",
+    variable %in% c("P12_017N", "P12_018N", "P12_019N", "P12_041N", "P12_042N", "P12_043N") ~ "55 - 64 yrs",
+    variable %in% c("P12_020N", "P12_021N", "P12_022N", "P12_044N", "P12_045N", "P12_046N") ~ "65 - 74 yrs",
+    variable %in% c("P12_023N", "P12_024N", "P12_025N", "P12_047N", "P12_048N", "P12_049N") ~ "75 or over"
+  )) %>%
+  group_by(GEOID, age_group) %>%
+  summarise(
+    population_estimate = sum(value)
+  ) %>%
+  rename(census_block_group = GEOID) %>%
+  ungroup()
+
+df <- left_join(cbgs, adph_primary,
+                by = "census_block_group") %>%
+  select(-c(statefp, countyfp, tractce, blkgrpce, affgeoid, name, namelsad, lsad)) %>%
+  mutate(cbg_included_by_adph = if_else(is.na(cbg_included_by_adph), 0, cbg_included_by_adph),
+         hypertensive_deaths = if_else(cbg_included_by_adph == 0, 0, hypertensive_deaths),
+         ischemic_deaths = if_else(cbg_included_by_adph == 0, 0, ischemic_deaths),
+         stroke_cerebrovascular_deaths = if_else(cbg_included_by_adph == 0, 0, stroke_cerebrovascular_deaths),
+         diabetes_deaths = if_else(cbg_included_by_adph == 0, 0, diabetes_deaths)) %>%
+  left_join(., df_age_populations,
+            by = c("census_block_group", "age_group")) %>%
+  as_tibble()
 
 # Now we will create a simulated dataset
 cbgs_analysis <- cbgs %>%
-  mutate(fips = str_c(COUNTY, TRACT, BLKGROUP)) %>%
+  mutate(fips = str_c(countyfp, tractce, blkgrpce)) %>%
   group_by(fips) %>%
   mutate(
     rurality = sample(seq(1, 9), 1, replace = TRUE), # Generate random RUCA codes
@@ -209,6 +256,24 @@ Now, how do we do constrained multiple imputation with `Amelia`? Here is a basic
 ```{r, message = FALSE}
 library(Amelia)
 
+<<<<<<< HEAD
+=======
+bds_df <- matrix(c(2, 1, 5,
+                   3, 1, 5,
+                   4, 1, 5,
+                   5, 1, 5), 
+                 nrow = 4, 
+                 ncol = 3, 
+                 byrow = TRUE)
+
+a_df <- amelia(as.data.frame(df_adph_included) %>%
+                 mutate(age_group = as_factor(age_group) %>% fct_relevel("45 - 54 yrs", "55 - 64 yrs", "65 - 74 yrs", "75 or over") %>% as.ordered() %>% as.integer()) %>%
+                 dplyr::select(-geometry),
+               m = 60,
+               idvars = c("census_block_group"),
+               bounds = bds_df)
+
+>>>>>>> test-adph-data
 bds <- matrix(c(1, 1, 4), nrow = 1, ncol = 3)
 a_wells <- amelia(as.data.frame(select(cbgs_analysis, suppressed_y, c_wells, population, age_group, rural, fips)),
                  m = 50,
@@ -224,6 +289,22 @@ And then we can re-fit the models on the imputed data.
 
 ```{r}
 library(lme4)
+<<<<<<< HEAD
+=======
+
+f_imputed <- lapply(1:2, function(i){
+  f <- glmer(round(hypertensive_deaths) ~ (1 | census_block_group) + age_group + offset(log(p)),
+             family = poisson(link = "log"),
+             data = a_df$imputations[[i]] %>% filter(!(census_block_group %in% c("010730027011", "010810406031"))) %>% # These two census block groups have population of 0, which was throwing off the model. So we are excluding them. %>%
+               mutate(age_group = as_factor(age_group),
+                      p = population_estimate * 5),  # These deaths are aggregating over a certain number of years, so we are multiplying the population by the number of years to reflect the real population at risk for that many deaths. This number may be corrected later. It's currently yielding approximately the correct rates.
+             glmerControl(optimizer = "bobyqa", optCtrl = list(maxfun = 500000))
+             )
+})
+
+
+
+>>>>>>> test-adph-data
 imputed_models <- lapply(1:10, function(i){
   f <- glmer(suppressed_y ~ (1 | fips) + rural + c_wells + age_group + offset(log(population)),
               family = poisson(link = "log"),
@@ -240,8 +321,24 @@ Here is how we might report the results:
 
 ```{r}
 library(ggeffects)
+<<<<<<< HEAD
 predictions_ischemic <- lapply(imputed_models, predict_response, terms = c("c_wells [0, 1]"),
                                condition = c(population = 100000, rural = 1, age_group = "65 plus")) %>%
+=======
+
+p_hypertensive <- lapply(f_imputed, predict_response, terms = c("age_group", "census_block_group"),
+                               condition = c(p = 100000),
+                         type = "re") %>%
+  pool_predictions()
+
+p_hypertensive %>% plot()
+
+p_hypertensive_cbgs <- lapply(f_imputed, predict_response, terms = c("age_group"),
+                               condition = c(p = 100000))
+
+predictions_ischemic <- lapply(imputed_models, predict_response, terms = c("c_wells [0, 1]"),
+                               condition = c(p = 100000, rural = 1, age_group = "65 plus")) %>%
+>>>>>>> test-adph-data
   pool_predictions()
 
 predictions_ischemic
