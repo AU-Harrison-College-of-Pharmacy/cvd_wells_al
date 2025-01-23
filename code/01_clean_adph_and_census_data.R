@@ -73,18 +73,56 @@ df <- left_join(cbgs, adph_primary,
   left_join(., df_age_populations,
             by = c("census_block_group", "age_group")) %>%
   as_tibble() %>%
+  rename(
+    id_census_block_group = census_block_group,
+    amt_area_land = aland,
+    amt_area_water = awater,
+    cat_age_group = age_group,
+    n_hypertensive_deaths = hypertensive_deaths,
+    n_ischemic_deaths = ischemic_deaths,
+    n_stroke_cerebrovascular_deaths = stroke_cerebrovascular_deaths,
+    n_diabetes_deaths = diabetes_deaths,
+    ind_cbg_age_group_included_by_adph = cbg_age_included_by_adph,
+    n_population = population_estimate
+  ) %>%
+  mutate(
+    cat_hypertensive_deaths = case_when(
+      n_hypertensive_deaths == 0 ~ "0",
+      n_hypertensive_deaths >= 6 ~ "6 or more",
+      is.na(n_hypertensive_deaths) ~ "1 - 5"
+    ),
+    cat_ischemic_deaths = case_when(
+      n_ischemic_deaths == 0 ~ "0",
+      n_ischemic_deaths >= 6 ~ "6 or more",
+      is.na(n_ischemic_deaths) ~ "1 - 5"
+    ),
+    cat_stroke_cerebrovascular_deaths = case_when(
+      n_stroke_cerebrovascular_deaths == 0 ~ "0",
+      n_stroke_cerebrovascular_deaths >= 6 ~ "6 or more",
+      is.na(n_stroke_cerebrovascular_deaths) ~ "1 - 5"
+    ),
+    cat_diabetes_deaths = case_when(
+      n_diabetes_deaths == 0 ~ "0",
+      n_diabetes_deaths >= 6 ~ "6 or more",
+      is.na(n_diabetes_deaths) ~ "1 - 5"
+    )
+  ) %>%
   var_labels(
-    census_block_group = "Census block group FIPS according to 2020 Census",
-    aland = "Area of CBG that is land (m^2)",
-    awater = "Are of CBG that is water (m^2)",
-    age_group = "Age group (years)",
-    hypertensive_deaths = "Number of deaths from 2016 to 2019 with primary cause of death listed as hypertensive heart disease (I10 - I15). Missing values indicate a suppressed count between 1 and 5, inclusive.",
-    ischemic_deaths = "Number of deaths from 2016 to 2019 with primary cause of death listed as ischemic heart disease (I20 - I25). Missing values indicate a suppressed count between 1 and 5, inclusive.",
-    stroke_cerebrovascular_deaths = "Number of deaths from 2016 to 2019 with primary cause of death listed as stroke or cerebrovascular diseases (I60 - I69). Missing values indicate a suppressed count between 1 and 5, inclusive.",
-    diabetes_deaths = "Number of deaths from 2016 to 2019 with primary cause of death listed as diabetes (E10 - E14). Missing values indicate a suppressed count between 1 and 5, inclusive.",
-    cbg_age_included_by_adph = "Indicator variable for whether this CBG x age_group combination was included in the ADPH data. All death counts are forced to 0 when the value of this variable is 0.",
+    id_census_block_group = "Census block group FIPS according to 2020 Census",
+    amt_area_land = "Area of CBG that is land (m^2)",
+    amt_area_water = "Are of CBG that is water (m^2)",
+    cat_age_group = "Age group (years)",
+    n_hypertensive_deaths = "Number of deaths from 2016 to 2019 with primary cause of death listed as hypertensive heart disease (I10 - I15). Missing values indicate a suppressed count between 1 and 5, inclusive.",
+    n_ischemic_deaths = "Number of deaths from 2016 to 2019 with primary cause of death listed as ischemic heart disease (I20 - I25). Missing values indicate a suppressed count between 1 and 5, inclusive.",
+    n_stroke_cerebrovascular_deaths = "Number of deaths from 2016 to 2019 with primary cause of death listed as stroke or cerebrovascular diseases (I60 - I69). Missing values indicate a suppressed count between 1 and 5, inclusive.",
+    n_diabetes_deaths = "Number of deaths from 2016 to 2019 with primary cause of death listed as diabetes (E10 - E14). Missing values indicate a suppressed count between 1 and 5, inclusive.",
+    ind_cbg_age_group_included_by_adph = "Indicator variable for whether this CBG x age_group combination was included in the ADPH data. All death counts are forced to 0 when the value of this variable is 0.",
     geometry = "The sf geometry polygon of the CBG according to 2020 Census.",
-    population_estimate = "Total population estimate in CBG according to 2020 Census."
+    n_population = "Total population estimate in CBG according to 2020 Census.",
+    cat_hypertensive_deaths = "Categorical counts of hypertensive deaths: 0, 1 - 5, or >= 6",
+    cat_ischemic_deaths = "Categorical counts of ischemic deaths: 0, 1 - 5, or >= 6",
+    cat_stroke_cerebrovascular_deaths = "Categorical counts of stroke or cerebrovascular deaths: 0, 1 - 5, or >= 6",
+    cat_diabetes_deaths = "Categorical counts of diabetes deaths: 0, 1 - 5, or >= 6"
   )
 
 write_rds(df, file = "/Volumes/Projects/usgs_cvd_wells_al/data/clean/01_clean_adph_census_primary_cod.rds")
