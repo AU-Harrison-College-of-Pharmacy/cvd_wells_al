@@ -24,35 +24,37 @@ The [*overarching objective*]{.underline} of this research project is to determi
 ```{=typst}
 
 #figure(caption: "Directed Acyclic Graph (DAG) for hypothesized relationships between key variables for Objective 1",
-        image("grant_application/dag.png", width: 80%))
+        image("dag.png", width: 80%))
 ```
 # Data story
 
--   **CVD mortality data by CBG** - The CVD mortality counts (Ischemic Heart Disease, Hypertensive Heart Diseases, and Stroke/Cerebrovascular Diseases) will be obtained via a data request from the Alabama Department of Public Health (ADPH). The Center for Health Statistics (CHS) collects, stores, and performs analysis on official vital records for the state of Alabama. The public facing portal can be found [**here**](https://dph1.adph.state.al.us/csc/vs/Query/Mortality/MortalityQryYear.htm). Causes of death are ascertained by the medical personnel completing the death certificate. (A possible blank example of AL death certificate can be found [**here**.](https://www.alabamapublichealth.gov/edrs/assets/sampledeathcertificate.pdf) There are rules about who fills out the death certificate, and the person could be the attending physician, a medical examiner, or a coroner, with preference for the attending physician. As far as I can tell, the medical personnel filling out the certificate writing down the causes of death, and then ADPH would assign the ICD-10 code based on the description in the death certificate. We are using data from 1999 and later because that is when cause of death began using the International Classification of Diseases Version 10 coding system. We are limiting to years before 2020 in order to reduce the impact of the COVID-19 pandemic on the mortality rates. The three CVD outcomes are based on the following ICD-10 codes: I20 - I25 (Ischemic Heart Disease); I11 and I13 (Hypertensive Heart Disease or Heart and Renal Disease); and I60 - I69 (Stroke \[Cerebrovascular Diseases\]). We will obtain the data for CBG x year x age subgroups. ADPH will suppress any counts of deaths that are in the range \[1,5\] in order to improve the confidentiality of the data. We obtained deaths by location of *residence*, so some deaths included in the file are not from residents of AL. Likewise, we will also miss deaths for AL residents who died in another state.
--   **Percent of population in a CBG served by private domestic wells in 2020** - We will download the data for CBGs using the "% Served" checkbox and the "Show Table" button from [**this website**](https://experience.arcgis.com/experience/be9006c30a2148f595693066441fb8eb/page/Map/). The data at this website is a new data release for 2020, based off methods that were estimated for 2010 data.[@murray2021] The methods use data from the 1990 Census, which was the last time the Census asked about water use in the home. The methods assume that the relationship between density of well use and density of housing units remained constant from 1990 to 2020. Then the data providers calculated the percent change in housing units from 1990 to 2020 (based on decennial Census results) at the CBG level to estimate the number of homes served by private wells in 2020. The account for changing geometries of CBGs from 1990 to 2020, the authors used something called the dasymetric method, which converts 1990 population density within CBGs into a raster, then overlays that raster on top of 2020 CBG geometries. Or something like that. Somehow population density change is also taken into account.
+-   **CVD mortality data by CBG** - The CVD mortality counts (Ischemic Heart Disease, Hypertensive Heart Diseases, Stroke/Cerebrovascular Diseases, and Diabetes) will be obtained via a data request from the Alabama Department of Public Health (ADPH). Both primary cause of death and underlying cause of death counts will be obtained. The Center for Health Statistics (CHS) collects, stores, and performs analysis on official vital records for the state of Alabama. The public facing portal can be found [**here**](https://dph1.adph.state.al.us/csc/vs/Query/Mortality/MortalityQryYear.htm). Causes of death are ascertained by the medical personnel completing the death certificate. (A possible blank example of AL death certificate can be found [**here**.](https://www.alabamapublichealth.gov/edrs/assets/sampledeathcertificate.pdf) There are rules about who fills out the death certificate, and the person could be the attending physician, a medical examiner, or a coroner, with preference for the attending physician. As far as I can tell, the medical personnel filling out the certificate writing down the causes of death, and then ADPH would assign the ICD-10 code based on the description in the death certificate. We are using data from 2016 and later because that is when AL started collecting address data in a more rigorous way. We are limiting to years before 2020 in order to reduce the impact of the COVID-19 pandemic on the mortality rates. The three CVD outcomes are based on the following ICD-10 codes: I20 - I25 (Ischemic Heart Disease); I10 - I15 (Hypertensive Heart Disease); I60 - I69 (Stroke \[Cerebrovascular Diseases\]); and E10 - E14 (Diabetes). We will obtain the data for CBG x age subgroups. ADPH will suppress any counts of deaths that are in the range \[1,5\] in order to improve the confidentiality of the data. We obtained deaths by location of *residence*, so some deaths included in the file are not from residents of AL. Likewise, we will also miss deaths for AL residents who died in another state. The age groups are: 45 - 54, 55 - 64, 65 - 74, and 75 years and older. If a CBG x age group combination had 0 deaths for all four of the causes of death we were investigating, then that row is missing from the ADPH data.
+-   **Percent of population in a CBG served by private domestic wells in 2020** - We have downloaded the data from [**this GitHub repository**](https://github.com/USEPA/ORD_Water_Source_2020/blob/main/outputs/Well_Estimates_2020_Blocks.csv). The data at this website is a new data release for 2020, based off methods that were estimated for 2010 data.[@murray2021] The methods use data from the 1990 Census, which was the last time the Census asked about water use in the home. The methods assume that the relationship between density of well use and density of housing units remained constant from 1990 to 2020. Then the data providers calculated the percent change in housing units from 1990 to 2020 (based on decennial Census results) at the CBG level to estimate the number of homes served by private wells in 2020. The account for changing geometries of CBGs from 1990 to 2020, the authors used something called the dasymetric method, which converts 1990 population density within CBGs into a raster, then overlays that raster on top of 2020 CBG geometries. Or something like that. Somehow population density change is also taken into account.
 -   **Percent land cover by CBG in 2021 -** We will obtain the data from [**this website**](https://www.mrlc.gov/viewer/). Specifically, we will use the 2021 CONUS land cover and download the data for Alabama only by uploading a shapefile for the state of Alabama (cartographic boundary) obtained from the 2020 Census using the `tigris::states()` function in `R`. Data is provided on a 30 m $x$ 30 m grid with a legend in a `.tiff` file format. We will consider pixels with a value of 81 (Pasture/Hay) or 82 (Cultivated Crops) as agricultural land use. We will calculate the proportion of pixels in a given CBG that have agricultural land use.
 -   **Geologic region of a CBG** - We will use the map of physiographic regions of Alabama.[@Ebersole2019-hx] But, we are having a hard time locating that report just cited that the map [**here**](https://www.ogb.alabama.gov/img/Geological/PhysiographicMap.jpg) came from. *Helen will handle this*.
 -   **Rurality of a CBG** - We will use Rural-Urban Commuting Area (RUCA) codes from the USDA Economic Research Service, which can be downloaded [**here**](https://www.ers.usda.gov/data-products/rural-urban-commuting-area-codes/). These RUCA codes are integers from 1 (most urban) to 10 (most rural) for Census tracts in 1990, 2000, and 2010. Census tracts are the next-largest Census geometry above CBGs, so all CBGs fall within exactly one Census tract. We will assign the RUCA code for the tract to each CBG that falls within that tract. *Helen will handle this*.
--   **Population counts for CBGs in Alabama for 2000, 2010, and 2020** These counts will be obtained from the decennial census using the `tidycensus` package in `R`.
+-   **Population counts for CBGs in Alabama for 2000, 2010, and 2020** These counts will be obtained from the decennial census using the `tidycensus` package in `R`. The counts come from different variables in the `dhc` summary file, and they are split by age group and sex. We have to combine the appropriate variables in order to arrive at total population estimates for each of the CBGS.
 
 # Key variables
 
 ## Outcomes
 
--   Number of deaths from ischemic heart disease in a given CBG and year
--   Number of deaths from hypertensive heart disease in a given CBG and year
--   Number of deaths from cerebrovascular diseases/stroke in a given CBG and year
+-   Number of deaths from ischemic heart disease in a given CBG from 2016 - 2019
+-   Number of deaths from hypertensive heart disease in a given CBG from 2016 - 2019
+-   Number of deaths from cerebrovascular diseases/stroke in a given CBG from 2016 - 2019
+-   Number of deaths from diabetes in a given CBG from 2016 - 2019
 
 ## Exposures
 
--   Percent of population served by domestic wells in a given CBG in 2020
+- Percent of population served by domestic wells in a given CBG in 2020
+    - One challenge with this variable is that 0% is the 1st quartile and the standard deviation is 27% with a mean of 21%. That means that when trying to center and scale the variable, going one standard deviation down from the mean is already an impossible number. So for the negative values of the scaled variable, they will have a hard boundary at ~`-0.778`.
 
 ## Other covariates of interest
 
 -   Potential confounders: rurality
 -   Offset: estimated population of given CBG in given year
 -   Effect modifiers: geologic region, percent land cover in 2021
--   Predictors of outcome: age group
+-   Predictors of outcome: age group (`45 - 54`, `55 - 64`, `65 - 74`, and `75+`)
 
 # Statistical analysis strategy
 
@@ -69,16 +71,15 @@ Overall strategy:
 ### Model and estimand
 
 ```{=typst}
-$ "Ischemic Heart Disease Deaths"_("ijk") ~ "Poisson"(lambda_("ijk")) $
-$ ln(lambda_("ijk")) = beta_0 + "CBG"_i + W_("i")beta_1 + R_i beta_2 + bold(Y)_("ij") bold(beta)_3 + bold(A)_("ijk") bold(beta)_4 + ln("population"_("ijk")) $
+$ "Ischemic Heart Disease Deaths"_("ij") ~ "Poisson"(lambda_("ij")) $
+$ ln(lambda_("ij")) = beta_0 + "CBG"_i + W_("i")beta_1 + R_i beta_2 + bold(A)_("ij") bold(beta)_3 + ln("population"_("ij") * 4) $
 $ "CBG" ~ N(0, sigma_C) $
 
 / $"CBG"_i$: the $i^("th")$ Census block group 
-/ $W_("i")$: the proportion of the population estimated to be using private wells in the $i^("th")$ Census block group
+/ $W_("i")$: the percentage of housing units estimated to be using private wells in the $i^("th")$ Census block group
 / $R_i$: the rurality of the $i^("th")$ Census block group
-/ $bold(Y)_("ij")$: the set of indicator terms for year (1999 - 2019), treated as a categorical variable
-/ $bold(A)_("ijk")$: the age group, treated as a categorical variable
-/ $"population"_("ijk")$: the residential population of the $i^("th")$ Census block group in the $j^("th")$ year in the $k^("th")$ age group
+/ $bold(A)_("ij")$: the age group, treated as a categorical variable
+/ $"population"_("ij") * 4$: the residential population of the $i^("th")$ Census block group in the $j^("th")$ age group. This number is multiplied by 4 since the counts for numbers of deaths are over 4 years. We are assuming the population in 2020 is the same as the population in each of the years under study.
 ```
 
 The target estimand is $\beta_1$. 
@@ -87,15 +88,19 @@ The target estimand is $\beta_1$.
 
 The dataset will look something like
 
-| cbg          | year | age_group | population | cbg_rurality | proportion_well_users | ischemic_deaths |
+| cbg          | year | age_group | population | cbg_rurality | percentage_well_users | ischemic_deaths |
 |-----------|-----------|-----------|-----------|-----------|-----------|-----------|
-| 010810407002 | 2019 | 15 - 24   | 600        | 1            | 0.005                 | 0               |
-| 010810407002 | 2019 | 25 - 44   | 1000       | 1            | 0.005                 | 3               |
-| 010810407002 | 2019 | 45 - 64   | 1200       | 1            | 0.005                 | 10              |
+| 010810407002 | 2019 | 45 - 54   | 600        | 1            | 5                 | 0               |
+| 010810407002 | 2019 | 55 - 64   | 1000       | 1            | 5                 | 3               |
+| 010810407002 | 2019 | 65 - 74   | 1200       | 1            | 5                 | 10              |
 
 Now, let's start simulating a dataset that will look something like this. 
 
 ```{r, message = FALSE}
+knitr::opts_chunk$set(eval = FALSE)
+```
+
+```{r}
 library(tidyverse)
 library(tigris)
 library(sf)
@@ -258,17 +263,17 @@ library(Amelia)
 
 <<<<<<< HEAD
 =======
-bds_df <- matrix(c(2, 1, 5,
-                   3, 1, 5,
-                   4, 1, 5,
-                   5, 1, 5), 
+bds_df <- matrix(c(5, 1, 5,
+                   6, 1, 5,
+                   7, 1, 5,
+                   8, 1, 5), 
                  nrow = 4, 
                  ncol = 3, 
                  byrow = TRUE)
 
-a_df <- amelia(as.data.frame(df_adph_included) %>%
+a_df <- amelia(as.data.frame(a) %>%
                  mutate(age_group = as_factor(age_group) %>% fct_relevel("45 - 54 yrs", "55 - 64 yrs", "65 - 74 yrs", "75 or over") %>% as.ordered() %>% as.integer()) %>%
-                 dplyr::select(-geometry),
+                 dplyr::select(-c(geometry, population_estimate, mean_pct_wells_cbg)),
                m = 60,
                idvars = c("census_block_group"),
                bounds = bds_df)
@@ -289,22 +294,18 @@ And then we can re-fit the models on the imputed data.
 
 ```{r}
 library(lme4)
-<<<<<<< HEAD
-=======
+library(splines)
 
 f_imputed <- lapply(1:2, function(i){
-  f <- glmer(round(hypertensive_deaths) ~ (1 | census_block_group) + age_group + offset(log(p)),
+  f <- glmer(round(hypertensive_deaths) ~ (1 | census_block_group) + age_group + ns(c) + offset(log(p)),
              family = poisson(link = "log"),
              data = a_df$imputations[[i]] %>% filter(!(census_block_group %in% c("010730027011", "010810406031"))) %>% # These two census block groups have population of 0, which was throwing off the model. So we are excluding them. %>%
-               mutate(age_group = as_factor(age_group),
-                      p = population_estimate * 5),  # These deaths are aggregating over a certain number of years, so we are multiplying the population by the number of years to reflect the real population at risk for that many deaths. This number may be corrected later. It's currently yielding approximately the correct rates.
+               mutate(age_group = as_factor(age_group)),  # These deaths are aggregating over a certain number of years, so we are multiplying the population by the number of years to reflect the real population at risk for that many deaths. This number may be corrected later. It's currently yielding approximately the correct rates.
              glmerControl(optimizer = "bobyqa", optCtrl = list(maxfun = 500000))
              )
 })
 
 
-
->>>>>>> test-adph-data
 imputed_models <- lapply(1:10, function(i){
   f <- glmer(suppressed_y ~ (1 | fips) + rural + c_wells + age_group + offset(log(population)),
               family = poisson(link = "log"),
@@ -321,10 +322,10 @@ Here is how we might report the results:
 
 ```{r}
 library(ggeffects)
-<<<<<<< HEAD
+
 predictions_ischemic <- lapply(imputed_models, predict_response, terms = c("c_wells [0, 1]"),
                                condition = c(population = 100000, rural = 1, age_group = "65 plus")) %>%
-=======
+
 
 p_hypertensive <- lapply(f_imputed, predict_response, terms = c("age_group", "census_block_group"),
                                condition = c(p = 100000),
@@ -338,7 +339,6 @@ p_hypertensive_cbgs <- lapply(f_imputed, predict_response, terms = c("age_group"
 
 predictions_ischemic <- lapply(imputed_models, predict_response, terms = c("c_wells [0, 1]"),
                                condition = c(p = 100000, rural = 1, age_group = "65 plus")) %>%
->>>>>>> test-adph-data
   pool_predictions()
 
 predictions_ischemic
@@ -357,37 +357,35 @@ map(imputed_models, ~fixef(.)[3]) %>% unlist() %>% mean() %>% exp() %>% round(di
 ### Model and estimand
 
 ```{=typst}
-$ "Ischemic Heart Disease Deaths"_("ijk") ~ "Poisson"(lambda_("ijk")) $
-$ ln(lambda_("ijk")) = beta_0 + "CBG"_i + W_("i")beta_1 + R_i beta_2 + bold(Y)_("ij") bold(beta)_3 + bold(A)_("ijk") bold(beta)_4 + bold("Region")_i bold(beta)_5 + W_("i") "x " bold("Region")_i bold(beta)_6 + ln("population"_("ijk")) $
+$ "Ischemic Heart Disease Deaths"_("ij") ~ "Poisson"(lambda_("ij")) $
+$ ln(lambda_("ij")) = beta_0 + "CBG"_i + W_("i")beta_1 + R_i beta_2 + bold(A)_("ij") bold(beta)_3 + bold("Region")_i bold(beta)_4 + W_("i") "x " bold("Region")_i bold(beta)_5 + ln("population"_("ij") * 4) $
 $ "CBG" ~ N(0, sigma_C) $
 
 / $"CBG"_i$: the $i^("th")$ Census block group 
-/ $W_("i")$: the proportion of the population estimated to be using private wells in the $i^("th")$ Census block group
+/ $W_("i")$: the percentage of housing units estimated to be using private wells in the $i^("th")$ Census block group
 / $R_i$: the rurality of the $i^("th")$ Census block group
-/ $bold(Y)_("ij")$: the set of indicator terms for year (1999 - 2019), treated as a categorical variable
-/ $bold(A)_("ijk")$: the age group, treated as a categorical variable
+/ $bold(A)_("ij")$: the age group, treated as a categorical variable
 / $bold("Region")_i$: the physiographic region of AL (5 levels)
-/ $"population"_("ijk")$: the residential population of the $i^("th")$ Census block group in the $j^("th")$ year in the $k^("th")$ age group
+/ $"population"_("ij") * 4$: the residential population of the $i^("th")$ Census block group in the $j^("th")$ age group. This number is multiplied by 4 since the counts for numbers of deaths are over 4 years. We are assuming the population in 2020 is the same as the population in each of the years under study.
 ```
 
-The estimands of interest are the $\mathbf{\beta}_6$, which we can assess as a group to see whether any of them fall outside a reasonable range of "no interaction". We have simulated the parameter for the centered and scaled version of well use percentage to be indicate a 1 standard deviation higher rate of well use to be associated with a ~1.5% higher rate of CVD mortality, keeping all other covariates constant. Assuming that this 1.5% higher rate is the average across all physiographic regions, what would we consider a meaningful deviation from this average? Perhaps a rate that is below 1% higher or more than 2% higher would be meaningful? In that case, we can use the posterior distributions from the INLA models to calculate the probability that at least 1 of the $\mathbf{\beta}_6$ (the log rate ratios) from the fitted model is less than 0.01 or greater than 0.02. This probability would be $1 - P[\textrm{all are }0.01 - 0.02]$, so it should be fairly easy to calculate. 
+The estimands of interest are the $\mathbf{\beta}_5$, which we can assess as a group to see whether any of them fall outside a reasonable range of "no interaction". We have simulated the parameter for the centered and scaled version of well use percentage to be indicate a 1 standard deviation higher rate of well use to be associated with a ~1.5% higher rate of CVD mortality, keeping all other covariates constant. Assuming that this 1.5% higher rate is the average across all physiographic regions, what would we consider a meaningful deviation from this average? Perhaps a rate that is below 1% higher or more than 2% higher would be meaningful? In that case, we can use the posterior distributions from the INLA models to calculate the probability that at least 1 of the $\mathbf{\beta}_5$ (the log rate ratios) from the fitted model is less than 0.01 or greater than 0.02. This probability would be $1 - P[\textrm{all are }0.01 - 0.02]$, so it should be fairly easy to calculate. 
 
 ## Research Question 3
 
 ### Model and estimand
 
 ```{=typst}
-$ "Ischemic Heart Disease Deaths"_("ijk") ~ "Poisson"(lambda_("ijk")) $
-$ ln(lambda_("ijk")) = beta_0 + "CBG"_i + W_("i")beta_1 + R_i beta_2 + bold(Y)_("ij") bold(beta)_3 + bold(A)_("ijk") bold(beta)_4 + L_i beta_5 + W_("i") "x " L_i beta_6 + ln("population"_("ijk")) $
+$ "Ischemic Heart Disease Deaths"_("ij") ~ "Poisson"(lambda_("ij")) $
+$ ln(lambda_("ij")) = beta_0 + "CBG"_i + W_("i")beta_1 + R_i beta_2 + bold(A)_("ij") bold(beta)_3 + L_i bold(beta)_4 + W_("i") "x " L_i bold(beta)_5 + ln("population"_("ij") * 4) $
 $ "CBG" ~ N(0, sigma_C) $
 
 / $"CBG"_i$: the $i^("th")$ Census block group 
-/ $W_("i")$: the proportion of the population estimated to be using private wells in the $i^("th")$ Census block group
+/ $W_("i")$: the percentage of housing units estimated to be using private wells in the $i^("th")$ Census block group
 / $R_i$: the rurality of the $i^("th")$ Census block group
-/ $bold(Y)_("ij")$: the set of indicator terms for year (1999 - 2019), treated as a categorical variable
-/ $bold(A)_("ijk")$: the age group, treated as a categorical variable
+/ $bold(A)_("ij")$: the age group, treated as a categorical variable
 / $L_i$: the percent agricultural land use
-/ $"population"_("ijk")$: the residential population of the $i^("th")$ Census block group in the $j^("th")$ year in the $k^("th")$ age group
+/ $"population"_("ij") * 4$: the residential population of the $i^("th")$ Census block group in the $j^("th")$ age group. This number is multiplied by 4 since the counts for numbers of deaths are over 4 years. We are assuming the population in 2020 is the same as the population in each of the years under study.
 ```
 
 The estimand of interest is the $\beta_6$, which we can assess to see if it falls outside a reasonable range of "no interaction". We have simulated the parameter for the centered and scaled version of well use percentage to be indicate a 1 standard deviation higher rate of well use to be associated with a ~1.5% higher rate of CVD mortality, keeping all other covariates constant. We would likely want to center and scale the percent agricultural land use variable, too. Assuming that this 1.5% higher rate is the average across all values of percent agricultural land use, what would we consider a meaningful deviation from this average? Perhaps a rate that is below 1% higher or more than 2% higher would be meaningful for a 1 standard deviation change in percent agricultural land use? In that case, we can use the posterior distributions from the INLA models to calculate the probability that $\beta_6$ (the log rate ratio) from the fitted model is less than 0.01 or greater than 0.02. This probability would be fairly easy to calculate using the posterior distributions. 
@@ -400,7 +398,7 @@ The estimand of interest is the $\beta_6$, which we can assess to see if it fall
 
 | Decision | Date | Decision owner |
 |----------|------|----------------|
-|          |      |                |
+| Request ages aggregated across years         |  2024-12    |  Matthew Loop (matthew_loop@auburn.edu)              |
 |          |      |                |
 |          |      |                |
 
