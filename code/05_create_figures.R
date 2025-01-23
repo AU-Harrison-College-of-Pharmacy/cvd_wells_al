@@ -11,7 +11,7 @@ preds_hypertensive <- lapply(f_hypertensive, predict_response, terms = c("amt_ce
 p_hypertensive <- preds_hypertensive %>% 
   plot() +
   labs(
-    x = "Centered and scaled percent prival well use",
+    x = "Centered and scaled percent private well use",
     y = "Hypertensive deaths per 100,000", 
     title = ""
   )
