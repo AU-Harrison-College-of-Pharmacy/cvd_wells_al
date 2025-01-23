@@ -107,6 +107,9 @@ df <- left_join(cbgs, adph_primary,
       is.na(n_diabetes_deaths) ~ "1 - 5"
     )
   ) %>%
+  mutate(
+    cat_age_group = as_factor(cat_age_group, order) %>% fct_relevel("45 - 54 yrs", "55 - 64 yrs", "65 - 74 yrs") %>% as.ordered()
+  ) %>%
   var_labels(
     id_census_block_group = "Census block group FIPS according to 2020 Census",
     amt_area_land = "Area of CBG that is land (m^2)",
