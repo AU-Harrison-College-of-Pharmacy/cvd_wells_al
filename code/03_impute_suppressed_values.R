@@ -10,32 +10,32 @@ df_hypertensive <- df %>%
   mutate(
     n_population_times_4 = n_population * 4
   ) %>%
-  select(id_census_block_group, cat_age_group, amt_area_land, amt_area_water, n_population_times_4, amt_mean_pct_wells_cbg, n_hypertensive_deaths)
+  select(id_census_block_group, cat_age_group, amt_area_land, amt_area_water, n_population_times_4, amt_centered_scaled_mean_pct_wells_cbg, n_hypertensive_deaths)
 
 df_ischemic <- df %>%
   filter(is_included_in_analysis == 1) %>%
   mutate(
     n_population_times_4 = n_population * 4,
   ) %>%
-  select(id_census_block_group, cat_age_group, amt_area_land, amt_area_water, n_population_times_4, amt_mean_pct_wells_cbg, n_ischemic_deaths)
+  select(id_census_block_group, cat_age_group, amt_area_land, amt_area_water, n_population_times_4, amt_centered_scaled_mean_pct_wells_cbg, n_ischemic_deaths)
 
 df_stroke_cerebrovascular <- df %>%
   filter(is_included_in_analysis == 1) %>%
   mutate(
     n_population_times_4 = n_population * 4,
   ) %>%
-  select(id_census_block_group, cat_age_group, amt_area_land, amt_area_water, n_population_times_4, amt_mean_pct_wells_cbg, n_stroke_cerebrovascular_deaths)
+  select(id_census_block_group, cat_age_group, amt_area_land, amt_area_water, n_population_times_4, amt_centered_scaled_mean_pct_wells_cbg, n_stroke_cerebrovascular_deaths)
 
 df_diabetes <- df %>%
   filter(is_included_in_analysis == 1) %>%
   mutate(
     n_population_times_4 = n_population * 4,
   ) %>%
-  select(id_census_block_group, cat_age_group, amt_area_land, amt_area_water, n_population_times_4, amt_mean_pct_wells_cbg, n_diabetes_deaths)
+  select(id_census_block_group, cat_age_group, amt_area_land, amt_area_water, n_population_times_4, amt_centered_scaled_mean_pct_wells_cbg, n_diabetes_deaths)
 
 # Impute datasets for each outcome
 imputation_boundaries <- matrix(c(7, 1, 5,
-                                  6, 0, 100),
+                                  6, -0.7775699, 2.892063),
                                 nrow = 2,
                                 ncol = 3,
                                 byrow = TRUE)
