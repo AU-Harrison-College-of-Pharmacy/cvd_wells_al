@@ -58,6 +58,7 @@ df <- left_join(cbgs, adph_primary,
                 by = "census_block_group") %>%
   
   # This is going to get a little weird. The problem is that now for CBGs that weren't in the ADPH data, the age group is now missing because a match for the CBG in census data couldn't be found in ADPH data. So we will assign the missing ones to be a specific value, then do the dplyr::complete() to complete all of the CBG x age_group combinations again.
+  
   mutate(
     age_group = if_else(is.na(age_group), "45 - 54 yrs", age_group)
   ) %>%
@@ -66,6 +67,16 @@ df <- left_join(cbgs, adph_primary,
     cbg_age_included_by_adph = if_else(is.na(cbg_age_included_by_adph), 0, cbg_age_included_by_adph)
   ) %>%
   select(-c(statefp, countyfp, tractce, blkgrpce, affgeoid, name, namelsad, lsad)) %>%
+  
+  # After joining and completing the implicit missing values, some of the variables from the cbgs dataset are now missing for rows 2 - 4 for each cbg. Fix this issue.
+  
+  group_by(census_block_group) %>%
+  mutate(
+    aland = first(aland),
+    awater = first(awater),
+    geometry = first(geometry)
+  ) %>% 
+  ungroup() %>%
   mutate(hypertensive_deaths = if_else(cbg_age_included_by_adph == 0, 0, hypertensive_deaths),
          ischemic_deaths = if_else(cbg_age_included_by_adph == 0, 0, ischemic_deaths),
          stroke_cerebrovascular_deaths = if_else(cbg_age_included_by_adph == 0, 0, stroke_cerebrovascular_deaths),
@@ -129,5 +140,14 @@ df <- left_join(cbgs, adph_primary,
     cat_diabetes_deaths = "Categorical counts of diabetes deaths: 0, 1 - 5, or >= 6",
     amt_population_density_per_km2_per_age_group = "Population density per 1 km^2 (by age group)"
   )
+
+# Test whether you ended up with the same number of distinct Census block groups as the dataset from the Census. This test should return `TRUE`.
+distinct(cbgs, census_block_group) %>% nrow() == distinct(df, id_census_block_group) %>% nrow()
+
+# Test whether any of the land area values are missing. This test should return a dataset with 0 rows.
+df %>% filter(is.na(amt_area_land))
+
+# Test whether any of the geometries are empty. This test should return a dataset with 0 rows.
+df %>% filter(st_is_empty(geometry))
 
 write_rds(df, file = "/Volumes/Projects/usgs_cvd_wells_al/data/clean/01_clean_adph_census_primary_cod.rds")
