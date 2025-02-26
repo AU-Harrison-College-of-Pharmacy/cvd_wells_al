@@ -10,28 +10,28 @@ df_hypertensive <- df %>%
   mutate(
     n_population_times_4 = n_population * 4
   ) %>%
-  select(id_census_block_group, cat_age_group, amt_area_land, amt_area_water, n_population_times_4, amt_centered_scaled_mean_pct_wells_cbg, n_hypertensive_deaths)
+  select(id_census_block_group, cat_age_group, amt_area_land, amt_area_water, n_population_times_4, amt_centered_scaled_mean_pct_wells_cbg, n_hypertensive_deaths, amt_population_density_per_km2_per_age_group)
 
 df_ischemic <- df %>%
   filter(is_included_in_analysis == 1) %>%
   mutate(
     n_population_times_4 = n_population * 4,
   ) %>%
-  select(id_census_block_group, cat_age_group, amt_area_land, amt_area_water, n_population_times_4, amt_centered_scaled_mean_pct_wells_cbg, n_ischemic_deaths)
+  select(id_census_block_group, cat_age_group, amt_area_land, amt_area_water, n_population_times_4, amt_centered_scaled_mean_pct_wells_cbg, n_ischemic_deaths, amt_population_density_per_km2_per_age_group)
 
 df_stroke_cerebrovascular <- df %>%
   filter(is_included_in_analysis == 1) %>%
   mutate(
     n_population_times_4 = n_population * 4,
   ) %>%
-  select(id_census_block_group, cat_age_group, amt_area_land, amt_area_water, n_population_times_4, amt_centered_scaled_mean_pct_wells_cbg, n_stroke_cerebrovascular_deaths)
+  select(id_census_block_group, cat_age_group, amt_area_land, amt_area_water, n_population_times_4, amt_centered_scaled_mean_pct_wells_cbg, n_stroke_cerebrovascular_deaths, amt_population_density_per_km2_per_age_group)
 
 df_diabetes <- df %>%
   filter(is_included_in_analysis == 1) %>%
   mutate(
     n_population_times_4 = n_population * 4,
   ) %>%
-  select(id_census_block_group, cat_age_group, amt_area_land, amt_area_water, n_population_times_4, amt_centered_scaled_mean_pct_wells_cbg, n_diabetes_deaths)
+  select(id_census_block_group, cat_age_group, amt_area_land, amt_area_water, n_population_times_4, amt_centered_scaled_mean_pct_wells_cbg, n_diabetes_deaths, amt_population_density_per_km2_per_age_group)
 
 # Impute datasets for each outcome
 imputation_boundaries <- matrix(c(7, 1, 5,
