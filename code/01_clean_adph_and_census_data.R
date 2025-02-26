@@ -86,6 +86,7 @@ df <- left_join(cbgs, adph_primary,
     n_population = population_estimate
   ) %>%
   mutate(
+    amt_population_density_per_km2_per_age_group = n_population / amt_area_land * 1000 * 1000,  # change to per 1 km^2
     cat_hypertensive_deaths = case_when(
       n_hypertensive_deaths == 0 ~ "0",
       n_hypertensive_deaths >= 6 ~ "6 or more",
@@ -125,7 +126,8 @@ df <- left_join(cbgs, adph_primary,
     cat_hypertensive_deaths = "Categorical counts of hypertensive deaths: 0, 1 - 5, or >= 6",
     cat_ischemic_deaths = "Categorical counts of ischemic deaths: 0, 1 - 5, or >= 6",
     cat_stroke_cerebrovascular_deaths = "Categorical counts of stroke or cerebrovascular deaths: 0, 1 - 5, or >= 6",
-    cat_diabetes_deaths = "Categorical counts of diabetes deaths: 0, 1 - 5, or >= 6"
+    cat_diabetes_deaths = "Categorical counts of diabetes deaths: 0, 1 - 5, or >= 6",
+    amt_population_density_per_km2_per_age_group = "Population density per 1 km^2 (by age group)"
   )
 
 write_rds(df, file = "/Volumes/Projects/usgs_cvd_wells_al/data/clean/01_clean_adph_census_primary_cod.rds")
