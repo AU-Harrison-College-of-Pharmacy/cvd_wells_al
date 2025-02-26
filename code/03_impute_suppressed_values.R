@@ -34,8 +34,7 @@ df_diabetes <- df %>%
   select(id_census_block_group, cat_age_group, amt_area_land, amt_area_water, n_population_times_4, amt_centered_scaled_mean_pct_wells_cbg, n_diabetes_deaths, amt_population_density_per_km2_per_age_group)
 
 # Impute datasets for each outcome
-imputation_boundaries <- matrix(c(7, 1, 5,
-                                  6, -0.7775699, 2.892063),
+imputation_boundaries <- matrix(c(7, 1, 5),
                                 nrow = 2,
                                 ncol = 3,
                                 byrow = TRUE)
