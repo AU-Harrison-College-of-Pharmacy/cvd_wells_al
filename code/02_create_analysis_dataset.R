@@ -28,11 +28,13 @@ df <- mortality %>%
     is_population_greater_than_0 = if_else(n_population == 0, 0, 1),
     is_pct_wells_nonmissing = if_else(is.na(amt_mean_pct_wells_cbg), 0, 1),
     is_included_in_analysis = if_else(is_population_greater_than_0 == 1 &
-                                      is_pct_wells_nonmissing == 1, 1, 0)
+                                      is_pct_wells_nonmissing == 1, 1, 0),
+    amt_centered_scaled_area_land = scale(amt_area_land)[, 1]
   ) %>%
   var_labels(amt_mean_pct_wells_cbg = "Percent of housing units relying on private wells in the given CBG. This percent is a mean of the percents across all Census blocks from USEPA/ORD_Water_Source_2020 GitHub repository.",
              amt_centered_scaled_mean_pct_wells_cbg = "Centered and scaled version of amt_mean_pct_wells_cbg.",
-             is_included_in_analysis = "Final exclusion variable to identify which CBG x age group combinations are included in analysis"
+             is_included_in_analysis = "Final exclusion variable to identify which CBG x age group combinations are included in analysis",
+             amt_centered_scaled_area_land = "Centered and scaled version of CBG land area (originally in m^2)"
              )
 
 # Write out the dataset
