@@ -54,6 +54,17 @@ df_age_populations <- cbg_age_populations %>%
   rename(census_block_group = GEOID) %>%
   ungroup()
 
+cbg_percent_aa_alone_populations <- get_decennial(geography = "cbg", 
+                                                  state = "AL",
+                                                  variables = c("P3_001N", "P3_003N"),
+                                                  sumfile = "dhc")
+
+df_aa_populations <- cbg_percent_aa_alone_populations %>%
+  pivot_wider(names_from = variable, values_from = value) %>%
+  mutate(percent_aa_only = round(P3_003N  / P3_001N * 100, 1)) %>%
+  select(GEOID, percent_aa_only) %>%
+  rename(census_block_group = GEOID)
+
 df <- left_join(cbgs, adph_primary,
                 by = "census_block_group") %>%
   

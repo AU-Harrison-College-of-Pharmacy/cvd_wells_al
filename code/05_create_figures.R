@@ -10,7 +10,7 @@ df <- read_rds("/Volumes/Projects/usgs_cvd_wells_al/data/clean/02_analysis_datas
 m <- mean(df$amt_mean_pct_wells_cbg, na.rm = TRUE) %>% round(1)
 s <- sd(df$amt_mean_pct_wells_cbg, na.rm = TRUE) %>% round(1)
 
-au_colors <- c("#ffc044", "#e86100", "#0093d2", "#0b2341")
+au_colors <- c("#ffc044", "#e86100", "#0093d2", "#0b2341", "#00a597")
 
 # Hypertension
 
@@ -104,6 +104,98 @@ p <- p_hypertensive + p_ischemic + p_stroke_cerebrovascular + p_diabetes
 p
 
 ggsave(filename = "figs/05_combined_plots.pdf", p)
+
+#########
+# Interaction with physiographic region
+#########
+
+# Hypertension
+
+f_hypertensive <- read_rds("/Volumes/Projects/usgs_cvd_wells_al/output/04_01_hypertension_deaths_poisson_model_ixn_physiographic_region.rds")
+
+preds_hypertensive <- lapply(f_hypertensive, predict_response, terms = c("amt_centered_scaled_mean_pct_wells_cbg [-0.78:2.9]", "cat_physiographic_region"),
+                             condition = c(n_population_times_4 = 100000)) %>%
+  pool_predictions()
+
+p_hypertensive <- preds_hypertensive %>% 
+  plot() +
+  labs(
+    x = "Percent private well use",
+    y = "", 
+    title = "Hypertensive deaths per 100,000"
+  ) +
+  scale_x_continuous(labels = c(paste0(m - 0.78 * s), paste0(m), paste0(m + s), paste0(m + 2 * s))) +
+  scale_color_manual(values = au_colors) +
+  scale_fill_manual(values = au_colors)
+
+ggsave("figs/05_hypertensive_deaths_ixn_physiographic_region.pdf",
+       p_hypertensive)
+
+# Ischemic
+
+f_ischemic <- read_rds("/Volumes/Projects/usgs_cvd_wells_al/output/04_01_ischemic_deaths_poisson_model_ixn_physiographic_region.rds")
+
+preds_ischemic <- lapply(f_ischemic, predict_response, terms = c("amt_centered_scaled_mean_pct_wells_cbg [-0.78:2.9]", "cat_physiographic_region"),
+                         condition = c(n_population_times_4 = 100000)) %>%
+  pool_predictions()
+
+p_ischemic <- preds_ischemic %>% 
+  plot() +
+  labs(
+    x = "Centered and scaled percent private well use",
+    y = "", 
+    title = "Ischemic deaths per 100,000"
+  ) +
+  scale_x_continuous(labels = c(paste0(m - 0.78 * s), paste0(m), paste0(m + s), paste0(m + 2 * s))) +
+  scale_color_manual(values = au_colors) +
+  scale_fill_manual(values = au_colors)
+
+ggsave("figs/05_ischemic_deaths_ixn_physiographic_region.pdf",
+       p_ischemic)
+
+# Stroke/cerebrovascular
+
+f_stroke_cerebrovascular <- read_rds("/Volumes/Projects/usgs_cvd_wells_al/output/04_01_stroke_cerebrovascular_deaths_poisson_model_ixn_physiographic_region.rds")
+
+preds_stroke_cerebrovascular <- lapply(f_stroke_cerebrovascular, predict_response, terms = c("amt_centered_scaled_mean_pct_wells_cbg [-0.78:2.9]", "cat_physiographic_region"),
+                                       condition = c(n_population_times_4 = 100000)) %>%
+  pool_predictions()
+
+p_stroke_cerebrovascular <- preds_stroke_cerebrovascular %>% 
+  plot() +
+  labs(
+    x = "Centered and scaled percent private well use",
+    y = "", 
+    title = "Stroke/cerebrovascular deaths per 100,000"
+  ) +
+  scale_x_continuous(labels = c(paste0(m - 0.78 * s), paste0(m), paste0(m + s), paste0(m + 2 * s))) +
+  scale_color_manual(values = au_colors) +
+  scale_fill_manual(values = au_colors)
+
+ggsave("figs/05_stroke_cerebrovascular_deaths_ixn_physiographic_region.pdf",
+       p_stroke_cerebrovascular)
+
+# Diabetes
+
+f_diabetes <- read_rds("/Volumes/Projects/usgs_cvd_wells_al/output/04_01_diabetes_deaths_poisson_model_ixn_physiographic_region.rds")
+
+preds_diabetes <- lapply(f_diabetes, predict_response, terms = c("amt_centered_scaled_mean_pct_wells_cbg [-0.78:2.9]", "cat_physiographic_region"),
+                         condition = c(n_population_times_4 = 100000)) %>%
+  pool_predictions()
+
+p_diabetes <- preds_diabetes %>% 
+  plot() +
+  labs(
+    x = "Centered and scaled percent private well use",
+    y = "", 
+    title = "Diabetes deaths per 100,000"
+  ) +
+  scale_x_continuous(labels = c(paste0(m - 0.78 * s), paste0(m), paste0(m + s), paste0(m + 2 * s))) +
+  scale_color_manual(values = au_colors) +
+  scale_fill_manual(values = au_colors)
+
+ggsave("figs/05_diabetes_deaths_ixn_physiographic_region.pdf",
+       p_diabetes)
 
 #########
 # Sensitivity analysis: restricting to second largest block groups

@@ -39,7 +39,7 @@ df <- mortality %>%
              )
 
 # Join physiographic region data for each CBG
-# There are 3,924 observations, which is the expected number based on the CBGs Census data. One CBG has a missing physiographic region (010979900000). It is Gaillard Island in the middle of Mobile Bay. It is a land mass, so it should probably have a PR.
+# There are 3,924 observations, which is the expected number based on the CBGs Census data. One CBG has a missing physiographic region (010979900000). It is Gaillard Island in the middle of Mobile Bay. It is already excluded from the analysis because it's population is 0 and it has missing well water data.
 pr <- read_csv("/Volumes/Projects/usgs_cvd_wells_al/data/raw/centered_geospatial_data.csv") %>%
   janitor::clean_names() %>%
   select(geoid, pr) %>%

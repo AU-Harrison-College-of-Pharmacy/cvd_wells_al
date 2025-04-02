@@ -10,28 +10,28 @@ df_hypertensive <- df %>%
   mutate(
     n_population_times_4 = n_population * 4
   ) %>%
-  select(id_census_block_group, cat_age_group, amt_centered_scaled_area_land, amt_area_water, n_population_times_4, amt_centered_scaled_mean_pct_wells_cbg, n_hypertensive_deaths)
+  select(id_census_block_group, cat_age_group, amt_centered_scaled_area_land, amt_area_water, n_population_times_4, amt_centered_scaled_mean_pct_wells_cbg, n_hypertensive_deaths, cat_physiographic_region)
 
 df_ischemic <- df %>%
   filter(is_included_in_analysis == 1) %>%
   mutate(
     n_population_times_4 = n_population * 4,
   ) %>%
-  select(id_census_block_group, cat_age_group, amt_centered_scaled_area_land, amt_area_water, n_population_times_4, amt_centered_scaled_mean_pct_wells_cbg, n_ischemic_deaths)
+  select(id_census_block_group, cat_age_group, amt_centered_scaled_area_land, amt_area_water, n_population_times_4, amt_centered_scaled_mean_pct_wells_cbg, n_ischemic_deaths, cat_physiographic_region)
 
 df_stroke_cerebrovascular <- df %>%
   filter(is_included_in_analysis == 1) %>%
   mutate(
     n_population_times_4 = n_population * 4,
   ) %>%
-  select(id_census_block_group, cat_age_group, amt_centered_scaled_area_land, amt_area_water, n_population_times_4, amt_centered_scaled_mean_pct_wells_cbg, n_stroke_cerebrovascular_deaths)
+  select(id_census_block_group, cat_age_group, amt_centered_scaled_area_land, amt_area_water, n_population_times_4, amt_centered_scaled_mean_pct_wells_cbg, n_stroke_cerebrovascular_deaths, cat_physiographic_region)
 
 df_diabetes <- df %>%
   filter(is_included_in_analysis == 1) %>%
   mutate(
     n_population_times_4 = n_population * 4,
   ) %>%
-  select(id_census_block_group, cat_age_group, amt_centered_scaled_area_land, amt_area_water, n_population_times_4, amt_centered_scaled_mean_pct_wells_cbg, n_diabetes_deaths)
+  select(id_census_block_group, cat_age_group, amt_centered_scaled_area_land, amt_area_water, n_population_times_4, amt_centered_scaled_mean_pct_wells_cbg, n_diabetes_deaths, cat_physiographic_region)
 
 # Impute datasets for each outcome
 imputation_boundaries <- matrix(c(7, 1, 5),
@@ -45,6 +45,7 @@ imputation_boundaries <- matrix(c(7, 1, 5),
                         m = p_missing,
                         idvars = c("id_census_block_group"),
                         ords = c("cat_age_group", "n_hypertensive_deaths"),
+                        noms = c("cat_physiographic_region"),
                         bounds = imputation_boundaries
     )
     
@@ -54,7 +55,7 @@ imputation_boundaries <- matrix(c(7, 1, 5),
       as.data.frame(df_ischemic),
       m = p_missing,
       idvars = c("id_census_block_group"),
-      ords = c("cat_age_group", "n_ischemic_deaths"),
+      ords = c("cat_age_group", "n_ischemic_deaths"),noms = c("cat_physiographic_region"),
       bounds = imputation_boundaries
     )
     
@@ -65,6 +66,7 @@ imputation_boundaries <- matrix(c(7, 1, 5),
       m = p_missing,
       idvars = c("id_census_block_group"),
       ords = c("cat_age_group", "n_stroke_cerebrovascular_deaths"),
+      noms = c("cat_physiographic_region"),
       bounds = imputation_boundaries
     )
     
@@ -75,6 +77,7 @@ imputation_boundaries <- matrix(c(7, 1, 5),
       m = p_missing,
       idvars = c("id_census_block_group"),
       ords = c("cat_age_group", "n_diabetes_deaths"),
+      noms = c("cat_physiographic_region"),
       bounds = imputation_boundaries
     )
       
