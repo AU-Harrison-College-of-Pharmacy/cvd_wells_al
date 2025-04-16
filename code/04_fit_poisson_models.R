@@ -13,18 +13,20 @@ df <- read_rds("/Volumes/Projects/usgs_cvd_wells_al/data/clean/02_analysis_datas
 df %>%
   mutate(
     cat_centered_scaled_mean_pct_wells = Hmisc::cut2(amt_centered_scaled_mean_pct_wells_cbg, g = 4),
-    cat_centered_scaled_area_land = Hmisc::cut2(amt_centered_scaled_area_land, g = 4)
+    cat_centered_scaled_area_land = Hmisc::cut2(amt_centered_scaled_area_land, g = 4),
+    cat_pct_aa_only = Hmisc::cut2(amt_pct_aa_only, g = 4)
   ) %>%
-  count(cat_centered_scaled_area_land, cat_centered_scaled_mean_pct_wells) %>%
-  arrange(cat_centered_scaled_mean_pct_wells, cat_centered_scaled_area_land) %>%
+  count(cat_centered_scaled_area_land, cat_centered_scaled_mean_pct_wells, cat_pct_aa_only) %>%
+  arrange(cat_centered_scaled_mean_pct_wells, cat_centered_scaled_area_land, cat_pct_aa_only) %>%
   mutate(
-    cat_centered_scaled_mean_pct_wells = as_character(cat_centered_scaled_mean_pct_wells),
-    cat_centered_scaled_area_land = as_character(cat_centered_scaled_area_land)
+    cat_centered_scaled_mean_pct_wells = as.character(cat_centered_scaled_mean_pct_wells),
+    cat_centered_scaled_area_land = as.character(cat_centered_scaled_area_land),
+    cat_pct_aa_only = as.character(cat_pct_aa_only)
   ) %>%
-  tidyr::complete(cat_centered_scaled_area_land, cat_centered_scaled_mean_pct_wells) %>%
+  tidyr::complete(cat_centered_scaled_area_land, cat_centered_scaled_mean_pct_wells, cat_pct_aa_only) %>%
   ggplot(aes(x = cat_centered_scaled_mean_pct_wells, y = n)) +
   geom_bar(stat = "identity") +
-  facet_wrap(~ cat_centered_scaled_area_land, scales = "free_y")
+  facet_grid(cat_pct_aa_only ~ cat_centered_scaled_area_land, scales = "free_y")
 
 df_hypertensive <- read_rds("/Volumes/Projects/usgs_cvd_wells_al/data/clean/03_imputed_hypertensive_deaths.rds")
 

@@ -5,7 +5,7 @@ library(tidycensus)
 library(sjlabelled)
 
 # Download CBGs and their geometry from 2020 census. Use the cartographic boundary.
-cbgs <- block_groups(state = "AL", cb = TRUE, year = 2020) %>%
+cbgs <- block_groups(state = "AL", cb = TRUE, year = 2020) %>%  # The cartographic boundary of AL has 3,924 CBGs, while the non-cartographic (political?) boundary has 3,925. The Census datasets later on will have 3,925. We will just leave that one CBG out.
   janitor::clean_names() %>%
   rename(census_block_group = geoid)
 
@@ -77,7 +77,7 @@ df <- left_join(cbgs, adph_primary,
   mutate(
     cbg_age_included_by_adph = if_else(is.na(cbg_age_included_by_adph), 0, cbg_age_included_by_adph)
   ) %>%
-  select(-c(statefp, countyfp, tractce, blkgrpce, affgeoid, name, namelsad, lsad)) %>%
+  select(-c(statefp, countyfp, tractce, blkgrpce, mtfcc, funcstat, intptlat, intptlon, namelsad)) %>%
   
   # After joining and completing the implicit missing values, some of the variables from the cbgs dataset are now missing for rows 2 - 4 for each cbg. Fix this issue.
   
@@ -94,11 +94,14 @@ df <- left_join(cbgs, adph_primary,
          diabetes_deaths = if_else(cbg_age_included_by_adph == 0, 0, diabetes_deaths)) %>%
   left_join(., df_age_populations,
             by = c("census_block_group", "age_group")) %>%
+  left_join(., df_aa_populations,
+            by = "census_block_group") %>%
   as_tibble() %>%
   rename(
     id_census_block_group = census_block_group,
     amt_area_land = aland,
     amt_area_water = awater,
+    amt_pct_aa_only = percent_aa_only,
     cat_age_group = age_group,
     n_hypertensive_deaths = hypertensive_deaths,
     n_ischemic_deaths = ischemic_deaths,
@@ -149,7 +152,8 @@ df <- left_join(cbgs, adph_primary,
     cat_ischemic_deaths = "Categorical counts of ischemic deaths: 0, 1 - 5, or >= 6",
     cat_stroke_cerebrovascular_deaths = "Categorical counts of stroke or cerebrovascular deaths: 0, 1 - 5, or >= 6",
     cat_diabetes_deaths = "Categorical counts of diabetes deaths: 0, 1 - 5, or >= 6",
-    amt_population_density_per_km2_per_age_group = "Population density per 1 km^2 (by age group)"
+    amt_population_density_per_km2_per_age_group = "Population density per 1 km^2 (by age group)",
+    amt_pct_aa_only = "Percent of population self-reporting as Black or African American only"
   )
 
 # Test whether you ended up with the same number of distinct Census block groups as the dataset from the Census. This test should return `TRUE`.
@@ -162,3 +166,6 @@ df %>% filter(is.na(amt_area_land))
 df %>% filter(st_is_empty(geometry))
 
 write_rds(df, file = "/Volumes/Projects/usgs_cvd_wells_al/data/clean/01_clean_adph_census_primary_cod.rds")
+
+
+# Dataset of >= 75 years for Helen

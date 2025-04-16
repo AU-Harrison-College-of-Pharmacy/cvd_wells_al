@@ -2,6 +2,8 @@ library(tidyverse)
 library(lme4)
 library(ggeffects)
 library(patchwork)
+library(mice)
+library(broom.mixed)
 
 # Get the original well data so that we can show the results in terms of the original well percentages, not the centered and scaled well percentages
 
@@ -15,6 +17,10 @@ au_colors <- c("#ffc044", "#e86100", "#0093d2", "#0b2341", "#00a597")
 # Hypertension
 
 f_hypertensive <- read_rds("/Volumes/Projects/usgs_cvd_wells_al/output/04_hypertension_deaths_poisson_model.rds")
+
+pool(f_hypertensive) %>%
+  summary(conf.int = TRUE, exponentiate = TRUE) %>%
+  select(term, estimate, conf.low, conf.high)
 
 preds_hypertensive <- lapply(f_hypertensive, predict_response, terms = c("amt_centered_scaled_mean_pct_wells_cbg [-0.78:2.9]", "cat_age_group"),
                          condition = c(n_population_times_4 = 100000)) %>%
@@ -38,6 +44,10 @@ ggsave("figs/05_hypertensive_deaths.pdf",
 
 f_ischemic <- read_rds("/Volumes/Projects/usgs_cvd_wells_al/output/04_ischemic_deaths_poisson_model.rds")
 
+pool(f_ischemic) %>%
+  summary(conf.int = TRUE, exponentiate = TRUE) %>%
+  select(term, estimate, conf.low, conf.high)
+
 preds_ischemic <- lapply(f_ischemic, predict_response, terms = c("amt_centered_scaled_mean_pct_wells_cbg [-0.78:2.9]", "cat_age_group"),
                              condition = c(n_population_times_4 = 100000)) %>%
   pool_predictions()
@@ -60,6 +70,10 @@ ggsave("figs/05_ischemic_deaths.pdf",
 
 f_stroke_cerebrovascular <- read_rds("/Volumes/Projects/usgs_cvd_wells_al/output/04_stroke_cerebrovascular_deaths_poisson_model.rds")
 
+pool(f_stroke_cerebrovascular) %>%
+  summary(conf.int = TRUE, exponentiate = TRUE) %>%
+  select(term, estimate, conf.low, conf.high)
+
 preds_stroke_cerebrovascular <- lapply(f_stroke_cerebrovascular, predict_response, terms = c("amt_centered_scaled_mean_pct_wells_cbg [-0.78:2.9]", "cat_age_group"),
                          condition = c(n_population_times_4 = 100000)) %>%
   pool_predictions()
@@ -81,6 +95,10 @@ ggsave("figs/05_stroke_cerebrovascular_deaths.pdf",
 # Diabetes
 
 f_diabetes <- read_rds("/Volumes/Projects/usgs_cvd_wells_al/output/04_diabetes_deaths_poisson_model.rds")
+
+pool(f_diabetes) %>%
+  summary(conf.int = TRUE, exponentiate = TRUE) %>%
+  select(term, estimate, conf.low, conf.high)
 
 preds_diabetes <- lapply(f_diabetes, predict_response, terms = c("amt_centered_scaled_mean_pct_wells_cbg [-0.78:2.9]", "cat_age_group"),
                                        condition = c(n_population_times_4 = 100000)) %>%

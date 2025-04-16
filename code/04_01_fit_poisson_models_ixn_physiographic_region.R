@@ -18,8 +18,8 @@ df %>%
   count(cat_centered_scaled_area_land, cat_centered_scaled_mean_pct_wells) %>%
   arrange(cat_centered_scaled_mean_pct_wells, cat_centered_scaled_area_land) %>%
   mutate(
-    cat_centered_scaled_mean_pct_wells = as_character(cat_centered_scaled_mean_pct_wells),
-    cat_centered_scaled_area_land = as_character(cat_centered_scaled_area_land)
+    cat_centered_scaled_mean_pct_wells = as.character(cat_centered_scaled_mean_pct_wells),
+    cat_centered_scaled_area_land = as.character(cat_centered_scaled_area_land)
   ) %>%
   tidyr::complete(cat_centered_scaled_area_land, cat_centered_scaled_mean_pct_wells) %>%
   ggplot(aes(x = cat_centered_scaled_mean_pct_wells, y = n)) +
