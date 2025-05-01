@@ -1,5 +1,5 @@
 # pool_inla() function
-# input: list of inla results for multiple imputation datasets
+# input: a list of inla results for multiple imputation datasets
 # output: term, estimate, std.error, conf.low, conf.high  
 # Mimic mice::pool() function by combining parameter estimates across imputations
 
@@ -7,18 +7,16 @@ pool_inla <- function(f_condition_inla){
   
   param_names <- names(f_condition_inla[[1]]$marginals.fixed)
   
-  stacked_marginals <- lapply(param_names, function(par) {
-    all_samples <- unlist(lapply(f_condition_inla, function(mod) {
+  stacked_marginals <- lapply(f_condition_inla, function(mod) {
+    lapply(param_names, function(par) {
       inla.rmarginal(1000, mod$marginals.fixed[[par]])
-    }))
-    all_samples
+    }) %>%
+      setNames(param_names) %>%
+      bind_cols()
   })
   
-  
-  names(stacked_marginals) <- param_names
-  
   output <- stacked_marginals %>%
-    bind_cols() %>%
+    bind_rows() %>%
     summarise(
       across(everything(), 
              list(
@@ -38,5 +36,5 @@ pool_inla <- function(f_condition_inla){
     select(term, estimate, std.error, conf.low, conf.high)
   
   
-  return(output)
+  return(list(output= output, estimated_parameters = stacked_marginals))
 }
