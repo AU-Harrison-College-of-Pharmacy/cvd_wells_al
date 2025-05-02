@@ -4,6 +4,11 @@ library(ggeffects)
 library(patchwork)
 library(mice)
 library(broom.mixed)
+library(INLA)
+
+source("r/pool_inla.R")
+source("r/pool_predictions_inla.R")
+source("r/plot_inla.R")
 
 # Get the original well data so that we can show the results in terms of the original well percentages, not the centered and scaled well percentages
 
@@ -16,112 +21,125 @@ au_colors <- c("#ffc044", "#e86100", "#0093d2", "#0b2341", "#00a597")
 
 # Hypertension
 
-f_hypertensive <- read_rds("/Volumes/Projects/usgs_cvd_wells_al/output/04_hypertension_deaths_poisson_model.rds")
+f_hypertensive <- read_rds("/Volumes/Projects/usgs_cvd_wells_al/output/04_hypertension_deaths_poisson_model_inla.rds")
 
-pool(f_hypertensive) %>%
-  summary(conf.int = TRUE, exponentiate = TRUE) %>%
+pool_inla(f_hypertensive) %>%
   select(term, estimate, conf.low, conf.high)
 
-preds_hypertensive <- lapply(f_hypertensive, predict_response, terms = c("amt_centered_scaled_mean_pct_wells_cbg [-0.78:2.9]", "cat_age_group"),
-                         condition = c(n_population_times_4 = 100000)) %>%
-  pool_predictions()
+preds_hypertensive <- pool_predictions_inla(f_hypertensive, 
+                                        terms = c("amt_centered_scaled_mean_pct_wells_cbg [-0.78:2.9]", "cat_age_group"),
+                                        condition = c(n_population_times_4 = 100000))
 
 p_hypertensive <- preds_hypertensive %>% 
-  plot() +
+  plot_inla() +
   labs(
-    x = "Percent private well use",
+    x = "Centered and scaled percent private well use",
     y = "", 
-    title = "Hypertensive deaths per 100,000"
+    title = "Hypertensive deaths per 100,000",
+    color = "Age group (years)",
+    fill = "Age group (years)"
   ) +
   scale_x_continuous(labels = c(paste0(m - 0.78 * s), paste0(m), paste0(m + s), paste0(m + 2 * s))) +
   scale_color_manual(values = au_colors) +
-  scale_fill_manual(values = au_colors)
+  scale_fill_manual(values = au_colors) + 
+  theme_minimal() +
+  theme(axis.line = element_line(color = "lightgray"))
 
-ggsave("figs/05_hypertensive_deaths.pdf",
+ggsave("figs/05_hypertensive_deaths_inla.pdf",
        p_hypertensive)
 
 # Ischemic
 
-f_ischemic <- read_rds("/Volumes/Projects/usgs_cvd_wells_al/output/04_ischemic_deaths_poisson_model.rds")
+f_ischemic <- read_rds("/Volumes/Projects/usgs_cvd_wells_al/output/04_ischemic_deaths_poisson_model_inla.rds")
 
-pool(f_ischemic) %>%
-  summary(conf.int = TRUE, exponentiate = TRUE) %>%
+pool_inla(f_ischemic) %>%
   select(term, estimate, conf.low, conf.high)
 
-preds_ischemic <- lapply(f_ischemic, predict_response, terms = c("amt_centered_scaled_mean_pct_wells_cbg [-0.78:2.9]", "cat_age_group"),
-                             condition = c(n_population_times_4 = 100000)) %>%
-  pool_predictions()
+preds_ischemic <- pool_predictions_inla(f_ischemic, 
+                                        terms = c("amt_centered_scaled_mean_pct_wells_cbg [-0.78:2.9]", "cat_age_group"),
+                                        condition = c(n_population_times_4 = 100000))
 
 p_ischemic <- preds_ischemic %>% 
-  plot() +
+  plot_inla() +
   labs(
     x = "Centered and scaled percent private well use",
     y = "", 
-    title = "Ischemic deaths per 100,000"
+    title = "Ischemic deaths per 100,000",
+    color = "Age group (years)",
+    fill = "Age group (years)"
   ) +
   scale_x_continuous(labels = c(paste0(m - 0.78 * s), paste0(m), paste0(m + s), paste0(m + 2 * s))) +
   scale_color_manual(values = au_colors) +
-  scale_fill_manual(values = au_colors)
+  scale_fill_manual(values = au_colors) + 
+  theme_minimal() +
+  theme(axis.line = element_line(color = "lightgray"))
 
-ggsave("figs/05_ischemic_deaths.pdf",
+ggsave("figs/05_ischemic_deaths_inla.pdf",
        p_ischemic)
 
 # Stroke/cerebrovascular
 
-f_stroke_cerebrovascular <- read_rds("/Volumes/Projects/usgs_cvd_wells_al/output/04_stroke_cerebrovascular_deaths_poisson_model.rds")
+f_stroke_cerebrovascular <- read_rds("/Volumes/Projects/usgs_cvd_wells_al/output/04_stroke_cerebrovascular_deaths_poisson_model_inla.rds")
 
-pool(f_stroke_cerebrovascular) %>%
-  summary(conf.int = TRUE, exponentiate = TRUE) %>%
+pool_inla(f_stroke_cerebrovascular) %>%
   select(term, estimate, conf.low, conf.high)
 
-preds_stroke_cerebrovascular <- lapply(f_stroke_cerebrovascular, predict_response, terms = c("amt_centered_scaled_mean_pct_wells_cbg [-0.78:2.9]", "cat_age_group"),
-                         condition = c(n_population_times_4 = 100000)) %>%
-  pool_predictions()
+preds_stroke_cerebrovascular <- pool_predictions_inla(f_stroke_cerebrovascular, 
+                                                      terms = c("amt_centered_scaled_mean_pct_wells_cbg [-0.78:2.9]", "cat_age_group"),
+                                                      condition = c(n_population_times_4 = 100000))
 
 p_stroke_cerebrovascular <- preds_stroke_cerebrovascular %>% 
-  plot() +
+  plot_inla() +
   labs(
     x = "Centered and scaled percent private well use",
     y = "", 
-    title = "Stroke/cerebrovascular deaths per 100,000"
+    title = "Stroke/cerebrovascular deaths per 100,000",
+    color = "Age group (years)",
+    fill = "Age group (years)"
   ) +
   scale_x_continuous(labels = c(paste0(m - 0.78 * s), paste0(m), paste0(m + s), paste0(m + 2 * s))) +
   scale_color_manual(values = au_colors) +
-  scale_fill_manual(values = au_colors)
+  scale_fill_manual(values = au_colors) + 
+  theme_minimal() +
+  theme(axis.line = element_line(color = "lightgray"))
 
-ggsave("figs/05_stroke_cerebrovascular_deaths.pdf",
+ggsave("figs/05_stroke_cerebrovascular_deaths_inla.pdf",
        p_stroke_cerebrovascular)
 
 # Diabetes
 
-f_diabetes <- read_rds("/Volumes/Projects/usgs_cvd_wells_al/output/04_diabetes_deaths_poisson_model.rds")
+f_diabetes <- read_rds("/Volumes/Projects/usgs_cvd_wells_al/output/04_diabetes_deaths_poisson_model_inla.rds")
 
-pool(f_diabetes) %>%
-  summary(conf.int = TRUE, exponentiate = TRUE) %>%
-  select(term, estimate, conf.low, conf.high)
+pool_inla(f_diabetes) %>%
+  select(term, estimate, conf.low, conf.high) 
 
-preds_diabetes <- lapply(f_diabetes, predict_response, terms = c("amt_centered_scaled_mean_pct_wells_cbg [-0.78:2.9]", "cat_age_group"),
-                                       condition = c(n_population_times_4 = 100000)) %>%
-  pool_predictions()
+preds_diabetes <- pool_predictions_inla(f_diabetes, 
+                                             terms = c("amt_centered_scaled_mean_pct_wells_cbg [-0.78:2.9]", "cat_age_group"),
+                                             condition = c(n_population_times_4 = 100000))
+
 
 p_diabetes <- preds_diabetes %>% 
-  plot() +
+  plot_inla() +
   labs(
     x = "Centered and scaled percent private well use",
     y = "", 
-    title = "Diabetes deaths per 100,000"
+    title = "Diabetes deaths per 100,000",
+    color = "Age group (years)",
+    fill = "Age group (years)"
   ) +
   scale_x_continuous(labels = c(paste0(m - 0.78 * s), paste0(m), paste0(m + s), paste0(m + 2 * s))) +
   scale_color_manual(values = au_colors) +
-  scale_fill_manual(values = au_colors)
+  scale_fill_manual(values = au_colors) + 
+  theme_minimal() +
+  theme(axis.line = element_line(color = "lightgray"))
 
-ggsave("figs/05_diabetes_deaths.pdf",
+ggsave("figs/05_diabetes_deaths_inla.pdf",
        p_diabetes)
 
 p <- p_hypertensive + p_ischemic + p_stroke_cerebrovascular + p_diabetes
 p
 
-ggsave(filename = "figs/05_combined_plots.pdf", p)
+ggsave(filename = "figs/05_combined_plots_inla.pdf", p)
 
 #########
 # Interaction with physiographic region
@@ -129,90 +147,106 @@ ggsave(filename = "figs/05_combined_plots.pdf", p)
 
 # Hypertension
 
-f_hypertensive <- read_rds("/Volumes/Projects/usgs_cvd_wells_al/output/04_01_hypertension_deaths_poisson_model_ixn_physiographic_region.rds")
+f_hypertensive <- read_rds("/Volumes/Projects/usgs_cvd_wells_al/output/04_01_hypertension_deaths_poisson_model_ixn_physiographic_region_inla.rds")
 
-preds_hypertensive <- lapply(f_hypertensive, predict_response, terms = c("amt_centered_scaled_mean_pct_wells_cbg [-0.78:2.9]", "cat_physiographic_region"),
-                             condition = c(n_population_times_4 = 100000)) %>%
-  pool_predictions()
+preds_hypertensive <- pool_predictions_inla(f_hypertensive, 
+                                            terms = c("amt_centered_scaled_mean_pct_wells_cbg [-0.78:2.9]", "cat_physiographic_region"),
+                                            condition = c(n_population_times_4 = 100000))
 
 p_hypertensive <- preds_hypertensive %>% 
-  plot() +
+  plot_inla() +
   labs(
-    x = "Percent private well use",
+    x = "Centered and scaled percent private well use",
     y = "", 
-    title = "Hypertensive deaths per 100,000"
+    title = "Hypertensive deaths per 100,000",
+    color = "Physiographic region according to USGS",
+    fill = "Physiographic region according to USGS"
   ) +
   scale_x_continuous(labels = c(paste0(m - 0.78 * s), paste0(m), paste0(m + s), paste0(m + 2 * s))) +
   scale_color_manual(values = au_colors) +
-  scale_fill_manual(values = au_colors)
+  scale_fill_manual(values = au_colors) + 
+  theme_minimal() +
+  theme(axis.line = element_line(color = "lightgray"))
 
-ggsave("figs/05_hypertensive_deaths_ixn_physiographic_region.pdf",
+ggsave("figs/05_hypertensive_deaths_ixn_physiographic_region_inla.pdf",
        p_hypertensive)
 
 # Ischemic
 
-f_ischemic <- read_rds("/Volumes/Projects/usgs_cvd_wells_al/output/04_01_ischemic_deaths_poisson_model_ixn_physiographic_region.rds")
+f_ischemic <- read_rds("/Volumes/Projects/usgs_cvd_wells_al/output/04_01_ischemic_deaths_poisson_model_ixn_physiographic_region_inla.rds")
 
-preds_ischemic <- lapply(f_ischemic, predict_response, terms = c("amt_centered_scaled_mean_pct_wells_cbg [-0.78:2.9]", "cat_physiographic_region"),
-                         condition = c(n_population_times_4 = 100000)) %>%
-  pool_predictions()
+preds_ischemic <- pool_predictions_inla(f_ischemic, 
+                                        terms = c("amt_centered_scaled_mean_pct_wells_cbg [-0.78:2.9]", "cat_physiographic_region"),
+                                        condition = c(n_population_times_4 = 100000))
 
 p_ischemic <- preds_ischemic %>% 
-  plot() +
+  plot_inla() +
   labs(
     x = "Centered and scaled percent private well use",
     y = "", 
-    title = "Ischemic deaths per 100,000"
+    title = "Ischemic deaths per 100,000",
+    color = "Physiographic region according to USGS",
+    fill = "Physiographic region according to USGS"
   ) +
   scale_x_continuous(labels = c(paste0(m - 0.78 * s), paste0(m), paste0(m + s), paste0(m + 2 * s))) +
   scale_color_manual(values = au_colors) +
-  scale_fill_manual(values = au_colors)
+  scale_fill_manual(values = au_colors) + 
+  theme_minimal() +
+  theme(axis.line = element_line(color = "lightgray"))
 
-ggsave("figs/05_ischemic_deaths_ixn_physiographic_region.pdf",
+ggsave("figs/05_ischemic_deaths_ixn_physiographic_region_inla.pdf",
        p_ischemic)
 
 # Stroke/cerebrovascular
 
-f_stroke_cerebrovascular <- read_rds("/Volumes/Projects/usgs_cvd_wells_al/output/04_01_stroke_cerebrovascular_deaths_poisson_model_ixn_physiographic_region.rds")
+f_stroke_cerebrovascular <- read_rds("/Volumes/Projects/usgs_cvd_wells_al/output/04_01_stroke_cerebrovascular_deaths_poisson_model_ixn_physiographic_region_inla.rds")
 
-preds_stroke_cerebrovascular <- lapply(f_stroke_cerebrovascular, predict_response, terms = c("amt_centered_scaled_mean_pct_wells_cbg [-0.78:2.9]", "cat_physiographic_region"),
-                                       condition = c(n_population_times_4 = 100000)) %>%
-  pool_predictions()
+preds_stroke_cerebrovascular <- pool_predictions_inla(f_stroke_cerebrovascular, 
+                                                      terms = c("amt_centered_scaled_mean_pct_wells_cbg [-0.78:2.9]", "cat_physiographic_region"),
+                                                      condition = c(n_population_times_4 = 100000))
 
 p_stroke_cerebrovascular <- preds_stroke_cerebrovascular %>% 
-  plot() +
+  plot_inla() +
   labs(
     x = "Centered and scaled percent private well use",
     y = "", 
-    title = "Stroke/cerebrovascular deaths per 100,000"
+    title = "Stroke/cerebrovascular deaths per 100,000",
+    color = "Physiographic region according to USGS",
+    fill = "Physiographic region according to USGS"
   ) +
   scale_x_continuous(labels = c(paste0(m - 0.78 * s), paste0(m), paste0(m + s), paste0(m + 2 * s))) +
   scale_color_manual(values = au_colors) +
-  scale_fill_manual(values = au_colors)
+  scale_fill_manual(values = au_colors) + 
+  theme_minimal() +
+  theme(axis.line = element_line(color = "lightgray"))
 
-ggsave("figs/05_stroke_cerebrovascular_deaths_ixn_physiographic_region.pdf",
+ggsave("figs/05_stroke_cerebrovascular_deaths_ixn_physiographic_region_inla.pdf",
        p_stroke_cerebrovascular)
 
 # Diabetes
 
-f_diabetes <- read_rds("/Volumes/Projects/usgs_cvd_wells_al/output/04_01_diabetes_deaths_poisson_model_ixn_physiographic_region.rds")
+f_diabetes <- read_rds("/Volumes/Projects/usgs_cvd_wells_al/output/04_01_diabetes_deaths_poisson_model_ixn_physiographic_region_inla.rds")
 
-preds_diabetes <- lapply(f_diabetes, predict_response, terms = c("amt_centered_scaled_mean_pct_wells_cbg [-0.78:2.9]", "cat_physiographic_region"),
-                         condition = c(n_population_times_4 = 100000)) %>%
-  pool_predictions()
+preds_diabetes <- pool_predictions_inla(f_diabetes, 
+                                        terms = c("amt_centered_scaled_mean_pct_wells_cbg [-0.78:2.9]", "cat_physiographic_region"),
+                                        condition = c(n_population_times_4 = 100000))
 
 p_diabetes <- preds_diabetes %>% 
-  plot() +
+  plot_inla() +
   labs(
     x = "Centered and scaled percent private well use",
     y = "", 
-    title = "Diabetes deaths per 100,000"
+    title = "Diabetes deaths per 100,000",
+    color = "Physiographic region according to USGS",
+    fill = "Physiographic region according to USGS"
   ) +
   scale_x_continuous(labels = c(paste0(m - 0.78 * s), paste0(m), paste0(m + s), paste0(m + 2 * s))) +
   scale_color_manual(values = au_colors) +
-  scale_fill_manual(values = au_colors)
+  scale_fill_manual(values = au_colors) + 
+  theme_minimal() +
+  theme(axis.line = element_line(color = "lightgray"))
 
-ggsave("figs/05_diabetes_deaths_ixn_physiographic_region.pdf",
+ggsave("figs/05_diabetes_deaths_ixn_physiographic_region_inla.pdf",
        p_diabetes)
 
 #########
@@ -220,90 +254,108 @@ ggsave("figs/05_diabetes_deaths_ixn_physiographic_region.pdf",
 #########
 
 # Hypertension
-f_hypertensive_sensitivity_area <- read_rds("/Volumes/Projects/usgs_cvd_wells_al/output/04_hypertension_deaths_poisson_model_sensitivity_area.rds")
+f_hypertensive_sensitivity_area <- read_rds("/Volumes/Projects/usgs_cvd_wells_al/output/04_hypertension_deaths_poisson_model_sensitivity_area_inla.rds")
 
-preds_hypertensive_sensitivity_area <- lapply(f_hypertensive_sensitivity_area, predict_response, terms = c("amt_centered_scaled_mean_pct_wells_cbg [-0.78:2.9]", "cat_age_group"),
-                             condition = c(n_population_times_4 = 100000)) %>%
-  pool_predictions()
+
+
+preds_hypertensive_sensitivity_area <- pool_predictions_inla(f_hypertensive_sensitivity_area, 
+                                                             terms = c("amt_centered_scaled_mean_pct_wells_cbg [-0.78:2.9]", "cat_age_group"),
+                                                             condition = c(n_population_times_4 = 100000))
 
 p_hypertensive_sensitivity_area <- preds_hypertensive_sensitivity_area %>% 
-  plot() +
+  plot_inla() +
   labs(
-    x = "Percent private well use",
+    x = "Centered and scaled percent private well use",
     y = "", 
-    title = "Hypertensive deaths per 100,000"
+    title = "Hypertensive deaths per 100,000",
+    color = "Age group (years)",
+    fill = "Age group (years)"
   ) +
   scale_x_continuous(labels = c(paste0(m - 0.78 * s), paste0(m), paste0(m + s), paste0(m + 2 * s))) +
   scale_color_manual(values = au_colors) +
-  scale_fill_manual(values = au_colors)
+  scale_fill_manual(values = au_colors) + 
+  theme_minimal() +
+  theme(axis.line = element_line(color = "lightgray"))
 
-ggsave("figs/05_hypertensive_deaths_sensitivity_area.pdf",
+ggsave("figs/05_hypertensive_deaths_sensitivity_area_inla.pdf",
        p_hypertensive_sensitivity_area)
 
 # Ischemic
-f_ischemic_sensitivity_area <- read_rds("/Volumes/Projects/usgs_cvd_wells_al/output/04_ischemic_deaths_poisson_model_sensitivity_area.rds")
+f_ischemic_sensitivity_area <- read_rds("/Volumes/Projects/usgs_cvd_wells_al/output/04_ischemic_deaths_poisson_model_sensitivity_area_inla.rds")
 
-preds_ischemic_sensitivity_area <- lapply(f_ischemic_sensitivity_area, predict_response, terms = c("amt_centered_scaled_mean_pct_wells_cbg [-0.78:2.9]", "cat_age_group"),
-                                              condition = c(n_population_times_4 = 100000)) %>%
-  pool_predictions()
+preds_ischemic_sensitivity_area <- pool_predictions_inla(f_ischemic_sensitivity_area, 
+                                                         terms = c("amt_centered_scaled_mean_pct_wells_cbg [-0.78:2.9]", "cat_age_group"),
+                                                         condition = c(n_population_times_4 = 100000))
 
 p_ischemic_sensitivity_area <- preds_ischemic_sensitivity_area %>% 
-  plot() +
+  plot_inla() +
   labs(
-    x = "Percent private well use",
+    x = "Centered and scaled percent private well use",
     y = "", 
-    title = "Ischemic deaths per 100,000"
+    title = "Ischemic deaths per 100,000",
+    color = "Age group (years)",
+    fill = "Age group (years)"
   ) +
   scale_x_continuous(labels = c(paste0(m - 0.78 * s), paste0(m), paste0(m + s), paste0(m + 2 * s))) +
   scale_color_manual(values = au_colors) +
-  scale_fill_manual(values = au_colors)
+  scale_fill_manual(values = au_colors) + 
+  theme_minimal() +
+  theme(axis.line = element_line(color = "lightgray"))
 
-ggsave("figs/05_ischemic_deaths_sensitivity_area.pdf",
+ggsave("figs/05_ischemic_deaths_sensitivity_area_inla.pdf",
        p_ischemic_sensitivity_area)
 
 # Stroke/cerebrovascular
-f_stroke_cerebrovascular_sensitivity_area <- read_rds("/Volumes/Projects/usgs_cvd_wells_al/output/04_stroke_cerebrovascular_deaths_poisson_model_sensitivity_area.rds")
+f_stroke_cerebrovascular_sensitivity_area <- read_rds("/Volumes/Projects/usgs_cvd_wells_al/output/04_stroke_cerebrovascular_deaths_poisson_model_sensitivity_area_inla.rds")
 
-preds_stroke_cerebrovascular_sensitivity_area <- lapply(f_stroke_cerebrovascular_sensitivity_area, predict_response, terms = c("amt_centered_scaled_mean_pct_wells_cbg [-0.78:2.9]", "cat_age_group"),
-                                          condition = c(n_population_times_4 = 100000)) %>%
-  pool_predictions()
+preds_stroke_cerebrovascular_sensitivity_area <- pool_predictions_inla(f_stroke_cerebrovascular_sensitivity_area, 
+                                                                       terms = c("amt_centered_scaled_mean_pct_wells_cbg [-0.78:2.9]", "cat_age_group"),
+                                                                       condition = c(n_population_times_4 = 100000))
 
 p_stroke_cerebrovascular_sensitivity_area <- preds_stroke_cerebrovascular_sensitivity_area %>% 
-  plot() +
+  plot_inla() +
   labs(
-    x = "Percent private well use",
+    x = "Centered and scaled percent private well use",
     y = "", 
-    title = "Stroke/cerebrovascular deaths per 100,000"
+    title = "Stroke/cerebrovascular deaths per 100,000",
+    color = "Age group (years)",
+    fill = "Age group (years)"
   ) +
   scale_x_continuous(labels = c(paste0(m - 0.78 * s), paste0(m), paste0(m + s), paste0(m + 2 * s))) +
   scale_color_manual(values = au_colors) +
-  scale_fill_manual(values = au_colors)
+  scale_fill_manual(values = au_colors) + 
+  theme_minimal() +
+  theme(axis.line = element_line(color = "lightgray"))
 
-ggsave("figs/05_stroke_cerebrovascular_deaths_sensitivity_area.pdf",
+ggsave("figs/05_stroke_cerebrovascular_deaths_sensitivity_area_inla.pdf",
        p_stroke_cerebrovascular_sensitivity_area)
 
 # Diabetes
-f_diabetes_sensitivity_area <- read_rds("/Volumes/Projects/usgs_cvd_wells_al/output/04_diabetes_deaths_poisson_model_sensitivity_area.rds")
+f_diabetes_sensitivity_area <- read_rds("/Volumes/Projects/usgs_cvd_wells_al/output/04_diabetes_deaths_poisson_model_sensitivity_area_inla.rds")
 
-preds_diabetes_sensitivity_area <- lapply(f_diabetes_sensitivity_area, predict_response, terms = c("amt_centered_scaled_mean_pct_wells_cbg [-0.78:2.9]", "cat_age_group"),
-                                          condition = c(n_population_times_4 = 100000)) %>%
-  pool_predictions()
+preds_diabetes_sensitivity_area <- pool_predictions_inla(f_diabetes_sensitivity_area, 
+                                                         terms = c("amt_centered_scaled_mean_pct_wells_cbg [-0.78:2.9]", "cat_age_group"),
+                                                         condition = c(n_population_times_4 = 100000))
 
 p_diabetes_sensitivity_area <- preds_diabetes_sensitivity_area %>% 
-  plot() +
+  plot_inla() +
   labs(
-    x = "Percent private well use",
+    x = "Centered and scaled percent private well use",
     y = "", 
-    title = "Diabetes deaths per 100,000"
+    title = "Diabetes deaths per 100,000",
+    color = "Age group (years)",
+    fill = "Age group (years)"
   ) +
   scale_x_continuous(labels = c(paste0(m - 0.78 * s), paste0(m), paste0(m + s), paste0(m + 2 * s))) +
   scale_color_manual(values = au_colors) +
-  scale_fill_manual(values = au_colors)
+  scale_fill_manual(values = au_colors) + 
+  theme_minimal() +
+  theme(axis.line = element_line(color = "lightgray"))
 
-ggsave("figs/05_diabetes_deaths_sensitivity_area.pdf",
+ggsave("figs/05_diabetes_deaths_sensitivity_area_inla.pdf",
        p_diabetes_sensitivity_area)
 
 p_sensitivity_area <- p_hypertensive_sensitivity_area + p_ischemic_sensitivity_area + p_stroke_cerebrovascular_sensitivity_area + p_diabetes_sensitivity_area
 p_sensitivity_area
 
-ggsave(filename = "figs/05_combined_plots_sensitivity_area.pdf", p_sensitivity_area)
+ggsave(filename = "figs/05_combined_plots_sensitivity_area_inla.pdf", p_sensitivity_area)
