@@ -11,7 +11,7 @@ plot_inla <- function(preds_condition_inla){
                y = predicted,
                color = .data[[factor_var]],
                fill = .data[[factor_var]])) +
-    geom_line(size = 1) +
+    geom_line(linewidth = 1) +
     geom_ribbon(aes(ymin = conf.low, ymax = conf.high), alpha = 0.2, color = NA) +
     theme_minimal() +
     theme(axis.line = element_line(color = "lightgray")) 

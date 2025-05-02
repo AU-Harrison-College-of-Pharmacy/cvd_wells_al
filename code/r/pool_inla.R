@@ -36,5 +36,5 @@ pool_inla <- function(f_condition_inla){
     select(term, estimate, std.error, conf.low, conf.high)
   
   
-  return(list(output= output, estimated_parameters = stacked_marginals))
+  return(output)
 }
