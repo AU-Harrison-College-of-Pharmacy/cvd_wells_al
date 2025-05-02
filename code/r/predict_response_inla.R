@@ -59,7 +59,8 @@ predict_response_inla <- function(f_condition_inla_each, terms, condition = list
            conf.high = apply(y_hat, 1, quantile, probs = 0.975))
   y_hat <- newdata_each %>% 
     dplyr::select(all_of(parsed_terms)) %>% 
-    supressMessages(bind_cols(y_hat))
+    bind_cols(y_hat) %>%
+    suppressMessages()
   
   return(list(pred_summary = out, y_hat = y_hat))
 }

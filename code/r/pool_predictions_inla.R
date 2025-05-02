@@ -1,15 +1,16 @@
-# pool_response_inla() function
+# pool_predictions_inla() function
 # input: a list of inla results for multiple imputation datasets; terms; condition
 # output: prediction summary to plot
 
-pool_response_inla <- function(f_condition_inla, terms, condition = list()) {
+pool_predictions_inla <- function(f_condition_inla, terms, condition = list()) {
   
   source("r/predict_response_inla.R")
   source("r/generate_newdata.R")
   y_hat_stacked <- lapply(f_condition_inla, function(f_condition_inla_each){
     
     predict_response_inla(f_condition_inla_each, terms = terms, condition = condition)$y_hat[, -c(1:2)]
-  }) %>% supressMessages(bind_cols())
+  }) %>% bind_cols() %>%
+    suppressMessages()
   
   # terms for prediction summary
   newdata_each <- generate_newdata(f_condition_inla[[1]], terms, condition)
