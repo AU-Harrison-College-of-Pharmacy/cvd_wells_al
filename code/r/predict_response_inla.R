@@ -7,6 +7,7 @@ predict_response_inla <- function(f_condition_inla_each, terms, condition = list
   
   source("r/generate_newdata.R")
   
+  param_names <- names(f_condition_inla_each$marginals.fixed)
   # estimated_parameters_each per each imputation data result
   estimated_parameters_each <- 
     lapply(param_names, function(par) {
