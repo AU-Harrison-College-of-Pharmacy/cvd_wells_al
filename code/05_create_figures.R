@@ -30,6 +30,8 @@ preds_hypertensive <- pool_predictions_inla(f_hypertensive,
                                         terms = c("amt_centered_scaled_mean_pct_wells_cbg [-0.78:2.9]", "cat_age_group"),
                                         condition = c(n_population_times_4 = 100000))
 
+write_rds(preds_hypertensive, "/Volumes/Projects/usgs_cvd_wells_al/output/05_preds_hypertension_deaths_poisson_model_inla.rds")
+
 p_hypertensive <- preds_hypertensive %>% 
   plot_inla() +
   labs(
@@ -59,6 +61,7 @@ preds_ischemic <- pool_predictions_inla(f_ischemic,
                                         terms = c("amt_centered_scaled_mean_pct_wells_cbg [-0.78:2.9]", "cat_age_group"),
                                         condition = c(n_population_times_4 = 100000))
 
+write_rds(preds_ischemic, "/Volumes/Projects/usgs_cvd_wells_al/output/05_preds_ischemic_deaths_poisson_model_inla.rds")
 p_ischemic <- preds_ischemic %>% 
   plot_inla() +
   labs(
@@ -87,6 +90,8 @@ pool_inla(f_stroke_cerebrovascular) %>%
 preds_stroke_cerebrovascular <- pool_predictions_inla(f_stroke_cerebrovascular, 
                                                       terms = c("amt_centered_scaled_mean_pct_wells_cbg [-0.78:2.9]", "cat_age_group"),
                                                       condition = c(n_population_times_4 = 100000))
+
+write_rds(preds_stroke_cerebrovascular, "/Volumes/Projects/usgs_cvd_wells_al/output/05_preds_stroke_cerebrovascular_deaths_poisson_model_inla.rds")
 
 p_stroke_cerebrovascular <- preds_stroke_cerebrovascular %>% 
   plot_inla() +
@@ -117,6 +122,7 @@ preds_diabetes <- pool_predictions_inla(f_diabetes,
                                              terms = c("amt_centered_scaled_mean_pct_wells_cbg [-0.78:2.9]", "cat_age_group"),
                                              condition = c(n_population_times_4 = 100000))
 
+write_rds(preds_diabetes, "/Volumes/Projects/usgs_cvd_wells_al/output/05_preds_diabetes_deaths_poisson_model_inla.rds")
 
 p_diabetes <- preds_diabetes %>% 
   plot_inla() +
@@ -134,7 +140,7 @@ p_diabetes <- preds_diabetes %>%
   theme(axis.line = element_line(color = "lightgray"))
 
 ggsave("figs/05_diabetes_deaths_inla.pdf",
-       p_diabetes)
+       p_diabetes, width= 6, height=4)
 
 p <- p_hypertensive + p_ischemic + p_stroke_cerebrovascular + p_diabetes
 p
@@ -152,6 +158,8 @@ f_hypertensive <- read_rds("/Volumes/Projects/usgs_cvd_wells_al/output/04_01_hyp
 preds_hypertensive <- pool_predictions_inla(f_hypertensive, 
                                             terms = c("amt_centered_scaled_mean_pct_wells_cbg [-0.78:2.9]", "cat_physiographic_region"),
                                             condition = c(n_population_times_4 = 100000))
+
+write_rds(preds_hypertensive, "/Volumes/Projects/usgs_cvd_wells_al/output/05_preds_hypertension_deaths_poisson_model_ixn_physiographic_region_inla.rds")
 
 p_hypertensive <- preds_hypertensive %>% 
   plot_inla() +
@@ -179,6 +187,8 @@ preds_ischemic <- pool_predictions_inla(f_ischemic,
                                         terms = c("amt_centered_scaled_mean_pct_wells_cbg [-0.78:2.9]", "cat_physiographic_region"),
                                         condition = c(n_population_times_4 = 100000))
 
+write_rds(preds_ischemic, "/Volumes/Projects/usgs_cvd_wells_al/output/05_preds_ischemic_deaths_poisson_model_ixn_physiographic_region_inla.rds")
+
 p_ischemic <- preds_ischemic %>% 
   plot_inla() +
   labs(
@@ -204,6 +214,8 @@ f_stroke_cerebrovascular <- read_rds("/Volumes/Projects/usgs_cvd_wells_al/output
 preds_stroke_cerebrovascular <- pool_predictions_inla(f_stroke_cerebrovascular, 
                                                       terms = c("amt_centered_scaled_mean_pct_wells_cbg [-0.78:2.9]", "cat_physiographic_region"),
                                                       condition = c(n_population_times_4 = 100000))
+
+write_rds(preds_stroke_cerebrovascular, "/Volumes/Projects/usgs_cvd_wells_al/output/05_preds_stroke_cerebrovascular_deaths_poisson_model_ixn_physiographic_region_inla.rds")
 
 p_stroke_cerebrovascular <- preds_stroke_cerebrovascular %>% 
   plot_inla() +
@@ -231,6 +243,8 @@ preds_diabetes <- pool_predictions_inla(f_diabetes,
                                         terms = c("amt_centered_scaled_mean_pct_wells_cbg [-0.78:2.9]", "cat_physiographic_region"),
                                         condition = c(n_population_times_4 = 100000))
 
+write_rds(preds_diabetes, "/Volumes/Projects/usgs_cvd_wells_al/output/05_preds_diabetes_deaths_poisson_model_ixn_physiographic_region_inla.rds")
+
 p_diabetes <- preds_diabetes %>% 
   plot_inla() +
   labs(
@@ -249,18 +263,23 @@ p_diabetes <- preds_diabetes %>%
 ggsave("figs/05_diabetes_deaths_ixn_physiographic_region_inla.pdf",
        p_diabetes)
 
+p <- p_hypertensive + p_ischemic + p_stroke_cerebrovascular + p_diabetes
+p
+
+ggsave(filename = "figs/05_combined_plots_deaths_ixn_physiographic_region_inla.pdf", p)
 #########
 # Sensitivity analysis: restricting to second largest block groups
 #########
 
 # Hypertension
+
 f_hypertensive_sensitivity_area <- read_rds("/Volumes/Projects/usgs_cvd_wells_al/output/04_hypertension_deaths_poisson_model_sensitivity_area_inla.rds")
-
-
 
 preds_hypertensive_sensitivity_area <- pool_predictions_inla(f_hypertensive_sensitivity_area, 
                                                              terms = c("amt_centered_scaled_mean_pct_wells_cbg [-0.78:2.9]", "cat_age_group"),
                                                              condition = c(n_population_times_4 = 100000))
+
+write_rds(preds_hypertensive_sensitivity_area, "/Volumes/Projects/usgs_cvd_wells_al/output/05_preds_hypertension_deaths_poisson_model_sensitivity_area_inla.rds")
 
 p_hypertensive_sensitivity_area <- preds_hypertensive_sensitivity_area %>% 
   plot_inla() +
@@ -281,11 +300,14 @@ ggsave("figs/05_hypertensive_deaths_sensitivity_area_inla.pdf",
        p_hypertensive_sensitivity_area)
 
 # Ischemic
+
 f_ischemic_sensitivity_area <- read_rds("/Volumes/Projects/usgs_cvd_wells_al/output/04_ischemic_deaths_poisson_model_sensitivity_area_inla.rds")
 
 preds_ischemic_sensitivity_area <- pool_predictions_inla(f_ischemic_sensitivity_area, 
                                                          terms = c("amt_centered_scaled_mean_pct_wells_cbg [-0.78:2.9]", "cat_age_group"),
                                                          condition = c(n_population_times_4 = 100000))
+
+write_rds(preds_ischemic_sensitivity_area, "/Volumes/Projects/usgs_cvd_wells_al/output/05_preds_ischemic_deaths_poisson_model_sensitivity_area_inla.rds")
 
 p_ischemic_sensitivity_area <- preds_ischemic_sensitivity_area %>% 
   plot_inla() +
@@ -306,11 +328,14 @@ ggsave("figs/05_ischemic_deaths_sensitivity_area_inla.pdf",
        p_ischemic_sensitivity_area)
 
 # Stroke/cerebrovascular
+
 f_stroke_cerebrovascular_sensitivity_area <- read_rds("/Volumes/Projects/usgs_cvd_wells_al/output/04_stroke_cerebrovascular_deaths_poisson_model_sensitivity_area_inla.rds")
 
 preds_stroke_cerebrovascular_sensitivity_area <- pool_predictions_inla(f_stroke_cerebrovascular_sensitivity_area, 
                                                                        terms = c("amt_centered_scaled_mean_pct_wells_cbg [-0.78:2.9]", "cat_age_group"),
                                                                        condition = c(n_population_times_4 = 100000))
+
+write_rds(preds_stroke_cerebrovascular_sensitivity_area, "/Volumes/Projects/usgs_cvd_wells_al/output/05_preds_stroke_cerebrovascular_deaths_poisson_model_sensitivity_area_inla.rds")
 
 p_stroke_cerebrovascular_sensitivity_area <- preds_stroke_cerebrovascular_sensitivity_area %>% 
   plot_inla() +
@@ -331,11 +356,14 @@ ggsave("figs/05_stroke_cerebrovascular_deaths_sensitivity_area_inla.pdf",
        p_stroke_cerebrovascular_sensitivity_area)
 
 # Diabetes
+
 f_diabetes_sensitivity_area <- read_rds("/Volumes/Projects/usgs_cvd_wells_al/output/04_diabetes_deaths_poisson_model_sensitivity_area_inla.rds")
 
 preds_diabetes_sensitivity_area <- pool_predictions_inla(f_diabetes_sensitivity_area, 
                                                          terms = c("amt_centered_scaled_mean_pct_wells_cbg [-0.78:2.9]", "cat_age_group"),
                                                          condition = c(n_population_times_4 = 100000))
+
+write_rds(preds_diabetes_sensitivity_area, "/Volumes/Projects/usgs_cvd_wells_al/output/05_preds_diabetes_deaths_poisson_model_sensitivity_area_inla.rds")
 
 p_diabetes_sensitivity_area <- preds_diabetes_sensitivity_area %>% 
   plot_inla() +
