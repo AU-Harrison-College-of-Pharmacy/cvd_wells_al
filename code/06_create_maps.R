@@ -1,10 +1,55 @@
 library(tidyverse)
 library(sf)
 library(tigris)
+library(tmap)
 
-df <- read_rds(file = "/Volumes/Projects/usgs_cvd_wells_al/data/clean/02_analysis_dataset.rds")
+df <- read_rds(file = "/Volumes/Projects/usgs_cvd_wells_al/data/clean/02_analysis_dataset.rds") %>%
+  filter(is_included_in_analysis == 1)
 
 df
+
+## Maps of important covariates
+df_small <- df %>%
+  filter(cat_age_group == "75 or over") %>%
+  mutate(amt_hypertensive_per_100k_75_older = n_hypertensive_deaths / (4 * n_population) * 100000,
+         amt_ischemic_per_100k_75_older = n_ischemic_deaths / (4 * n_population) * 100000,
+         amt_stroke_cerebrovascular_per_100k_75_older = n_stroke_cerebrovascular_deaths / (4 * n_population) * 100000,
+         amt_diabetes_per_100k_75_older = n_diabetes_deaths / (4 * n_population) * 100000) %>%
+  select(amt_mean_pct_wells_cbg, amt_area_land, amt_pct_aa_only, amt_hypertensive_per_100k_75_older, amt_ischemic_per_100k_75_older, amt_stroke_cerebrovascular_per_100k_75_older, amt_diabetes_per_100k_75_older, geometry, cat_physiographic_region) %>%
+  st_as_sf()
+
+p_wells <- tm_shape(df_small) +
+  tm_polygons(fill = "amt_mean_pct_wells_cbg", fill.legend = tm_legend(title = "Percent of households relying on private wells"))
+
+p_area_land <- tm_shape(df_small) +
+  tm_polygons(fill = "amt_area_land", fill.legend = tm_legend(title = "Land area (m^2)"))
+
+p_pct_aa <- tm_shape(df_small) +
+  tm_polygons(fill = "amt_pct_aa_only", fill.legend = tm_legend(title = "Percent self-reporting African American race only"))
+
+p_hypertensive <- tm_shape(df_small) +
+  tm_polygons(fill = "amt_hypertensive_per_100k_75_older", fill.legend = tm_legend(title = "Hypertensive deaths per 100,000 (75 years and older)"))
+
+p_ischemic <- tm_shape(df_small) +
+  tm_polygons(fill = "amt_ischemic_per_100k_75_older", fill.legend = tm_legend(title = "Ischemic deaths per 100,000 (75 years and older)"))
+
+p_stroke_cerebrovascular <- tm_shape(df_small) +
+  tm_polygons(fill = "amt_stroke_cerebrovascular_per_100k_75_older", fill.legend = tm_legend(title = "Stroke/cerebrovascular deaths per 100,000 (75 years and older)"))
+
+p_diabetes <- tm_shape(df_small) +
+  tm_polygons(fill = "amt_diabetes_per_100k_75_older", fill.legend = tm_legend(title = "Diabetes deaths per 100,000 (75 years and older)"))
+
+p_physio <- tm_shape(df_small) +
+  tm_polygons(fill  = "cat_physiographic_region", fill.legend = tm_legend(title = "Physiographic regions"))
+
+p_overall <- tmap_arrange(p_physio, p_wells, p_area_land, p_pct_aa, p_hypertensive, p_ischemic, p_stroke_cerebrovascular, p_diabetes)
+
+tmap_options(component.autoscale = TRUE)
+
+tmap_save(p_overall, "figs/06_covariate_maps.png", width = 10, height = 10, units = "in")
+
+
+
 
 ## Create a map of CBGs with high well use and high AA, as well as high well use and low AA. See if they are in the same place
 
@@ -91,26 +136,3 @@ p_wells <- df %>%
   theme_void()
   
 p_aa + p_wells
-
-# SIMR: standardized incident mortality ratios
-
-df_hypertensive <- read_rds("/Volumes/Projects/usgs_cvd_wells_al/data/clean/03_imputed_hypertensive_deaths.rds")
-
-df_hypertensive$imputations[[1]] %>%
-  as_tibble() %>%
-  group_by(cat_age_group) %>%
-  mutate(
-    total_deaths = sum(n_hypertensive_deaths),
-    total_population_4_years = sum(n_population_times_4),
-    amt_sm = total_deaths / total_population_4_years,
-    n_expected_deaths = amt_sm * n_population_times_4,
-    smr = n_hypertensive_deaths / n_expected_deaths
-  ) %>%
-  select(id_census_block_group, total_deaths, total_population_4_years, n_expected_deaths, n_hypertensive_deaths, n_population_times_4,
-         amt_sm, 
-         smr) %>%
-  left_join(., df) %>%
-  st_as_sf() %>%
-  ggplot() +
-  geom_sf(aes(fill = smr)) %>%
-  facet_wrap(~ cat_age_gropu)

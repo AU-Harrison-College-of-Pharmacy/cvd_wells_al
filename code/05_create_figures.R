@@ -4,6 +4,7 @@ library(ggeffects)
 library(patchwork)
 library(mice)
 library(broom.mixed)
+library(gt)
 
 # Get the original well data so that we can show the results in terms of the original well percentages, not the centered and scaled well percentages
 
@@ -20,7 +21,8 @@ f_hypertensive <- read_rds("/Volumes/Projects/usgs_cvd_wells_al/output/04_hypert
 
 pool(f_hypertensive) %>%
   summary(conf.int = TRUE, exponentiate = TRUE) %>%
-  select(term, estimate, conf.low, conf.high)
+  select(term, estimate, conf.low, conf.high) %>%
+  mutate(outcome = "Hypertensive death")
 
 preds_hypertensive <- lapply(f_hypertensive, predict_response, terms = c("amt_centered_scaled_mean_pct_wells_cbg [-0.78:2.9]", "cat_age_group"),
                          condition = c(n_population_times_4 = 100000)) %>%
@@ -222,6 +224,11 @@ ggsave("figs/05_diabetes_deaths_ixn_physiographic_region.pdf",
 # Hypertension
 f_hypertensive_sensitivity_area <- read_rds("/Volumes/Projects/usgs_cvd_wells_al/output/04_hypertension_deaths_poisson_model_sensitivity_area.rds")
 
+pool(f_hypertensive_sensitivity_area) %>%
+  summary(conf.int = TRUE, exponentiate = TRUE) %>%
+  select(term, estimate, conf.low, conf.high) %>%
+  mutate(outcome = "Hypertensive death")
+
 preds_hypertensive_sensitivity_area <- lapply(f_hypertensive_sensitivity_area, predict_response, terms = c("amt_centered_scaled_mean_pct_wells_cbg [-0.78:2.9]", "cat_age_group"),
                              condition = c(n_population_times_4 = 100000)) %>%
   pool_predictions()
@@ -242,6 +249,11 @@ ggsave("figs/05_hypertensive_deaths_sensitivity_area.pdf",
 
 # Ischemic
 f_ischemic_sensitivity_area <- read_rds("/Volumes/Projects/usgs_cvd_wells_al/output/04_ischemic_deaths_poisson_model_sensitivity_area.rds")
+
+pool(f_ischemic_sensitivity_area) %>%
+  summary(conf.int = TRUE, exponentiate = TRUE) %>%
+  select(term, estimate, conf.low, conf.high) %>%
+  mutate(outcome = "Hypertensive death")
 
 preds_ischemic_sensitivity_area <- lapply(f_ischemic_sensitivity_area, predict_response, terms = c("amt_centered_scaled_mean_pct_wells_cbg [-0.78:2.9]", "cat_age_group"),
                                               condition = c(n_population_times_4 = 100000)) %>%
@@ -264,6 +276,11 @@ ggsave("figs/05_ischemic_deaths_sensitivity_area.pdf",
 # Stroke/cerebrovascular
 f_stroke_cerebrovascular_sensitivity_area <- read_rds("/Volumes/Projects/usgs_cvd_wells_al/output/04_stroke_cerebrovascular_deaths_poisson_model_sensitivity_area.rds")
 
+pool(f_stroke_cerebrovascular_sensitivity_area) %>%
+  summary(conf.int = TRUE, exponentiate = TRUE) %>%
+  select(term, estimate, conf.low, conf.high) %>%
+  mutate(outcome = "Hypertensive death")
+
 preds_stroke_cerebrovascular_sensitivity_area <- lapply(f_stroke_cerebrovascular_sensitivity_area, predict_response, terms = c("amt_centered_scaled_mean_pct_wells_cbg [-0.78:2.9]", "cat_age_group"),
                                           condition = c(n_population_times_4 = 100000)) %>%
   pool_predictions()
@@ -284,6 +301,11 @@ ggsave("figs/05_stroke_cerebrovascular_deaths_sensitivity_area.pdf",
 
 # Diabetes
 f_diabetes_sensitivity_area <- read_rds("/Volumes/Projects/usgs_cvd_wells_al/output/04_diabetes_deaths_poisson_model_sensitivity_area.rds")
+
+pool(f_diabetes_sensitivity_area) %>%
+  summary(conf.int = TRUE, exponentiate = TRUE) %>%
+  select(term, estimate, conf.low, conf.high) %>%
+  mutate(outcome = "Hypertensive death")
 
 preds_diabetes_sensitivity_area <- lapply(f_diabetes_sensitivity_area, predict_response, terms = c("amt_centered_scaled_mean_pct_wells_cbg [-0.78:2.9]", "cat_age_group"),
                                           condition = c(n_population_times_4 = 100000)) %>%
