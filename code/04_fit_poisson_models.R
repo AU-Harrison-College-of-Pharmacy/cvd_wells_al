@@ -11,6 +11,30 @@ library(INLA)
 df <- read_rds("/Volumes/Projects/usgs_cvd_wells_al/data/clean/02_analysis_dataset.rds") %>%
   dplyr::filter(is_included_in_analysis == 1)
 
+p_overlap_wells_area <- df %>%
+  mutate(
+    cat_centered_scaled_mean_pct_wells = Hmisc::cut2(amt_centered_scaled_mean_pct_wells_cbg, g = 4),
+    cat_centered_scaled_area_land = Hmisc::cut2(amt_centered_scaled_area_land, g = 4)
+  ) %>%
+  count(cat_centered_scaled_area_land, cat_centered_scaled_mean_pct_wells) %>%
+  arrange(cat_centered_scaled_mean_pct_wells, cat_centered_scaled_area_land) %>%
+  mutate(
+    cat_centered_scaled_mean_pct_wells = as.character(cat_centered_scaled_mean_pct_wells),
+    cat_centered_scaled_area_land = as.character(cat_centered_scaled_area_land)
+  ) %>%
+  tidyr::complete(cat_centered_scaled_area_land, cat_centered_scaled_mean_pct_wells) %>%
+  ggplot(aes(x = cat_centered_scaled_mean_pct_wells, y = n)) +
+  geom_bar(stat = "identity") +
+  facet_wrap(~ cat_centered_scaled_area_land, scales = "free_y") +
+  theme(
+    axis.text.x = element_text(angle = 45, hjust = 1)
+  ) +
+  labs(x = str_wrap("Percentage of households reliant on private wells (centered and scaled)", 40),
+       title = str_wrap("Bar plot of quartiles of percentage of households reliant on private wells, by quartiles of land area", 55)
+  )
+
+ggsave("figs/04_overlap_wells_area.pdf", width = 5, height = 4, units = "in")
+
 df %>%
   mutate(
     cat_centered_scaled_mean_pct_wells = Hmisc::cut2(amt_centered_scaled_mean_pct_wells_cbg, g = 4),

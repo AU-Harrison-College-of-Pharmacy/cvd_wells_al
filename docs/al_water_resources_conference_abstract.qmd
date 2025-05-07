@@ -1,0 +1,17 @@
+---
+title: "Alabama Water Resources Conference Abstract"
+authors: "Matthew Shane Loop, Helen Moylan, and Ann S. Ojeda"
+format: docx
+---
+
+The association between drinking private well water and cardiovascular disease is unclear. 
+Drinking private well water contaminated with metals such as lead or arsenic is associated with higher risk for cardiovascular diseases, but drinking harder water, with higher concentrations of magnesium and calcium ions, has been associated with both more and less risk for cardiovascular diseases. 
+One challenge with addressing this question is that prior research is mostly focused on municipal water supplies, where the variability of contaminants and water hardness is small. 
+In contract, drinking water from private wells has much more variation. 
+However, identifying the exact locations of private wells is difficult due to the lack of regulations surrounding them. 
+Therefore, we conducted a study of the relationship between percentage of households with private well water and cardiovascular disease mortality among Census block groups (CBGs) in Alabama.
+
+We collected number of deaths in Alabama from 2016 - 2019 from the Alabama Department of Public Health for all CBGs and age groups (45 - 54, 55 - 64, 65 - 74, and 75+ years) where the primary cause of death was hypertensive heart disease, ischemic heart disease, stroke/cerebrovascular disease, or diabetes. 
+We used a publicly available national database of estimated percent of households on private well use by Census block and averaged the blocks to CBGs. 
+
+We fit Poisson models to the counts of deaths from each type of CVD in turn to estimate the rate ratio for a 1-percentage-point 
