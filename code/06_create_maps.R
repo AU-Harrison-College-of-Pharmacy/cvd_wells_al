@@ -107,7 +107,7 @@ p_overall <- p_low + p_high
 
 p_overall
 
-ggsave(filename = "figs/06_maps_high_low_wells_high_low_aa.pdf", p_overall, width = 9, height = 7, units = "in")
+ggsave(filename = "figs/06_maps_high_low_wells_high_low_aa.png", p_overall, width = 9, height = 7, units = "in")
 
 ## zoom in on birmingham area
 

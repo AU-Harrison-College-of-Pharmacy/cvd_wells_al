@@ -77,7 +77,7 @@ df <- left_join(cbgs, adph_primary,
   mutate(
     cbg_age_included_by_adph = if_else(is.na(cbg_age_included_by_adph), 0, cbg_age_included_by_adph)
   ) %>%
-  select(-c(statefp, countyfp, tractce, blkgrpce, mtfcc, funcstat, intptlat, intptlon, namelsad)) %>%
+  select(-c(statefp, countyfp, tractce, blkgrpce, affgeoid, name, namelsad, lsad)) %>%
   
   # After joining and completing the implicit missing values, some of the variables from the cbgs dataset are now missing for rows 2 - 4 for each cbg. Fix this issue.
   
@@ -109,6 +109,9 @@ df <- left_join(cbgs, adph_primary,
     n_diabetes_deaths = diabetes_deaths,
     ind_cbg_age_group_included_by_adph = cbg_age_included_by_adph,
     n_population = population_estimate
+  ) %>%
+  mutate(
+    amt_centered_scaled_pct_aa_only = scale(amt_pct_aa_only)[, 1]
   ) %>%
   mutate(
     amt_population_density_per_km2_per_age_group = n_population / amt_area_land * 1000 * 1000,  # change to per 1 km^2
@@ -153,7 +156,8 @@ df <- left_join(cbgs, adph_primary,
     cat_stroke_cerebrovascular_deaths = "Categorical counts of stroke or cerebrovascular deaths: 0, 1 - 5, or >= 6",
     cat_diabetes_deaths = "Categorical counts of diabetes deaths: 0, 1 - 5, or >= 6",
     amt_population_density_per_km2_per_age_group = "Population density per 1 km^2 (by age group)",
-    amt_pct_aa_only = "Percent of population self-reporting as Black or African American only"
+    amt_pct_aa_only = "Percent of population self-reporting as Black or African American only",
+    amt_centered_scaled_pct_aa_only = "Centered and scaled version of percent of population self-reporting as Black or African American only"
   )
 
 # Test whether you ended up with the same number of distinct Census block groups as the dataset from the Census. This test should return `TRUE`.
