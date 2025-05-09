@@ -6,6 +6,7 @@ library(mice)
 library(broom.mixed)
 library(INLA)
 
+source("r/sample_posterior_parameter.R")
 source("r/pool_inla.R")
 source("r/pool_predictions_inla.R")
 source("r/plot_inla.R")
@@ -23,7 +24,7 @@ au_colors <- c("#ffc044", "#e86100", "#0093d2", "#0b2341", "#00a597")
 
 f_hypertensive <- read_rds("/Volumes/Projects/usgs_cvd_wells_al/output/04_hypertension_deaths_poisson_model_inla.rds")
 
-pool_inla(f_hypertensive) %>%
+pool_inla(sample_posterior_parameter(f_hypertensive)) %>%
   select(term, estimate, conf.low, conf.high)
 
 preds_hypertensive <- pool_predictions_inla(f_hypertensive, 
@@ -54,7 +55,7 @@ ggsave("figs/05_hypertensive_deaths_inla.pdf",
 
 f_ischemic <- read_rds("/Volumes/Projects/usgs_cvd_wells_al/output/04_ischemic_deaths_poisson_model_inla.rds")
 
-pool_inla(f_ischemic) %>%
+pool_inla(sample_posterior_parameter(f_ischemic)) %>%
   select(term, estimate, conf.low, conf.high)
 
 preds_ischemic <- pool_predictions_inla(f_ischemic, 
@@ -84,7 +85,7 @@ ggsave("figs/05_ischemic_deaths_inla.pdf",
 
 f_stroke_cerebrovascular <- read_rds("/Volumes/Projects/usgs_cvd_wells_al/output/04_stroke_cerebrovascular_deaths_poisson_model_inla.rds")
 
-pool_inla(f_stroke_cerebrovascular) %>%
+pool_inla(sample_posterior_parameter(f_stroke_cerebrovascular)) %>%
   select(term, estimate, conf.low, conf.high)
 
 preds_stroke_cerebrovascular <- pool_predictions_inla(f_stroke_cerebrovascular, 
@@ -115,7 +116,7 @@ ggsave("figs/05_stroke_cerebrovascular_deaths_inla.pdf",
 
 f_diabetes <- read_rds("/Volumes/Projects/usgs_cvd_wells_al/output/04_diabetes_deaths_poisson_model_inla.rds")
 
-pool_inla(f_diabetes) %>%
+pool_inla(sample_posterior_parameter(f_diabetes)) %>%
   select(term, estimate, conf.low, conf.high) 
 
 preds_diabetes <- pool_predictions_inla(f_diabetes, 
