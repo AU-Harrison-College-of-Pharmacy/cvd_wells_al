@@ -1,0 +1,95 @@
+---
+title: "Summary of the posteriors"
+format: docx
+editor: visual
+---
+
+```{r, include = FALSE}
+knitr::opts_chunk$set(
+  message = FALSE,
+  warning = FALSE,
+  echo = FALSE
+)
+
+
+```
+
+```{r}
+library(tidyverse)
+library(tinytable)
+library(gtsummary)
+library(gt)
+
+
+```
+## Primary analysis
+
+```{r}
+
+read_rds("/Volumes/Projects/usgs_cvd_wells_al/output/09_p_dir_rope_main_pct_wells_cbg_inla.rds") %>%
+  tt(digits = 3)
+```
+
+
+
+## Sensitivity analyses restricting to second-largest quartile of block groups
+
+
+```{r}
+read_rds("/Volumes/Projects/usgs_cvd_wells_al/output/09_p_dir_rope_sensitivity_area_pct_wells_cbg_inla.rds") %>%
+  tt(digits = 3)
+```
+
+## Interaction with physiographic region
+
+### ROPE
+```{r}
+read_rds("/Volumes/Projects/usgs_cvd_wells_al/output/09_rope_ixn_physiographic_region_inla.rds") %>% 
+  tt(digits = 3)
+```
+
+### WAIC
+```{r}
+read_rds("/Volumes/Projects/usgs_cvd_wells_al/output/09_waic_ixn_physiographic_region_inla.rds")  %>%
+  select(-each) %>%
+  tbl_summary(
+    by = condition,
+    
+    statistic = list(
+      all_continuous() ~ "{mean} ({sd})"
+    ) 
+  ) 
+```
+
+\newpage
+
+## Interaction with amt_centered_scaled_pct_aa_only 
+
+### P-direction and ROPE for interaction term
+```{r}
+read_rds("/Volumes/Projects/usgs_cvd_wells_al/output/09_p_dir_rope_ixn_pct_aa_only_inla.rds") %>%
+  tt(digits=3)
+```
+
+### P-direction and ROPE for `pct_aa_only`
+
+```{r}
+read_rds("/Volumes/Projects/usgs_cvd_wells_al/output/09_p_dir_rope_pct_aa_only_inla.rds") %>%
+  tt(digits=3)
+```
+
+### WAIC
+
+```{r}
+read_rds("/Volumes/Projects/usgs_cvd_wells_al/output/09_waic_ixn_pct_aa_only_inla.rds")  %>%
+  select(-each) %>%
+  tbl_summary(
+    by = condition,
+    
+    statistic = list(
+      all_continuous() ~ "{mean} ({sd})"
+    ) 
+  ) 
+
+
+```

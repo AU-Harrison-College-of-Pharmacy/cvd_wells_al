@@ -12,17 +12,34 @@ source("r/pool_predictions_inla.R")
 source("r/plot_inla.R")
 
 # Get the original well data so that we can show the results in terms of the original well percentages, not the centered and scaled well percentages
+# Run this file in window remote desktop.
 
-df <- read_rds("/Volumes/Projects/usgs_cvd_wells_al/data/clean/02_analysis_dataset.rds")
+df <- read_rds("K:/Projects/usgs_cvd_wells_al/data/clean/02_analysis_dataset.rds")
 
 m <- mean(df$amt_mean_pct_wells_cbg, na.rm = TRUE) %>% round(1)
 s <- sd(df$amt_mean_pct_wells_cbg, na.rm = TRUE) %>% round(1)
 
 au_colors <- c("#ffc044", "#e86100", "#0093d2", "#0b2341", "#00a597")
 
+# dataset with imputation
+df_hypertensive <- read_rds("K:/Projects/usgs_cvd_wells_al/data/clean/03_imputed_hypertensive_deaths.rds")
+df_ischemic <- read_rds("K:/Projects/usgs_cvd_wells_al/data/clean/03_imputed_ischemic_deaths.rds")
+df_stroke_cerebrovascular <- read_rds("K:/Projects/usgs_cvd_wells_al/data/clean/03_imputed_stroke_cerebrovascular_deaths.rds")
+df_diabetes <- read_rds("K:/Projects/usgs_cvd_wells_al/data/clean/03_imputed_diabetes_deaths.rds")
+
+#########
+# Primary analysis
+#########
+
 # Hypertension
 
-f_hypertensive <- read_rds("/Volumes/Projects/usgs_cvd_wells_al/output/04_hypertension_deaths_poisson_model_inla.rds")
+f_hypertensive <- lapply(1:length(df_hypertensive$imputations), function(i){
+  f <- inla(n_hypertensive_deaths ~ f(id_census_block_group, model = "iid") + cat_age_group + amt_centered_scaled_mean_pct_wells_cbg + amt_centered_scaled_area_land + offset(log(n_population_times_4)),
+            data = df_hypertensive$imputations[[i]],
+            family = "poisson",
+            control.compute = list(config = TRUE)
+  )
+})
 
 pool_inla(sample_posterior_parameter(f_hypertensive)) %>%
   select(term, estimate, conf.low, conf.high)
@@ -31,29 +48,17 @@ preds_hypertensive <- pool_predictions_inla(f_hypertensive,
                                         terms = c("amt_centered_scaled_mean_pct_wells_cbg [-0.78:2.9]", "cat_age_group"),
                                         condition = c(n_population_times_4 = 100000))
 
-write_rds(preds_hypertensive, "/Volumes/Projects/usgs_cvd_wells_al/output/05_preds_hypertension_deaths_poisson_model_inla.rds")
-
-p_hypertensive <- preds_hypertensive %>% 
-  plot_inla() +
-  labs(
-    x = "Centered and scaled percent private well use",
-    y = "", 
-    title = "Hypertensive deaths per 100,000",
-    color = "Age group (years)",
-    fill = "Age group (years)"
-  ) +
-  scale_x_continuous(labels = c(paste0(m - 0.78 * s), paste0(m), paste0(m + s), paste0(m + 2 * s))) +
-  scale_color_manual(values = au_colors) +
-  scale_fill_manual(values = au_colors) + 
-  theme_minimal() +
-  theme(axis.line = element_line(color = "lightgray"))
-
-ggsave("figs/05_hypertensive_deaths_inla.pdf",
-       p_hypertensive)
+write_rds(preds_hypertensive, "K:/Projects/usgs_cvd_wells_al/output/05_preds_hypertension_deaths_poisson_model_inla.rds")
 
 # Ischemic
 
-f_ischemic <- read_rds("/Volumes/Projects/usgs_cvd_wells_al/output/04_ischemic_deaths_poisson_model_inla.rds")
+f_ischemic <- lapply(1:length(df_ischemic$imputations), function(i){
+  f <- inla(n_ischemic_deaths ~ f(id_census_block_group, model = "iid") + cat_age_group + amt_centered_scaled_mean_pct_wells_cbg + amt_centered_scaled_area_land + offset(log(n_population_times_4)),
+            data = df_ischemic$imputations[[i]],
+            family = "poisson",
+            control.compute = list(config = TRUE)
+  )
+})
 
 pool_inla(sample_posterior_parameter(f_ischemic)) %>%
   select(term, estimate, conf.low, conf.high)
@@ -62,28 +67,17 @@ preds_ischemic <- pool_predictions_inla(f_ischemic,
                                         terms = c("amt_centered_scaled_mean_pct_wells_cbg [-0.78:2.9]", "cat_age_group"),
                                         condition = c(n_population_times_4 = 100000))
 
-write_rds(preds_ischemic, "/Volumes/Projects/usgs_cvd_wells_al/output/05_preds_ischemic_deaths_poisson_model_inla.rds")
-p_ischemic <- preds_ischemic %>% 
-  plot_inla() +
-  labs(
-    x = "Centered and scaled percent private well use",
-    y = "", 
-    title = "Ischemic deaths per 100,000",
-    color = "Age group (years)",
-    fill = "Age group (years)"
-  ) +
-  scale_x_continuous(labels = c(paste0(m - 0.78 * s), paste0(m), paste0(m + s), paste0(m + 2 * s))) +
-  scale_color_manual(values = au_colors) +
-  scale_fill_manual(values = au_colors) + 
-  theme_minimal() +
-  theme(axis.line = element_line(color = "lightgray"))
-
-ggsave("figs/05_ischemic_deaths_inla.pdf",
-       p_ischemic)
+write_rds(preds_ischemic, "K:/Projects/usgs_cvd_wells_al/output/05_preds_ischemic_deaths_poisson_model_inla.rds")
 
 # Stroke/cerebrovascular
 
-f_stroke_cerebrovascular <- read_rds("/Volumes/Projects/usgs_cvd_wells_al/output/04_stroke_cerebrovascular_deaths_poisson_model_inla.rds")
+f_stroke_cerebrovascular <- lapply(1:length(df_stroke_cerebrovascular$imputations), function(i){
+  f <- inla(n_stroke_cerebrovascular_deaths ~ f(id_census_block_group, model = "iid") + cat_age_group + amt_centered_scaled_mean_pct_wells_cbg + amt_centered_scaled_area_land + offset(log(n_population_times_4)),
+            data = df_stroke_cerebrovascular$imputations[[i]],
+            family = "poisson",
+            control.compute = list(config = TRUE)
+  )
+})
 
 pool_inla(sample_posterior_parameter(f_stroke_cerebrovascular)) %>%
   select(term, estimate, conf.low, conf.high)
@@ -92,29 +86,18 @@ preds_stroke_cerebrovascular <- pool_predictions_inla(f_stroke_cerebrovascular,
                                                       terms = c("amt_centered_scaled_mean_pct_wells_cbg [-0.78:2.9]", "cat_age_group"),
                                                       condition = c(n_population_times_4 = 100000))
 
-write_rds(preds_stroke_cerebrovascular, "/Volumes/Projects/usgs_cvd_wells_al/output/05_preds_stroke_cerebrovascular_deaths_poisson_model_inla.rds")
+write_rds(preds_stroke_cerebrovascular, "K:/Projects/usgs_cvd_wells_al/output/05_preds_stroke_cerebrovascular_deaths_poisson_model_inla.rds")
 
-p_stroke_cerebrovascular <- preds_stroke_cerebrovascular %>% 
-  plot_inla() +
-  labs(
-    x = "Centered and scaled percent private well use",
-    y = "", 
-    title = "Stroke/cerebrovascular deaths per 100,000",
-    color = "Age group (years)",
-    fill = "Age group (years)"
-  ) +
-  scale_x_continuous(labels = c(paste0(m - 0.78 * s), paste0(m), paste0(m + s), paste0(m + 2 * s))) +
-  scale_color_manual(values = au_colors) +
-  scale_fill_manual(values = au_colors) + 
-  theme_minimal() +
-  theme(axis.line = element_line(color = "lightgray"))
-
-ggsave("figs/05_stroke_cerebrovascular_deaths_inla.pdf",
-       p_stroke_cerebrovascular)
 
 # Diabetes
 
-f_diabetes <- read_rds("/Volumes/Projects/usgs_cvd_wells_al/output/04_diabetes_deaths_poisson_model_inla.rds")
+f_diabetes <- lapply(1:length(df_diabetes$imputations), function(i){
+  f <- inla(n_diabetes_deaths ~ f(id_census_block_group, model = "iid") + cat_age_group + amt_centered_scaled_mean_pct_wells_cbg + amt_centered_scaled_area_land + offset(log(n_population_times_4)),
+            data = df_diabetes$imputations[[i]],
+            family = "poisson",
+            control.compute = list(config = TRUE)
+  )
+})
 
 pool_inla(sample_posterior_parameter(f_diabetes)) %>%
   select(term, estimate, conf.low, conf.high) 
@@ -123,30 +106,76 @@ preds_diabetes <- pool_predictions_inla(f_diabetes,
                                              terms = c("amt_centered_scaled_mean_pct_wells_cbg [-0.78:2.9]", "cat_age_group"),
                                              condition = c(n_population_times_4 = 100000))
 
-write_rds(preds_diabetes, "/Volumes/Projects/usgs_cvd_wells_al/output/05_preds_diabetes_deaths_poisson_model_inla.rds")
+write_rds(preds_diabetes, "K:/Projects/usgs_cvd_wells_al/output/05_preds_diabetes_deaths_poisson_model_inla.rds")
 
-p_diabetes <- preds_diabetes %>% 
-  plot_inla() +
-  labs(
-    x = "Centered and scaled percent private well use",
-    y = "", 
-    title = "Diabetes deaths per 100,000",
-    color = "Age group (years)",
-    fill = "Age group (years)"
-  ) +
-  scale_x_continuous(labels = c(paste0(m - 0.78 * s), paste0(m), paste0(m + s), paste0(m + 2 * s))) +
-  scale_color_manual(values = au_colors) +
-  scale_fill_manual(values = au_colors) + 
-  theme_minimal() +
-  theme(axis.line = element_line(color = "lightgray"))
+#########
+# Sensitivity analysis: restricting to second largest block groups
+#########
 
-ggsave("figs/05_diabetes_deaths_inla.pdf",
-       p_diabetes, width= 6, height=4)
+# Hypertension
 
-p <- p_hypertensive + p_ischemic + p_stroke_cerebrovascular + p_diabetes
-p
+f_hypertensive_sensitivity_area <- lapply(1:length(df_hypertensive$imputations), function(i){
+  f <- inla(n_hypertensive_deaths ~ f(id_census_block_group, model = "iid") + cat_age_group + amt_centered_scaled_mean_pct_wells_cbg + amt_centered_scaled_area_land + offset(log(n_population_times_4)),
+            data = df_hypertensive$imputations[[i]] %>% filter(amt_centered_scaled_area_land >= -0.4228, amt_centered_scaled_area_land < 0.0508),
+            family = "poisson",
+            control.compute = list(config = TRUE)
+  )
+})
 
-ggsave(filename = "figs/05_combined_plots_inla.pdf", p)
+preds_hypertensive_sensitivity_area <- pool_predictions_inla(f_hypertensive_sensitivity_area, 
+                                                             terms = c("amt_centered_scaled_mean_pct_wells_cbg [-0.78:2.9]", "cat_age_group"),
+                                                             condition = c(n_population_times_4 = 100000))
+
+write_rds(preds_hypertensive_sensitivity_area, "K:/Projects/usgs_cvd_wells_al/output/05_preds_hypertension_deaths_poisson_model_sensitivity_area_inla.rds")
+
+# Ischemic
+
+f_ischemic_sensitivity_area <- lapply(1:length(df_ischemic$imputations), function(i){
+  f <- inla(n_ischemic_deaths ~ f(id_census_block_group, model = "iid") + cat_age_group + amt_centered_scaled_mean_pct_wells_cbg + amt_centered_scaled_area_land + offset(log(n_population_times_4)),
+            data = df_ischemic$imputations[[i]] %>% filter(amt_centered_scaled_area_land >= -0.4228, amt_centered_scaled_area_land < 0.0508),
+            family = "poisson",
+            control.compute = list(config = TRUE)
+  )
+})
+
+preds_ischemic_sensitivity_area <- pool_predictions_inla(f_ischemic_sensitivity_area, 
+                                                         terms = c("amt_centered_scaled_mean_pct_wells_cbg [-0.78:2.9]", "cat_age_group"),
+                                                         condition = c(n_population_times_4 = 100000))
+
+write_rds(preds_ischemic_sensitivity_area, "K:/Projects/usgs_cvd_wells_al/output/05_preds_ischemic_deaths_poisson_model_sensitivity_area_inla.rds")
+
+# Stroke/cerebrovascular
+
+f_stroke_cerebrovascular_sensitivity_area <- lapply(1:length(df_stroke_cerebrovascular$imputations), function(i){
+  f <- inla(n_stroke_cerebrovascular_deaths ~ f(id_census_block_group, model = "iid") + cat_age_group + amt_centered_scaled_mean_pct_wells_cbg + amt_centered_scaled_area_land + offset(log(n_population_times_4)),
+            data = df_stroke_cerebrovascular$imputations[[i]] %>% filter(amt_centered_scaled_area_land >= -0.4228, amt_centered_scaled_area_land < 0.0508),
+            family = "poisson",
+            control.compute = list(config = TRUE)
+  )
+})
+
+preds_stroke_cerebrovascular_sensitivity_area <- pool_predictions_inla(f_stroke_cerebrovascular_sensitivity_area, 
+                                                                       terms = c("amt_centered_scaled_mean_pct_wells_cbg [-0.78:2.9]", "cat_age_group"),
+                                                                       condition = c(n_population_times_4 = 100000))
+
+write_rds(preds_stroke_cerebrovascular_sensitivity_area, "K:/Projects/usgs_cvd_wells_al/output/05_preds_stroke_cerebrovascular_deaths_poisson_model_sensitivity_area_inla.rds")
+
+# Diabetes
+
+f_diabetes_sensitivity_area <- lapply(1:length(df_diabetes$imputations), function(i){
+  f <- inla(n_diabetes_deaths ~ f(id_census_block_group, model = "iid") + cat_age_group + amt_centered_scaled_mean_pct_wells_cbg + amt_centered_scaled_area_land + offset(log(n_population_times_4)),
+            data = df_diabetes$imputations[[i]] %>% filter(amt_centered_scaled_area_land >= -0.4228, amt_centered_scaled_area_land < 0.0508),
+            family = "poisson",
+            control.compute = list(config = TRUE)
+  )
+})
+
+preds_diabetes_sensitivity_area <- pool_predictions_inla(f_diabetes_sensitivity_area, 
+                                                         terms = c("amt_centered_scaled_mean_pct_wells_cbg [-0.78:2.9]", "cat_age_group"),
+                                                         condition = c(n_population_times_4 = 100000))
+
+write_rds(preds_diabetes_sensitivity_area, "K:/Projects/usgs_cvd_wells_al/output/05_preds_diabetes_deaths_poisson_model_sensitivity_area_inla.rds")
+
 
 #########
 # Interaction with physiographic region
@@ -154,237 +183,151 @@ ggsave(filename = "figs/05_combined_plots_inla.pdf", p)
 
 # Hypertension
 
-f_hypertensive <- read_rds("/Volumes/Projects/usgs_cvd_wells_al/output/04_01_hypertension_deaths_poisson_model_ixn_physiographic_region_inla.rds")
+f_hypertensive <- lapply(1:length(df_hypertensive$imputations), function(i){
+  f <- inla(
+    n_hypertensive_deaths ~ f(id_census_block_group, model = "iid") + cat_age_group + amt_centered_scaled_mean_pct_wells_cbg * cat_physiographic_region + amt_centered_scaled_area_land + offset(log(n_population_times_4)),
+    data = df_hypertensive$imputations[[i]],
+    family = "poisson",
+    control.compute = list(config = TRUE)
+  )
+})
 
 preds_hypertensive <- pool_predictions_inla(f_hypertensive, 
                                             terms = c("amt_centered_scaled_mean_pct_wells_cbg [-0.78:2.9]", "cat_physiographic_region"),
                                             condition = c(n_population_times_4 = 100000))
 
-write_rds(preds_hypertensive, "/Volumes/Projects/usgs_cvd_wells_al/output/05_preds_hypertension_deaths_poisson_model_ixn_physiographic_region_inla.rds")
-
-p_hypertensive <- preds_hypertensive %>% 
-  plot_inla() +
-  labs(
-    x = "Centered and scaled percent private well use",
-    y = "", 
-    title = "Hypertensive deaths per 100,000",
-    color = "Physiographic region according to USGS",
-    fill = "Physiographic region according to USGS"
-  ) +
-  scale_x_continuous(labels = c(paste0(m - 0.78 * s), paste0(m), paste0(m + s), paste0(m + 2 * s))) +
-  scale_color_manual(values = au_colors) +
-  scale_fill_manual(values = au_colors) + 
-  theme_minimal() +
-  theme(axis.line = element_line(color = "lightgray"))
-
-ggsave("figs/05_hypertensive_deaths_ixn_physiographic_region_inla.pdf",
-       p_hypertensive)
+write_rds(preds_hypertensive, "K:/Projects/usgs_cvd_wells_al/output/05_preds_hypertension_deaths_poisson_model_ixn_physiographic_region_inla.rds")
 
 # Ischemic
 
-f_ischemic <- read_rds("/Volumes/Projects/usgs_cvd_wells_al/output/04_01_ischemic_deaths_poisson_model_ixn_physiographic_region_inla.rds")
+f_ischemic <- lapply(1:length(df_ischemic$imputations), function(i){
+  f <- inla(n_ischemic_deaths ~ f(id_census_block_group, model = "iid") + cat_age_group + amt_centered_scaled_mean_pct_wells_cbg * cat_physiographic_region + amt_centered_scaled_area_land + offset(log(n_population_times_4)),
+            data = df_ischemic$imputations[[i]],
+            family = "poisson",
+            control.compute = list(config = TRUE)
+  )
+})
 
 preds_ischemic <- pool_predictions_inla(f_ischemic, 
                                         terms = c("amt_centered_scaled_mean_pct_wells_cbg [-0.78:2.9]", "cat_physiographic_region"),
                                         condition = c(n_population_times_4 = 100000))
 
-write_rds(preds_ischemic, "/Volumes/Projects/usgs_cvd_wells_al/output/05_preds_ischemic_deaths_poisson_model_ixn_physiographic_region_inla.rds")
-
-p_ischemic <- preds_ischemic %>% 
-  plot_inla() +
-  labs(
-    x = "Centered and scaled percent private well use",
-    y = "", 
-    title = "Ischemic deaths per 100,000",
-    color = "Physiographic region according to USGS",
-    fill = "Physiographic region according to USGS"
-  ) +
-  scale_x_continuous(labels = c(paste0(m - 0.78 * s), paste0(m), paste0(m + s), paste0(m + 2 * s))) +
-  scale_color_manual(values = au_colors) +
-  scale_fill_manual(values = au_colors) + 
-  theme_minimal() +
-  theme(axis.line = element_line(color = "lightgray"))
-
-ggsave("figs/05_ischemic_deaths_ixn_physiographic_region_inla.pdf",
-       p_ischemic)
+write_rds(preds_ischemic, "K:/Projects/usgs_cvd_wells_al/output/05_preds_ischemic_deaths_poisson_model_ixn_physiographic_region_inla.rds")
 
 # Stroke/cerebrovascular
 
-f_stroke_cerebrovascular <- read_rds("/Volumes/Projects/usgs_cvd_wells_al/output/04_01_stroke_cerebrovascular_deaths_poisson_model_ixn_physiographic_region_inla.rds")
+f_stroke_cerebrovascular <- lapply(1:length(df_stroke_cerebrovascular$imputations), function(i){
+  f <- inla(n_stroke_cerebrovascular_deaths ~  f(id_census_block_group, model = "iid") + cat_age_group + amt_centered_scaled_mean_pct_wells_cbg * cat_physiographic_region + amt_centered_scaled_area_land + offset(log(n_population_times_4)),
+            data = df_stroke_cerebrovascular$imputations[[i]],
+            family = "poisson",
+            control.compute = list(config = TRUE)
+  )
+})
 
 preds_stroke_cerebrovascular <- pool_predictions_inla(f_stroke_cerebrovascular, 
                                                       terms = c("amt_centered_scaled_mean_pct_wells_cbg [-0.78:2.9]", "cat_physiographic_region"),
                                                       condition = c(n_population_times_4 = 100000))
 
-write_rds(preds_stroke_cerebrovascular, "/Volumes/Projects/usgs_cvd_wells_al/output/05_preds_stroke_cerebrovascular_deaths_poisson_model_ixn_physiographic_region_inla.rds")
-
-p_stroke_cerebrovascular <- preds_stroke_cerebrovascular %>% 
-  plot_inla() +
-  labs(
-    x = "Centered and scaled percent private well use",
-    y = "", 
-    title = "Stroke/cerebrovascular deaths per 100,000",
-    color = "Physiographic region according to USGS",
-    fill = "Physiographic region according to USGS"
-  ) +
-  scale_x_continuous(labels = c(paste0(m - 0.78 * s), paste0(m), paste0(m + s), paste0(m + 2 * s))) +
-  scale_color_manual(values = au_colors) +
-  scale_fill_manual(values = au_colors) + 
-  theme_minimal() +
-  theme(axis.line = element_line(color = "lightgray"))
-
-ggsave("figs/05_stroke_cerebrovascular_deaths_ixn_physiographic_region_inla.pdf",
-       p_stroke_cerebrovascular)
+write_rds(preds_stroke_cerebrovascular, "K:/Projects/usgs_cvd_wells_al/output/05_preds_stroke_cerebrovascular_deaths_poisson_model_ixn_physiographic_region_inla.rds")
 
 # Diabetes
 
-f_diabetes <- read_rds("/Volumes/Projects/usgs_cvd_wells_al/output/04_01_diabetes_deaths_poisson_model_ixn_physiographic_region_inla.rds")
+f_diabetes <- lapply(1:length(df_diabetes$imputations), function(i){
+  f <- inla(n_diabetes_deaths ~  f(id_census_block_group, model = "iid") + cat_age_group + amt_centered_scaled_mean_pct_wells_cbg * cat_physiographic_region + amt_centered_scaled_area_land + offset(log(n_population_times_4)),
+            data = df_diabetes$imputations[[i]],
+            family = "poisson",
+            control.compute = list(config = TRUE)
+  )
+})
 
 preds_diabetes <- pool_predictions_inla(f_diabetes, 
                                         terms = c("amt_centered_scaled_mean_pct_wells_cbg [-0.78:2.9]", "cat_physiographic_region"),
                                         condition = c(n_population_times_4 = 100000))
 
-write_rds(preds_diabetes, "/Volumes/Projects/usgs_cvd_wells_al/output/05_preds_diabetes_deaths_poisson_model_ixn_physiographic_region_inla.rds")
+write_rds(preds_diabetes, "K:/Projects/usgs_cvd_wells_al/output/05_preds_diabetes_deaths_poisson_model_ixn_physiographic_region_inla.rds")
 
-p_diabetes <- preds_diabetes %>% 
-  plot_inla() +
-  labs(
-    x = "Centered and scaled percent private well use",
-    y = "", 
-    title = "Diabetes deaths per 100,000",
-    color = "Physiographic region according to USGS",
-    fill = "Physiographic region according to USGS"
-  ) +
-  scale_x_continuous(labels = c(paste0(m - 0.78 * s), paste0(m), paste0(m + s), paste0(m + 2 * s))) +
-  scale_color_manual(values = au_colors) +
-  scale_fill_manual(values = au_colors) + 
-  theme_minimal() +
-  theme(axis.line = element_line(color = "lightgray"))
 
-ggsave("figs/05_diabetes_deaths_ixn_physiographic_region_inla.pdf",
-       p_diabetes)
-
-p <- p_hypertensive + p_ischemic + p_stroke_cerebrovascular + p_diabetes
-p
-
-ggsave(filename = "figs/05_combined_plots_deaths_ixn_physiographic_region_inla.pdf", p)
 #########
-# Sensitivity analysis: restricting to second largest block groups
+# Interaction with percent reporting AA race alone
 #########
 
 # Hypertension
 
-f_hypertensive_sensitivity_area <- read_rds("/Volumes/Projects/usgs_cvd_wells_al/output/04_hypertension_deaths_poisson_model_sensitivity_area_inla.rds")
+f_hypertensive_ixn_pct_aa <- lapply(1:length(df_hypertensive$imputations), function(i){
+  f <- inla(
+    n_hypertensive_deaths ~ f(id_census_block_group, model = "iid") + cat_age_group + amt_centered_scaled_mean_pct_wells_cbg * amt_centered_scaled_pct_aa_only + amt_centered_scaled_area_land + offset(log(n_population_times_4)),
+    data = df_hypertensive$imputations[[i]],
+    family = "poisson",
+    control.compute = list(config = TRUE)
+  )
+})
 
-preds_hypertensive_sensitivity_area <- pool_predictions_inla(f_hypertensive_sensitivity_area, 
-                                                             terms = c("amt_centered_scaled_mean_pct_wells_cbg [-0.78:2.9]", "cat_age_group"),
-                                                             condition = c(n_population_times_4 = 100000))
+pool_inla(sample_posterior_parameter(f_hypertensive_ixn_pct_aa)) %>%
+  select(term, estimate, conf.low, conf.high) %>%
+  mutate(outcome = "Hypertensive death")
 
-write_rds(preds_hypertensive_sensitivity_area, "/Volumes/Projects/usgs_cvd_wells_al/output/05_preds_hypertension_deaths_poisson_model_sensitivity_area_inla.rds")
+preds_hypertensive <- pool_predictions_inla(f_hypertensive_ixn_pct_aa, 
+                                            terms = c("amt_centered_scaled_mean_pct_wells_cbg [-0.78:2.9]", "amt_centered_scaled_pct_aa_only"),
+                             condition = c(n_population_times_4 = 100000))
 
-p_hypertensive_sensitivity_area <- preds_hypertensive_sensitivity_area %>% 
-  plot_inla() +
-  labs(
-    x = "Centered and scaled percent private well use",
-    y = "", 
-    title = "Hypertensive deaths per 100,000",
-    color = "Age group (years)",
-    fill = "Age group (years)"
-  ) +
-  scale_x_continuous(labels = c(paste0(m - 0.78 * s), paste0(m), paste0(m + s), paste0(m + 2 * s))) +
-  scale_color_manual(values = au_colors) +
-  scale_fill_manual(values = au_colors) + 
-  theme_minimal() +
-  theme(axis.line = element_line(color = "lightgray"))
-
-ggsave("figs/05_hypertensive_deaths_sensitivity_area_inla.pdf",
-       p_hypertensive_sensitivity_area)
+write_rds(preds_hypertensive, "K:/Projects/usgs_cvd_wells_al/output/05_preds_hypertension_deaths_poisson_model_ixn_pct_aa_inla.rds")
 
 # Ischemic
 
-f_ischemic_sensitivity_area <- read_rds("/Volumes/Projects/usgs_cvd_wells_al/output/04_ischemic_deaths_poisson_model_sensitivity_area_inla.rds")
+f_ischemic_ixn_pct_aa <-  lapply(1:length(df_ischemic$imputations), function(i){
+  f <- inla(n_ischemic_deaths ~ f(id_census_block_group, model = "iid") + cat_age_group + amt_centered_scaled_mean_pct_wells_cbg * amt_centered_scaled_pct_aa_only + amt_centered_scaled_area_land + offset(log(n_population_times_4)),
+            data = df_ischemic$imputations[[i]],
+            family = "poisson",
+            control.compute = list(config = TRUE)
+  )
+})
 
-preds_ischemic_sensitivity_area <- pool_predictions_inla(f_ischemic_sensitivity_area, 
-                                                         terms = c("amt_centered_scaled_mean_pct_wells_cbg [-0.78:2.9]", "cat_age_group"),
-                                                         condition = c(n_population_times_4 = 100000))
+pool_inla(sample_posterior_parameter(f_ischemic_ixn_pct_aa)) %>%
+  select(term, estimate, conf.low, conf.high) %>%
+  mutate(outcome = "Ischemic death")
 
-write_rds(preds_ischemic_sensitivity_area, "/Volumes/Projects/usgs_cvd_wells_al/output/05_preds_ischemic_deaths_poisson_model_sensitivity_area_inla.rds")
+preds_ischemic <- pool_predictions_inla(f_ischemic_ixn_pct_aa, 
+                                            terms = c("amt_centered_scaled_mean_pct_wells_cbg [-0.78:2.9]", "amt_centered_scaled_pct_aa_only"),
+                                            condition = c(n_population_times_4 = 100000))
 
-p_ischemic_sensitivity_area <- preds_ischemic_sensitivity_area %>% 
-  plot_inla() +
-  labs(
-    x = "Centered and scaled percent private well use",
-    y = "", 
-    title = "Ischemic deaths per 100,000",
-    color = "Age group (years)",
-    fill = "Age group (years)"
-  ) +
-  scale_x_continuous(labels = c(paste0(m - 0.78 * s), paste0(m), paste0(m + s), paste0(m + 2 * s))) +
-  scale_color_manual(values = au_colors) +
-  scale_fill_manual(values = au_colors) + 
-  theme_minimal() +
-  theme(axis.line = element_line(color = "lightgray"))
-
-ggsave("figs/05_ischemic_deaths_sensitivity_area_inla.pdf",
-       p_ischemic_sensitivity_area)
+write_rds(preds_ischemic, "K:/Projects/usgs_cvd_wells_al/output/05_preds_ischemic_deaths_poisson_model_ixn_pct_aa_inla.rds")
 
 # Stroke/cerebrovascular
 
-f_stroke_cerebrovascular_sensitivity_area <- read_rds("/Volumes/Projects/usgs_cvd_wells_al/output/04_stroke_cerebrovascular_deaths_poisson_model_sensitivity_area_inla.rds")
+f_stroke_cerebrovascular_ixn_pct_aa <- lapply(1:length(df_stroke_cerebrovascular$imputations), function(i){
+  f <- inla(n_stroke_cerebrovascular_deaths ~  f(id_census_block_group, model = "iid") + cat_age_group + amt_centered_scaled_mean_pct_wells_cbg * amt_centered_scaled_pct_aa_only + amt_centered_scaled_area_land + offset(log(n_population_times_4)),
+            data = df_stroke_cerebrovascular$imputations[[i]],
+            family = "poisson",
+            control.compute = list(config = TRUE)
+  )
+})
 
-preds_stroke_cerebrovascular_sensitivity_area <- pool_predictions_inla(f_stroke_cerebrovascular_sensitivity_area, 
-                                                                       terms = c("amt_centered_scaled_mean_pct_wells_cbg [-0.78:2.9]", "cat_age_group"),
-                                                                       condition = c(n_population_times_4 = 100000))
+pool_inla(sample_posterior_parameter(f_stroke_cerebrovascular_ixn_pct_aa)) %>%
+  select(term, estimate, conf.low, conf.high) %>%
+  mutate(outcome = "Stroke/cerebrovascular death")
 
-write_rds(preds_stroke_cerebrovascular_sensitivity_area, "/Volumes/Projects/usgs_cvd_wells_al/output/05_preds_stroke_cerebrovascular_deaths_poisson_model_sensitivity_area_inla.rds")
+preds_stroke_cerebrovascular <- pool_predictions_inla(f_stroke_cerebrovascular_ixn_pct_aa, 
+                                        terms = c("amt_centered_scaled_mean_pct_wells_cbg [-0.78:2.9]", "amt_centered_scaled_pct_aa_only"),
+                                        condition = c(n_population_times_4 = 100000))
 
-p_stroke_cerebrovascular_sensitivity_area <- preds_stroke_cerebrovascular_sensitivity_area %>% 
-  plot_inla() +
-  labs(
-    x = "Centered and scaled percent private well use",
-    y = "", 
-    title = "Stroke/cerebrovascular deaths per 100,000",
-    color = "Age group (years)",
-    fill = "Age group (years)"
-  ) +
-  scale_x_continuous(labels = c(paste0(m - 0.78 * s), paste0(m), paste0(m + s), paste0(m + 2 * s))) +
-  scale_color_manual(values = au_colors) +
-  scale_fill_manual(values = au_colors) + 
-  theme_minimal() +
-  theme(axis.line = element_line(color = "lightgray"))
-
-ggsave("figs/05_stroke_cerebrovascular_deaths_sensitivity_area_inla.pdf",
-       p_stroke_cerebrovascular_sensitivity_area)
+write_rds(preds_stroke_cerebrovascular, "K:/Projects/usgs_cvd_wells_al/output/05_preds_stroke_cerebrovascular_deaths_poisson_model_ixn_pct_aa_inla.rds")
 
 # Diabetes
 
-f_diabetes_sensitivity_area <- read_rds("/Volumes/Projects/usgs_cvd_wells_al/output/04_diabetes_deaths_poisson_model_sensitivity_area_inla.rds")
+f_diabetes_ixn_pct_aa <- lapply(1:length(df_diabetes$imputations), function(i){
+  f <- inla(n_diabetes_deaths ~  f(id_census_block_group, model = "iid") + cat_age_group + amt_centered_scaled_mean_pct_wells_cbg * amt_centered_scaled_pct_aa_only + amt_centered_scaled_area_land + offset(log(n_population_times_4)),
+            data = df_diabetes$imputations[[i]],
+            family = "poisson",
+            control.compute = list(config = TRUE)
+  )
+})
 
-preds_diabetes_sensitivity_area <- pool_predictions_inla(f_diabetes_sensitivity_area, 
-                                                         terms = c("amt_centered_scaled_mean_pct_wells_cbg [-0.78:2.9]", "cat_age_group"),
-                                                         condition = c(n_population_times_4 = 100000))
+pool_inla(sample_posterior_parameter(f_diabetes_ixn_pct_aa)) %>%
+  select(term, estimate, conf.low, conf.high) %>%
+  mutate(outcome = "Diabetes death")
 
-write_rds(preds_diabetes_sensitivity_area, "/Volumes/Projects/usgs_cvd_wells_al/output/05_preds_diabetes_deaths_poisson_model_sensitivity_area_inla.rds")
+preds_diabetes <- pool_predictions_inla(f_diabetes_ixn_pct_aa, 
+                                        terms = c("amt_centered_scaled_mean_pct_wells_cbg [-0.78:2.9]", "amt_centered_scaled_pct_aa_only"),
+                                        condition = c(n_population_times_4 = 100000))
 
-p_diabetes_sensitivity_area <- preds_diabetes_sensitivity_area %>% 
-  plot_inla() +
-  labs(
-    x = "Centered and scaled percent private well use",
-    y = "", 
-    title = "Diabetes deaths per 100,000",
-    color = "Age group (years)",
-    fill = "Age group (years)"
-  ) +
-  scale_x_continuous(labels = c(paste0(m - 0.78 * s), paste0(m), paste0(m + s), paste0(m + 2 * s))) +
-  scale_color_manual(values = au_colors) +
-  scale_fill_manual(values = au_colors) + 
-  theme_minimal() +
-  theme(axis.line = element_line(color = "lightgray"))
-
-ggsave("figs/05_diabetes_deaths_sensitivity_area_inla.pdf",
-       p_diabetes_sensitivity_area)
-
-p_sensitivity_area <- p_hypertensive_sensitivity_area + p_ischemic_sensitivity_area + p_stroke_cerebrovascular_sensitivity_area + p_diabetes_sensitivity_area
-p_sensitivity_area
-
-ggsave(filename = "figs/05_combined_plots_sensitivity_area_inla.pdf", p_sensitivity_area)
+write_rds(preds_diabetes, "K:/Projects/usgs_cvd_wells_al/output/05_preds_diabetes_deaths_poisson_model_ixn_pct_aa_inla.rds")

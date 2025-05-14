@@ -8,23 +8,20 @@ source("r/calculate_p_direction_rope_interaction.R")
 source("r/get_p_dir_rope_table.R")
 source("r/get_waic_table.R")
 
+# Run this file in the window remote desktop.
 #####
 # This file has p_direction, rope, or waic for main, sensitivity, interaction with cat_physiographic_region, and interaction with amt_centered_scaled_pct_aa_only
 # Each of main analysis is used as reduced model to calculate waic.
 #####
 
-# Primary analysis
-
-df_hypertensive <- read_rds("/Volumes/Projects/usgs_cvd_wells_al/data/clean/03_imputed_hypertensive_deaths.rds")
-df_ischemic <- read_rds("/Volumes/Projects/usgs_cvd_wells_al/data/clean/03_imputed_ischemic_deaths.rds")
-df_stroke_cerebrovascular <- read_rds("/Volumes/Projects/usgs_cvd_wells_al/data/clean/03_imputed_stroke_cerebrovascular_deaths.rds")
-df_diabetes <- read_rds("/Volumes/Projects/usgs_cvd_wells_al/data/clean/03_imputed_diabetes_deaths.rds")
+# read dataset with imputation
 
 df_hypertensive <- read_rds("K:/Projects/usgs_cvd_wells_al/data/clean/03_imputed_hypertensive_deaths.rds")
 df_ischemic <- read_rds("K:/Projects/usgs_cvd_wells_al/data/clean/03_imputed_ischemic_deaths.rds")
 df_stroke_cerebrovascular <- read_rds("K:/Projects/usgs_cvd_wells_al/data/clean/03_imputed_stroke_cerebrovascular_deaths.rds")
 df_diabetes <- read_rds("K:/Projects/usgs_cvd_wells_al/data/clean/03_imputed_diabetes_deaths.rds")
 
+# Primary analysis
 
 f_hypertensive_main <- lapply(1:length(df_hypertensive$imputations), function(i){
   f <- inla(n_hypertensive_deaths ~ f(id_census_block_group, model = "iid") + cat_age_group + 
@@ -36,7 +33,6 @@ f_hypertensive_main <- lapply(1:length(df_hypertensive$imputations), function(i)
   )
 })
 
-
 f_ischemic_main <- lapply(1:length(df_ischemic$imputations), function(i){
   f <- inla(n_ischemic_deaths ~ f(id_census_block_group, model = "iid") + cat_age_group + 
               amt_centered_scaled_mean_pct_wells_cbg + 
@@ -47,9 +43,6 @@ f_ischemic_main <- lapply(1:length(df_ischemic$imputations), function(i){
   )
 })
 
-
-
-
 f_stroke_cerebrovascular_main <- lapply(1:length(df_stroke_cerebrovascular$imputations), function(i){
   f <- inla(n_stroke_cerebrovascular_deaths ~ f(id_census_block_group, model = "iid") + cat_age_group + 
               amt_centered_scaled_mean_pct_wells_cbg + 
@@ -59,9 +52,6 @@ f_stroke_cerebrovascular_main <- lapply(1:length(df_stroke_cerebrovascular$imput
             control.compute = list(config = TRUE, waic=TRUE)
   )
 })
-
-
-
 
 f_diabetes_main <- lapply(1:length(df_diabetes$imputations), function(i){
   f <- inla(n_diabetes_deaths ~ f(id_census_block_group, model = "iid") + cat_age_group + 
@@ -84,15 +74,6 @@ get_p_dir_rope_table(f_hypertensive_main,
 
 # Sensitivity analyses restricting to second-largest quartile of block groups
 
-
-f_hypertensive_sensitivity_area <- read_rds("/Volumes/Projects/usgs_cvd_wells_al/output/04_hypertension_deaths_poisson_model_sensitivity_area_inla.rds")
-
-f_ischemic_sensitivity_area <- read_rds("/Volumes/Projects/usgs_cvd_wells_al/output/04_ischemic_deaths_poisson_model_sensitivity_area_inla.rds")
-
-f_stroke_cerebrovascular_sensitivity_area <- read_rds("/Volumes/Projects/usgs_cvd_wells_al/output/04_stroke_cerebrovascular_deaths_poisson_model_sensitivity_area_inla.rds")
-
-f_diabetes_sensitivity_area <- read_rds("/Volumes/Projects/usgs_cvd_wells_al/output/04_diabetes_deaths_poisson_model_sensitivity_area_inla.rds")
-
 f_hypertensive_sensitivity_area <- read_rds("K:/Projects/usgs_cvd_wells_al/output/04_hypertension_deaths_poisson_model_sensitivity_area_inla.rds")
 
 f_ischemic_sensitivity_area <- read_rds("K:/Projects/usgs_cvd_wells_al/output/04_ischemic_deaths_poisson_model_sensitivity_area_inla.rds")
@@ -109,76 +90,9 @@ get_p_dir_rope_table(f_hypertensive_sensitivity_area,
   write_rds("K:/Projects/usgs_cvd_wells_al/output/09_p_dir_rope_sensitivity_area_pct_wells_cbg_inla.rds")
 
 
-
+#############
 # Interaction with physiographic region
-
-f_hypertensive_x <- read_rds("/Volumes/Projects/usgs_cvd_wells_al/output/04_01_hypertension_deaths_poisson_model_ixn_physiographic_region_inla.rds")
-
-f_ischemic_x <- read_rds("/Volumes/Projects/usgs_cvd_wells_al/output/04_01_ischemic_deaths_poisson_model_ixn_physiographic_region_inla.rds")
-
-f_stroke_cerebrovascular_x <- read_rds("/Volumes/Projects/usgs_cvd_wells_al/output/04_01_stroke_cerebrovascular_deaths_poisson_model_ixn_physiographic_region_inla.rds")
-
-f_diabetes_x <- read_rds("/Volumes/Projects/usgs_cvd_wells_al/output/04_01_diabetes_deaths_poisson_model_ixn_physiographic_region_inla.rds")
-
-f_hypertensive_x <- read_rds("K:/Projects/usgs_cvd_wells_al/output/04_01_hypertension_deaths_poisson_model_ixn_physiographic_region_inla.rds")
-
-f_ischemic_x <- read_rds("K:/Projects/usgs_cvd_wells_al/output/04_01_ischemic_deaths_poisson_model_ixn_physiographic_region_inla.rds")
-
-f_stroke_cerebrovascular_x <- read_rds("K:/Projects/usgs_cvd_wells_al/output/04_01_stroke_cerebrovascular_deaths_poisson_model_ixn_physiographic_region_inla.rds")
-
-f_diabetes_x <- read_rds("K:/Projects/usgs_cvd_wells_al/output/04_01_diabetes_deaths_poisson_model_ixn_physiographic_region_inla.rds")
-
-## p_direction for pairwise comparison between levels of regions  
-bind_rows(
-  calculate_p_direction_rope_interaction(f_hypertensive_x, kind = "p_direction"),
-  calculate_p_direction_rope_interaction(f_ischemic_x, kind = "p_direction"),
-  calculate_p_direction_rope_interaction(f_stroke_cerebrovascular_x, kind = "p_direction"),
-  calculate_p_direction_rope_interaction(f_diabetes_x, kind = "p_direction")
-) %>% 
-  mutate(Condition = c("Hypertension", "Ischemic", "Stroke cerebrovascular", "Diabetes")) %>%
-  relocate(Condition) %>%
-  write_rds("K:/Projects/usgs_cvd_wells_al/output/09_pairwise_p_direction_ixn_physiographic_region_inla.rds")
-
-
-## rope for pairwise comparison between levels of regions  
-bind_rows(
-  calculate_p_direction_rope_interaction(f_hypertensive_x, kind = "rope"),
-  calculate_p_direction_rope_interaction(f_ischemic_x, kind = "rope"),
-  calculate_p_direction_rope_interaction(f_stroke_cerebrovascular_x, kind = "rope"),
-  calculate_p_direction_rope_interaction(f_diabetes_x, kind = "rope")
-) %>% 
-  mutate(Condition = c("Hypertension", "Ischemic", "Stroke cerebrovascular", "Diabetes")) %>%
-  relocate(Condition) %>%
-  write_rds("K:/Projects/usgs_cvd_wells_al/output/09_pairwise_rope_ixn_physiographic_region_inla.rds")
-
-
-
-## rope summary for regions
-rope_summary_region <- bind_rows(f_hypertensive_x %>% 
-  sample_posterior_parameter() %>% select(contains("amt_centered_scaled_mean_pct_wells_cbg:")) %>% 
-  mutate(rope_each = apply(., 1, function(row) all(row >= -0.1 & row <= 0.1))) %>%
-  summarise(ROPE = mean(rope_each)) ,
-  
-f_ischemic_x %>% 
-  sample_posterior_parameter() %>% select(contains("amt_centered_scaled_mean_pct_wells_cbg:")) %>% 
-  mutate(rope_each = apply(., 1, function(row) all(row >= -0.1 & row <= 0.1))) %>%
-  summarise(ROPE = mean(rope_each)),
-
-f_stroke_cerebrovascular_x %>% 
-  sample_posterior_parameter() %>% select(contains("amt_centered_scaled_mean_pct_wells_cbg:")) %>% 
-  mutate(rope_each = apply(., 1, function(row) all(row >= -0.1 & row <= 0.1))) %>%
-  summarise(ROPE = mean(rope_each)),
-
-f_diabetes_x %>% 
-  sample_posterior_parameter() %>% select(contains("amt_centered_scaled_mean_pct_wells_cbg:")) %>% 
-  mutate(rope_each = apply(., 1, function(row) all(row >= -0.1 & row <= 0.1))) %>%
-  summarise(ROPE = mean(rope_each)))  %>% 
-  mutate(Condition = c("Hypertension", "Ischemic", "Stroke cerebrovascular", "Diabetes")) %>%
-  relocate(Condition)
-
-write_rds(rope_summary_region, "K:/Projects/usgs_cvd_wells_al/output/09_rope_ixn_physiographic_region_inla.rds")
-
-## Information criteria to compare Bayesian models
+#############
 
 f_hypertensive_full <- lapply(1:length(df_hypertensive$imputations), function(i){
   f <- inla(
@@ -212,6 +126,60 @@ f_diabetes_full <- lapply(1:length(df_diabetes$imputations), function(i){
             control.compute = list(dic = TRUE, waic = TRUE)
   )
 })
+
+
+## p_direction for pairwise comparison between levels of regions  
+bind_rows(
+  calculate_p_direction_rope_interaction(f_hypertensive_full, kind = "p_direction"),
+  calculate_p_direction_rope_interaction(f_ischemic_full, kind = "p_direction"),
+  calculate_p_direction_rope_interaction(f_stroke_cerebrovascular_full, kind = "p_direction"),
+  calculate_p_direction_rope_interaction(f_diabetes_full, kind = "p_direction")
+) %>% 
+  mutate(Condition = c("Hypertension", "Ischemic", "Stroke cerebrovascular", "Diabetes")) %>%
+  relocate(Condition) %>%
+  write_rds("K:/Projects/usgs_cvd_wells_al/output/09_pairwise_p_direction_ixn_physiographic_region_inla.rds")
+
+
+## rope for pairwise comparison between levels of regions  
+bind_rows(
+  calculate_p_direction_rope_interaction(f_hypertensive_full, kind = "rope"),
+  calculate_p_direction_rope_interaction(f_ischemic_full, kind = "rope"),
+  calculate_p_direction_rope_interaction(f_stroke_cerebrovascular_full, kind = "rope"),
+  calculate_p_direction_rope_interaction(f_diabetes_full, kind = "rope")
+) %>% 
+  mutate(Condition = c("Hypertension", "Ischemic", "Stroke cerebrovascular", "Diabetes")) %>%
+  relocate(Condition) %>%
+  write_rds("K:/Projects/usgs_cvd_wells_al/output/09_pairwise_rope_ixn_physiographic_region_inla.rds")
+
+
+
+## rope summary for regions
+rope_summary_region <- bind_rows(f_hypertensive_full %>% 
+  sample_posterior_parameter() %>% select(contains("amt_centered_scaled_mean_pct_wells_cbg:")) %>% 
+  mutate(rope_each = apply(., 1, function(row) all(row >= -0.1 & row <= 0.1))) %>%
+  summarise(ROPE = mean(rope_each)) ,
+  
+f_ischemic_full %>% 
+  sample_posterior_parameter() %>% select(contains("amt_centered_scaled_mean_pct_wells_cbg:")) %>% 
+  mutate(rope_each = apply(., 1, function(row) all(row >= -0.1 & row <= 0.1))) %>%
+  summarise(ROPE = mean(rope_each)),
+
+f_stroke_cerebrovascular_full %>% 
+  sample_posterior_parameter() %>% select(contains("amt_centered_scaled_mean_pct_wells_cbg:")) %>% 
+  mutate(rope_each = apply(., 1, function(row) all(row >= -0.1 & row <= 0.1))) %>%
+  summarise(ROPE = mean(rope_each)),
+
+f_diabetes_full %>% 
+  sample_posterior_parameter() %>% select(contains("amt_centered_scaled_mean_pct_wells_cbg:")) %>% 
+  mutate(rope_each = apply(., 1, function(row) all(row >= -0.1 & row <= 0.1))) %>%
+  summarise(ROPE = mean(rope_each)))  %>% 
+  mutate(Condition = c("Hypertension", "Ischemic", "Stroke cerebrovascular", "Diabetes")) %>%
+  relocate(Condition)
+
+write_rds(rope_summary_region, "K:/Projects/usgs_cvd_wells_al/output/09_rope_ixn_physiographic_region_inla.rds")
+
+## Information criteria to compare Bayesian models
+
 
 ### waic for physiographic region
 waic_table <- get_waic_table(

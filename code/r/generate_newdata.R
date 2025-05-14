@@ -16,14 +16,20 @@ generate_newdata <- function(f_condition_inla_each, terms, condition = list()) {
       range_str <- sub(".*\\[|\\]", "", term) %>% sub("\\]", "", .) 
       range_vals <- as.numeric(strsplit(range_str, ":")[[1]])
       values = seq(range_vals[1], range_vals[2], by = 1)
-      tibble(!!var := values)
-    } else {
+      tibble(!!sym(var) := values)
+    } 
+    else {
       var <- term
-      values <- sort(unique(data[[var]]))
-      tibble(!!var := values)
+      if (is.factor(data[[var]]) || is.character(data[[var]])) {
+        values <- sort(unique(data[[var]]))
+        tibble(!!sym(var) := values)
+      } else {
+        values <- c(-1, 0, 1)
+        tibble(!!sym(var) := values)
+      }
     }
-  }
-  )
+  })
+  
   
   grid <- expand_grid(!!!parsed_terms)
   for (nm in names(condition)) {
