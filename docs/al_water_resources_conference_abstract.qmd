@@ -1,6 +1,6 @@
 ---
 title: "Alabama Water Resources Conference Abstract"
-authors: "Matthew Shane Loop, Helen Moylan, and Ann S. Ojeda"
+authors: "Matthew Shane Loop, Helen Moylan, Jieun Park, and Ann S. Ojeda"
 format: docx
 ---
 
