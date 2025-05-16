@@ -261,6 +261,14 @@ get_p_dir_rope_table(f_hypertensive,
                      "amt_centered_scaled_pct_aa_only") %>%
   write_rds("K:/Projects/usgs_cvd_wells_al/output/09_p_dir_rope_pct_aa_only_inla.rds")
 
+## check for amt_centered_scaled_pct_aa_only pct_aa_only
+get_p_dir_rope_table(f_hypertensive, 
+                     f_ischemic, 
+                     f_stroke_cerebrovascular,  
+                     f_diabetes, 
+                     "amt_centered_scaled_mean_pct_wells_cbg") %>%
+  write_rds("K:/Projects/usgs_cvd_wells_al/output/09_p_dir_rope_cbg_pct_aa_only_inla.rds")
+
 ## waic for amt_centered_scaled_pct_aa_only
 waic_table_aa <- get_waic_table(
   f_hypertensive, f_hypertensive_main, 

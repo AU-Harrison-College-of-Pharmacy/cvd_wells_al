@@ -43,6 +43,7 @@ all_rr_ci <- list.files(path = "/Volumes/Projects/usgs_cvd_wells_al/output/", pa
   select(model, outcome, term, rr_ci) %>%
   filter(str_detect(term, c("amt_centered_scaled_mean_pct_wells_cbg| cat_physiographic_region|amt_centered_scaled_pct_aa_only") )) 
 ```
+
 ## Primary analysis
 
 ```{r}
@@ -66,10 +67,7 @@ read_rds("/Volumes/Projects/usgs_cvd_wells_al/output/09_p_dir_rope_main_pct_well
 
 ```
 
-
-
 ## Sensitivity analyses restricting to second-largest quartile of block groups
-
 
 ```{r}
 all_rr_ci %>% filter(model == "sensitivity_areal") %>%
@@ -129,11 +127,19 @@ read_rds("/Volumes/Projects/usgs_cvd_wells_al/output/09_waic_ixn_physiographic_r
          `Stroke/cerebrovascular` = Stroke_cerebrovascular) %>%
   rename(Hypertension = Hypertensive)
 ) %>%
-  gt()
+  gt() %>%
+  
+tab_footnote(
+ footnote = "Proportion that posterior samples in which all interaction parameter estimates are within the ROPE interval [-0.1, 0.1] on the log scale",
+ locations = cells_body(
+
+rows = term == "ROPE"
+ )
+ )
+
 ```
 
-## Interaction with amt_centered_scaled_pct_aa_only 
-
+## Interaction with amt_centered_scaled_pct_aa_only
 
 ```{r}
 
@@ -141,19 +147,21 @@ all_rr_ci %>% filter(model == "ixn_pct_aa") %>%
   arrange(outcome) %>%
   select(-model) %>%
   pivot_wider(names_from = outcome, values_from = rr_ci) %>%
+  
   bind_rows(
 
-read_rds("/Volumes/Projects/usgs_cvd_wells_al/output/09_p_dir_rope_ixn_pct_aa_only_inla.rds") %>%
-  rename(p_dir_ixn = p_dir,
-         ROPE_ixn = ROPE) %>%
+read_rds("/Volumes/Projects/usgs_cvd_wells_al/output/09_p_dir_rope_cbg_pct_aa_only_inla.rds") %>%
+  rename(p_dir_pct_wells_cbg = p_dir,
+         ROPE_pct_wells_cbg = ROPE) %>%
     pivot_longer(
-        cols = c(p_dir_ixn, ROPE_ixn),
+        cols = c(p_dir_pct_wells_cbg, ROPE_pct_wells_cbg),
         names_to = "term",
         values_to = "value"
     ) %>% pivot_wider(names_from = Condition) %>%
   rename(`Stroke/cerebrovascular` = Stroke_cerebrovascular) %>%
   mutate(across(where(is.numeric), ~ round(.x, 3) %>% as.character)) 
   ) %>%
+ 
   bind_rows(
 
 read_rds("/Volumes/Projects/usgs_cvd_wells_al/output/09_p_dir_rope_pct_aa_only_inla.rds") %>%
@@ -167,6 +175,19 @@ read_rds("/Volumes/Projects/usgs_cvd_wells_al/output/09_p_dir_rope_pct_aa_only_i
   rename(`Stroke/cerebrovascular` = Stroke_cerebrovascular) %>%
   mutate(across(where(is.numeric), ~ round(.x, 3) %>% as.character())) 
 ) %>%
+   bind_rows(
+
+read_rds("/Volumes/Projects/usgs_cvd_wells_al/output/09_p_dir_rope_ixn_pct_aa_only_inla.rds") %>%
+  rename(p_dir_ixn = p_dir,
+         ROPE_ixn = ROPE) %>%
+    pivot_longer(
+        cols = c(p_dir_ixn, ROPE_ixn),
+        names_to = "term",
+        values_to = "value"
+    ) %>% pivot_wider(names_from = Condition) %>%
+  rename(`Stroke/cerebrovascular` = Stroke_cerebrovascular) %>%
+  mutate(across(where(is.numeric), ~ round(.x, 3) %>% as.character)) 
+  ) %>%
   bind_rows(
 read_rds("/Volumes/Projects/usgs_cvd_wells_al/output/09_waic_ixn_pct_aa_only_inla.rds")  %>%
   select(-each) %>%
