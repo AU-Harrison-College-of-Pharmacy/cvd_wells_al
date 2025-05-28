@@ -42,6 +42,11 @@ residuals_st %>%
   tm_shape() +
   tm_polygons(fill = "avg_residual")
 
+residuals_st %>%
+  filter(str_starts(id_census_block_group, "01073|01117")) %>%
+  tm_shape() +
+  tm_polygons(fill = "avg_residual")
+
 nb <- poly2nb(residuals_st, queen = FALSE)
 nbw <- nb2listw(nb, style = "W")
 
@@ -50,3 +55,11 @@ gmoran <- moran.test(residuals_st$avg_residual,
                      alternative = "greater")
 
 gmoran
+
+residuals_jefferson_shelby_st <- residuals_st %>%
+  filter(str_starts(id_census_block_group, "01073|01117"))
+
+gmoran_jefferson_shelby <- moran.test(residuals_jefferson_shelby_st$avg_residual,
+                                      nb2listw(poly2nb(residuals_jefferson_shelby_st, queen = FALSE), style = "W")
+                                      )
+gmoran_jefferson_shelby
