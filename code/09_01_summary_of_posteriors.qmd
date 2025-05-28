@@ -1,0 +1,209 @@
+---
+title: "Summary of the posteriors"
+format: docx
+editor: visual
+---
+
+```{r, include = FALSE}
+knitr::opts_chunk$set(
+  message = FALSE,
+  warning = FALSE,
+  echo = FALSE
+)
+
+
+```
+
+```{r}
+library(tidyverse)
+library(tinytable)
+library(gtsummary)
+library(gt)
+
+##### 
+# The estimated RR (mean of posterior) and 95% credible interval.
+#####
+
+all_rr_ci <- list.files(path = "/Volumes/Projects/usgs_cvd_wells_al/output/", pattern = "^05_pool_.*\\.rds$", full.names = TRUE) %>%
+  set_names() %>%  
+  map_dfr(~ read_rds(.x) %>%
+          mutate(model = str_extract(basename(.x), "(?<=model_).*?(?=_inla)")),
+          .id = "file_id"
+  ) %>%
+  select(-file_id) %>% 
+  mutate(outcome = factor(outcome, 
+                             levels=c("Hypertensive death", 
+                                      "Ischemic death",
+                                      "Stroke/cerebrovascular death",
+                                      "Diabetes death"))) %>%
+  mutate(across(where(is.numeric), ~ round(.x, 2))) %>%
+  mutate(outcome = str_remove(as.character(outcome), " death")) %>%
+  mutate(outcome = if_else(outcome == "Hypertensive", "Hypertension", outcome)) %>%
+  mutate(rr_ci = paste0(estimate, " (", conf.low, ", ", conf.high, ")")) %>%
+  select(model, outcome, term, rr_ci) %>%
+  filter(str_detect(term, c("amt_centered_scaled_mean_pct_wells_cbg| cat_physiographic_region|amt_centered_scaled_pct_aa_only") )) 
+```
+
+## Primary analysis
+
+```{r}
+
+all_rr_ci %>% filter(model == "main") %>%
+  arrange(outcome) %>%
+  select(-model) %>%
+  pivot_wider(names_from = outcome, values_from = rr_ci) %>%
+  bind_rows(
+
+read_rds("/Volumes/Projects/usgs_cvd_wells_al/output/09_p_dir_rope_main_pct_wells_cbg_inla.rds") %>%
+  pivot_longer(
+        cols = c(p_dir, ROPE),
+        names_to = "term",
+        values_to = "value"
+    ) %>% pivot_wider(names_from = Condition) %>%
+  rename(`Stroke/cerebrovascular` = Stroke_cerebrovascular) %>%
+  mutate(across(where(is.numeric), ~ round(.x, 3) %>% as.character())) 
+  ) %>%
+  gt()
+
+```
+
+## Sensitivity analyses restricting to second-largest quartile of block groups
+
+```{r}
+all_rr_ci %>% filter(model == "sensitivity_areal") %>%
+  arrange(outcome) %>%
+  select(-model) %>%
+  pivot_wider(names_from = outcome, values_from = rr_ci) %>%
+  bind_rows(
+
+read_rds("/Volumes/Projects/usgs_cvd_wells_al/output/09_p_dir_rope_sensitivity_area_pct_wells_cbg_inla.rds") %>%
+  pivot_longer(
+        cols = c(p_dir, ROPE),
+        names_to = "term",
+        values_to = "value"
+    ) %>% pivot_wider(names_from = Condition) %>%
+  rename(`Stroke/cerebrovascular` = Stroke_cerebrovascular) %>%
+  mutate(across(where(is.numeric), ~ round(.x, 3) %>% as.character())) 
+) %>%
+  gt()
+
+```
+
+## Interaction with physiographic region
+
+```{r}
+
+all_rr_ci %>% filter(model == "ixn_physiographic_region") %>%
+  arrange(outcome) %>%
+  select(-model) %>%
+  pivot_wider(names_from = outcome, values_from = rr_ci) %>%
+  bind_rows(
+
+read_rds("/Volumes/Projects/usgs_cvd_wells_al/output/09_rope_ixn_physiographic_region_inla.rds") %>% 
+  pivot_wider(names_from = Condition, values_from = ROPE) %>%
+  mutate(term = "ROPE") %>%
+  rename(`Stroke/cerebrovascular` = `Stroke cerebrovascular`) %>%
+  relocate(term) %>%
+  mutate(across(where(is.numeric), ~ round(.x, 3) %>% as.character())) 
+  
+) %>% 
+  bind_rows(
+
+
+### WAIC
+
+read_rds("/Volumes/Projects/usgs_cvd_wells_al/output/09_waic_ixn_physiographic_region_inla.rds")  %>%
+  select(-each) %>%
+  tbl_summary(
+    by = condition,
+    
+    statistic = list(
+      all_continuous() ~ "{mean} ({sd})"
+    ) 
+  ) %>% as_tibble() %>%
+  rename_with(~ str_extract(.x, "(?<=\\*\\*).+?(?=\\*\\*)")) %>%
+  rename_with(~ str_to_title(.x)) %>%
+  rename(term = Characteristic,
+         `Stroke/cerebrovascular` = Stroke_cerebrovascular) %>%
+  rename(Hypertension = Hypertensive)
+) %>%
+  gt() %>%
+  
+tab_footnote(
+ footnote = "Proportion that posterior samples in which all interaction parameter estimates are within the ROPE interval [-0.1, 0.1] on the log scale",
+ locations = cells_body(
+
+rows = term == "ROPE"
+ )
+ )
+
+```
+
+## Interaction with amt_centered_scaled_pct_aa_only
+
+```{r}
+
+all_rr_ci %>% filter(model == "ixn_pct_aa") %>%
+  arrange(outcome) %>%
+  select(-model) %>%
+  pivot_wider(names_from = outcome, values_from = rr_ci) %>%
+  
+  bind_rows(
+
+read_rds("/Volumes/Projects/usgs_cvd_wells_al/output/09_p_dir_rope_cbg_pct_aa_only_inla.rds") %>%
+  rename(p_dir_pct_wells_cbg = p_dir,
+         ROPE_pct_wells_cbg = ROPE) %>%
+    pivot_longer(
+        cols = c(p_dir_pct_wells_cbg, ROPE_pct_wells_cbg),
+        names_to = "term",
+        values_to = "value"
+    ) %>% pivot_wider(names_from = Condition) %>%
+  rename(`Stroke/cerebrovascular` = Stroke_cerebrovascular) %>%
+  mutate(across(where(is.numeric), ~ round(.x, 3) %>% as.character)) 
+  ) %>%
+ 
+  bind_rows(
+
+read_rds("/Volumes/Projects/usgs_cvd_wells_al/output/09_p_dir_rope_pct_aa_only_inla.rds") %>%
+  rename(p_dir_pct_aa_only = p_dir,
+         ROPE_pct_aa_only = ROPE) %>%
+    pivot_longer(
+        cols = c(p_dir_pct_aa_only, ROPE_pct_aa_only),
+        names_to = "term",
+        values_to = "value"
+    ) %>% pivot_wider(names_from = Condition) %>%
+  rename(`Stroke/cerebrovascular` = Stroke_cerebrovascular) %>%
+  mutate(across(where(is.numeric), ~ round(.x, 3) %>% as.character())) 
+) %>%
+   bind_rows(
+
+read_rds("/Volumes/Projects/usgs_cvd_wells_al/output/09_p_dir_rope_ixn_pct_aa_only_inla.rds") %>%
+  rename(p_dir_ixn = p_dir,
+         ROPE_ixn = ROPE) %>%
+    pivot_longer(
+        cols = c(p_dir_ixn, ROPE_ixn),
+        names_to = "term",
+        values_to = "value"
+    ) %>% pivot_wider(names_from = Condition) %>%
+  rename(`Stroke/cerebrovascular` = Stroke_cerebrovascular) %>%
+  mutate(across(where(is.numeric), ~ round(.x, 3) %>% as.character)) 
+  ) %>%
+  bind_rows(
+read_rds("/Volumes/Projects/usgs_cvd_wells_al/output/09_waic_ixn_pct_aa_only_inla.rds")  %>%
+  select(-each) %>%
+  tbl_summary(
+    by = condition,
+    statistic = list(
+      all_continuous() ~ "{mean} ({sd})"
+    ) 
+  ) %>% as_tibble() %>%
+  rename_with(~ str_extract(.x, "(?<=\\*\\*).+?(?=\\*\\*)")) %>%
+  rename_with(~ str_to_title(.x)) %>%
+  rename(term = Characteristic,
+         `Stroke/cerebrovascular` = Stroke_cerebrovascular) %>%
+  rename(Hypertension = Hypertensive)
+
+) %>%
+  gt()
+
+```
