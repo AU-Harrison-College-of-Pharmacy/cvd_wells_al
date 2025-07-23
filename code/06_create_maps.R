@@ -21,6 +21,8 @@ df_small <- df %>%
 p_wells <- tm_shape(df_small) +
   tm_polygons(fill = "amt_mean_pct_wells_cbg", fill.legend = tm_legend(title = "Percent of households relying on private wells"))
 
+tmap_save(p_wells, "figs/06_wells_map.png", width = 4, height = 4, units = "in")
+
 p_area_land <- tm_shape(df_small) +
   tm_polygons(fill = "amt_area_land", fill.legend = tm_legend(title = "Land area (m^2)"))
 
@@ -66,6 +68,9 @@ high_wells_low_aa <- df %>%
   st_as_sf()
 
 counties_al <- counties(state = "AL", cb = TRUE, resolution = "20m", year = 2020)
+
+cbgs_mobile_baldwin <- block_groups(state = "AL", county = c("097", "003"), cb = TRUE, year = 2020)
+
 
 p_high <- ggplot(data = counties_al) +
   geom_sf(fill = "white") +
@@ -136,3 +141,48 @@ p_wells <- df %>%
   theme_void()
   
 p_aa + p_wells
+
+# Create a map comparing the well water percentage in baldwin and mobile counties if you use county level mean vs CBG-level
+
+p_county <- df %>%
+  filter(str_starts(id_census_block_group, "01003|01097")) %>%
+  group_by(id_census_block_group) %>%
+  slice(1) %>%
+  mutate(
+    county = if_else(str_starts(id_census_block_group, "01003"), "Baldwin County", "Mobile County"),
+    GEOID = if_else(str_starts(id_census_block_group, "01003"), "01003", "01097")
+  ) %>%
+  ungroup() %>%
+  group_by(county, GEOID) %>%
+  summarise(
+    m_wells = mean(amt_mean_pct_wells_cbg)
+  ) %>%
+  left_join(., counties_al, by = "GEOID") %>%
+  st_as_sf() %>%
+  tm_shape() +
+  tm_polygons(fill = "m_wells",
+              fill.scale = tm_scale_intervals(
+                n = 5, 
+                style = "fixed",
+                breaks = c(0, 20, 40, 60, 80, 100)),
+              fill.legend = tm_legend("Percentage on private wells", text.size = 3, title.size = 3)
+  ) +
+  tm_basemap("Esri.NatGeoWorldMap")
+
+p_cbgs <- df %>%
+  filter(str_starts(id_census_block_group, "01003|01097")) %>%
+  group_by(id_census_block_group) %>%
+  slice(1) %>%
+  st_as_sf() %>%
+  tm_shape() +
+  tm_polygons(fill = "amt_mean_pct_wells_cbg",
+              fill.scale = tm_scale_intervals(n = 5, 
+                                              style = "fixed",
+                                              breaks = c(0, 20, 40, 60, 80, 100)),
+              fill.legend = tm_legend("Percentage on private wells", text.size = 3, title.size = 3)
+  ) +
+  tm_basemap("Esri.NatGeoWorldMap")
+
+p_county_and_cbgs <- tmap_arrange(p_county, p_cbgs)
+
+tmap_save(p_county_and_cbgs, filename = "figs/06_well_means.png", width = 4, height = 4, units = "in", dpi = 300, outer.margins = NA)

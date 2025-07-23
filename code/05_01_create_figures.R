@@ -2,7 +2,7 @@ library(tidyverse)
 library(patchwork)
 library(broom.mixed)
 
-source("r/plot_inla.R")
+source("code/r/plot_inla.R")
 
 # Prediction plots
 
@@ -18,19 +18,19 @@ au_colors <- c("#ffc044", "#e86100", "#0093d2", "#0b2341", "#00a597")
 preds_hypertensive <- read_rds("/Volumes/Projects/usgs_cvd_wells_al/output/05_preds_hypertension_deaths_poisson_model_inla.rds")
 
 p_hypertensive <- preds_hypertensive %>% 
+  filter(cat_age_group == "75 or over") %>%
   plot_inla() +
   labs(
-    x = "Centered and scaled percent private well use",
+    x = "Percentage private well use",
     y = "", 
-    title = "Hypertensive deaths per 100,000",
-    color = "Age group (years)",
-    fill = "Age group (years)"
+    title = "Hypertensive deaths per 100,000"
   ) +
   scale_x_continuous(labels = c(paste0(m - 0.78 * s), paste0(m), paste0(m + s), paste0(m + 2 * s))) +
   scale_color_manual(values = au_colors) +
   scale_fill_manual(values = au_colors) + 
   theme_minimal() +
-  theme(axis.line = element_line(color = "lightgray"))
+  theme(axis.line = element_line(color = "lightgray"),
+        legend.position = "none")
 
 ggsave("figs/05_01_hypertensive_deaths_inla.pdf",
        p_hypertensive, width= 6, height=4)
@@ -40,19 +40,19 @@ ggsave("figs/05_01_hypertensive_deaths_inla.pdf",
 preds_ischemic <- read_rds("/Volumes/Projects/usgs_cvd_wells_al/output/05_preds_ischemic_deaths_poisson_model_inla.rds")
 
 p_ischemic <- preds_ischemic %>% 
+  filter(cat_age_group == "75 or over") %>%
   plot_inla() +
   labs(
-    x = "Centered and scaled percent private well use",
+    x = "Percentage private well use",
     y = "", 
-    title = "Ischemic deaths per 100,000",
-    color = "Age group (years)",
-    fill = "Age group (years)"
+    title = "Ischemic deaths per 100,000"
   ) +
   scale_x_continuous(labels = c(paste0(m - 0.78 * s), paste0(m), paste0(m + s), paste0(m + 2 * s))) +
   scale_color_manual(values = au_colors) +
   scale_fill_manual(values = au_colors) + 
   theme_minimal() +
-  theme(axis.line = element_line(color = "lightgray"))
+  theme(axis.line = element_line(color = "lightgray"),
+        legend.position = "none")
 
 ggsave("figs/05_01_ischemic_deaths_inla.pdf",
        p_ischemic, width= 6, height=4)
@@ -62,19 +62,19 @@ ggsave("figs/05_01_ischemic_deaths_inla.pdf",
 preds_stroke_cerebrovascular <- read_rds("/Volumes/Projects/usgs_cvd_wells_al/output/05_preds_stroke_cerebrovascular_deaths_poisson_model_inla.rds")
 
 p_stroke_cerebrovascular <- preds_stroke_cerebrovascular %>% 
+  filter(cat_age_group == "75 or over") %>%
   plot_inla() +
   labs(
-    x = "Centered and scaled percent private well use",
+    x = "Percent private well use",
     y = "", 
-    title = "Stroke/cerebrovascular deaths per 100,000",
-    color = "Age group (years)",
-    fill = "Age group (years)"
+    title = "Stroke/cerebrovascular deaths per 100,000"
   ) +
   scale_x_continuous(labels = c(paste0(m - 0.78 * s), paste0(m), paste0(m + s), paste0(m + 2 * s))) +
   scale_color_manual(values = au_colors) +
   scale_fill_manual(values = au_colors) + 
   theme_minimal() +
-  theme(axis.line = element_line(color = "lightgray"))
+  theme(axis.line = element_line(color = "lightgray"),
+        legend.position = "none")
 
 ggsave("figs/05_01_stroke_cerebrovascular_deaths_inla.pdf",
        p_stroke_cerebrovascular, width= 6, height=4)
@@ -84,19 +84,19 @@ ggsave("figs/05_01_stroke_cerebrovascular_deaths_inla.pdf",
 preds_diabetes <- read_rds("/Volumes/Projects/usgs_cvd_wells_al/output/05_preds_diabetes_deaths_poisson_model_inla.rds")
 
 p_diabetes <- preds_diabetes %>% 
+  filter(cat_age_group == "75 or over") %>%
   plot_inla() +
   labs(
-    x = "Centered and scaled percent private well use",
+    x = "Percent private well use",
     y = "", 
-    title = "Diabetes deaths per 100,000",
-    color = "Age group (years)",
-    fill = "Age group (years)"
+    title = "Diabetes deaths per 100,000"
   ) +
   scale_x_continuous(labels = c(paste0(m - 0.78 * s), paste0(m), paste0(m + s), paste0(m + 2 * s))) +
   scale_color_manual(values = au_colors) +
   scale_fill_manual(values = au_colors) + 
   theme_minimal() +
-  theme(axis.line = element_line(color = "lightgray"))
+  theme(axis.line = element_line(color = "lightgray"),
+        legend.position = "none")
 
 ggsave("figs/05_01_diabetes_deaths_inla.pdf",
        p_diabetes, width= 6, height=4)
@@ -105,6 +105,9 @@ p <- p_hypertensive + p_ischemic + p_stroke_cerebrovascular + p_diabetes
 p
 
 ggsave(filename = "figs/05_01_combined_plots_inla.pdf", p, width= 12, height=5.5)
+
+p_no_diabetes <- wrap_plots(list(p_hypertensive, p_ischemic, p_stroke_cerebrovascular), ncol = 2)
+ggsave(filename = "figs/05_01_combined_plots_inla_no_diabetes.png", p_no_diabetes, width= 6, height=4, dpi = 300)
 
 #########
 # Interaction with physiographic region
@@ -312,7 +315,7 @@ p_hypertensive_ixn_pct_aa <- preds_hypertensive %>%
   mutate(amt_centered_scaled_pct_aa_only = as.factor(amt_centered_scaled_pct_aa_only)) %>%
   plot_inla() +
   labs(
-    x = "Percent private well use",
+    x = "Percentage private well use",
     y = "", 
     title = "Hypertensive deaths per 100,000"
   ) +
@@ -320,7 +323,11 @@ p_hypertensive_ixn_pct_aa <- preds_hypertensive %>%
   scale_color_manual(values = au_colors, name = "Centered/scaled percent AA only") +
   scale_fill_manual(values = au_colors, name = "Centered/scaled percent AA only") +
   theme_minimal() +
-  theme(axis.line = element_line(color = "lightgray"))
+  theme(axis.line = element_line(color = "lightgray")) +
+  guides(
+    color = guide_legend(reverse = TRUE),
+    fill = guide_legend(reverse = TRUE)
+  )
 
 ggsave("figs/05_01_hypertensive_deaths_ixn_pct_aa_inla.pdf",
        p_hypertensive_ixn_pct_aa, width= 6, height=4)
@@ -333,7 +340,7 @@ p_ischemic_ixn_pct_aa <- preds_ischemic %>%
   mutate(amt_centered_scaled_pct_aa_only = as.factor(amt_centered_scaled_pct_aa_only)) %>%
   plot_inla() +
   labs(
-    x = "Percent private well use",
+    x = "Percentage private well use",
     y = "", 
     title = "Ischemic deaths per 100,000"
   ) +
@@ -341,7 +348,11 @@ p_ischemic_ixn_pct_aa <- preds_ischemic %>%
   scale_color_manual(values = au_colors, name = "Centered/scaled percent AA only") +
   scale_fill_manual(values = au_colors, name = "Centered/scaled percent AA only") +
   theme_minimal() +
-  theme(axis.line = element_line(color = "lightgray"))
+  theme(axis.line = element_line(color = "lightgray")) +
+  guides(
+    color = guide_legend(reverse = TRUE),
+    fill = guide_legend(reverse = TRUE)
+  )
 
 ggsave("figs/05_01_ischemic_deaths_ixn_pct_aa.pdf",
        p_ischemic_ixn_pct_aa, width= 6, height=4)
@@ -354,7 +365,7 @@ p_stroke_cerebrovascular_ixn_pct_aa <- preds_stroke_cerebrovascular %>%
   mutate(amt_centered_scaled_pct_aa_only = as.factor(amt_centered_scaled_pct_aa_only)) %>%
   plot_inla() +
   labs(
-    x = "Percent private well use",
+    x = "Percentage private well use",
     y = "", 
     title = "Stroke/cerebrovascular deaths per 100,000"
   ) +
@@ -362,7 +373,11 @@ p_stroke_cerebrovascular_ixn_pct_aa <- preds_stroke_cerebrovascular %>%
   scale_color_manual(values = au_colors, name = "Centered/scaled percent AA only") +
   scale_fill_manual(values = au_colors, name = "Centered/scaled percent AA only") +
   theme_minimal() +
-  theme(axis.line = element_line(color = "lightgray"))
+  theme(axis.line = element_line(color = "lightgray")) +
+  guides(
+    color = guide_legend(reverse = TRUE),
+    fill = guide_legend(reverse = TRUE)
+  )
 
 ggsave("figs/05_01_stroke_cerebrovascular_deaths_ixn_pct_aa.pdf",
        p_stroke_cerebrovascular_ixn_pct_aa, width= 6, height=4)
@@ -375,7 +390,7 @@ p_diabetes_ixn_pct_aa <- preds_diabetes %>%
   mutate(amt_centered_scaled_pct_aa_only = as.factor(amt_centered_scaled_pct_aa_only)) %>%
   plot_inla() +
   labs(
-    x = "Percent private well use",
+    x = "Percentage private well use",
     y = "", 
     title = "Diabetes deaths per 100,000"
   ) +
@@ -386,9 +401,17 @@ p_diabetes_ixn_pct_aa <- preds_diabetes %>%
   theme(axis.line = element_line(color = "lightgray"))
 
 ggsave("figs/05_01_diabetes_deaths_ixn_pct_aa.pdf",
-       p_diabetes_ixn_pct_aa, width= 6, height=4)
+       p_diabetes_ixn_pct_aa, width= 6, height=4) +
+  guides(
+    color = guide_legend(reverse = TRUE),
+    fill = guide_legend(reverse = TRUE)
+  )
 
 p <- p_hypertensive_ixn_pct_aa + p_ischemic_ixn_pct_aa + p_stroke_cerebrovascular_ixn_pct_aa + p_diabetes_ixn_pct_aa
 p
 
 ggsave(filename = "figs/05_01_combined_plots_deaths_ixn_pct_aa_inla.pdf", p, width= 12, height=5.5)
+
+p_no_diabetes <- wrap_plots(list(p_hypertensive_ixn_pct_aa, p_ischemic_ixn_pct_aa), ncol = 1)
+
+ggsave(filename = "figs/05_01_combined_plots_deaths_ixn_pct_aa_inla_no_diabetes.png", p_no_diabetes, width= 5, height=4, dpi = 300)
