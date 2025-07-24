@@ -5,6 +5,7 @@ library(sf)
 library(INLA)
 
 source("r/pool_inla.R")
+source("r/sample_posterior_parameter.R")
 
 # Run this file in the Window remote desktop. 
 
