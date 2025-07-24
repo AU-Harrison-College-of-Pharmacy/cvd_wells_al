@@ -3,6 +3,9 @@ library(Amelia)
 library(lme4)
 library(sf)
 library(INLA)
+
+source("r/pool_inla.R")
+
 # Run this file in the Window remote desktop. 
 
 # Primary analysis
