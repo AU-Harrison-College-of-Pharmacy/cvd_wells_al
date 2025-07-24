@@ -110,21 +110,21 @@ p_no_diabetes <- wrap_plots(list(p_hypertensive, p_ischemic, p_stroke_cerebrovas
 ggsave(filename = "figs/05_combined_plots_inla_no_diabetes.png", p_no_diabetes, width= 6, height=4, dpi = 300)
 
 #########
-# Interaction with physiographic region
+# Sensitivity analysis: restricting to second largest block groups
 #########
 
 # Hypertension
 
-preds_hypertensive <- read_rds("/Volumes/Projects/usgs_cvd_wells_al/output/04_preds_hypertension_deaths_poisson_model_ixn_physiographic_region_inla.rds")
+preds_hypertensive_sensitivity_area <- read_rds("/Volumes/Projects/usgs_cvd_wells_al/output/04_preds_hypertension_deaths_poisson_model_sensitivity_area_inla.rds")
 
-p_hypertensive <- preds_hypertensive %>% 
+p_hypertensive_sensitivity_area <- preds_hypertensive_sensitivity_area %>% 
   plot_inla() +
   labs(
     x = "Centered and scaled percent private well use",
     y = "", 
     title = "Hypertensive deaths per 100,000",
-    color = "Physiographic region according to USGS",
-    fill = "Physiographic region according to USGS"
+    color = "Age group (years)",
+    fill = "Age group (years)"
   ) +
   scale_x_continuous(labels = c(paste0(m - 0.78 * s), paste0(m), paste0(m + s), paste0(m + 2 * s))) +
   scale_color_manual(values = au_colors) +
@@ -132,21 +132,21 @@ p_hypertensive <- preds_hypertensive %>%
   theme_minimal() +
   theme(axis.line = element_line(color = "lightgray"))
 
-ggsave("figs/05_hypertensive_deaths_ixn_physiographic_region_inla.pdf",
-       p_hypertensive, width= 6, height=4)
+ggsave("figs/05_hypertensive_deaths_sensitivity_area_inla.pdf",
+       p_hypertensive_sensitivity_area, width= 6, height=4)
 
 # Ischemic
 
-preds_ischemic <- read_rds("/Volumes/Projects/usgs_cvd_wells_al/output/04_preds_ischemic_deaths_poisson_model_ixn_physiographic_region_inla.rds")
+preds_ischemic_sensitivity_area <- read_rds("/Volumes/Projects/usgs_cvd_wells_al/output/04_preds_ischemic_deaths_poisson_model_sensitivity_area_inla.rds")
 
-p_ischemic <- preds_ischemic %>% 
+p_ischemic_sensitivity_area <- preds_ischemic_sensitivity_area %>% 
   plot_inla() +
   labs(
     x = "Centered and scaled percent private well use",
     y = "", 
     title = "Ischemic deaths per 100,000",
-    color = "Physiographic region according to USGS",
-    fill = "Physiographic region according to USGS"
+    color = "Age group (years)",
+    fill = "Age group (years)"
   ) +
   scale_x_continuous(labels = c(paste0(m - 0.78 * s), paste0(m), paste0(m + s), paste0(m + 2 * s))) +
   scale_color_manual(values = au_colors) +
@@ -154,21 +154,21 @@ p_ischemic <- preds_ischemic %>%
   theme_minimal() +
   theme(axis.line = element_line(color = "lightgray"))
 
-ggsave("figs/05_ischemic_deaths_ixn_physiographic_region_inla.pdf",
-       p_ischemic, width= 6, height=4)
+ggsave("figs/05_ischemic_deaths_sensitivity_area_inla.pdf",
+       p_ischemic_sensitivity_area, width= 6, height=4)
 
 # Stroke/cerebrovascular
 
-preds_stroke_cerebrovascular <- read_rds("/Volumes/Projects/usgs_cvd_wells_al/output/04_preds_stroke_cerebrovascular_deaths_poisson_model_ixn_physiographic_region_inla.rds")
+preds_stroke_cerebrovascular_sensitivity_area <- read_rds("/Volumes/Projects/usgs_cvd_wells_al/output/04_preds_stroke_cerebrovascular_deaths_poisson_model_sensitivity_area_inla.rds")
 
-p_stroke_cerebrovascular <- preds_stroke_cerebrovascular %>% 
+p_stroke_cerebrovascular_sensitivity_area <- preds_stroke_cerebrovascular_sensitivity_area %>% 
   plot_inla() +
   labs(
     x = "Centered and scaled percent private well use",
     y = "", 
     title = "Stroke/cerebrovascular deaths per 100,000",
-    color = "Physiographic region according to USGS",
-    fill = "Physiographic region according to USGS"
+    color = "Age group (years)",
+    fill = "Age group (years)"
   ) +
   scale_x_continuous(labels = c(paste0(m - 0.78 * s), paste0(m), paste0(m + s), paste0(m + 2 * s))) +
   scale_color_manual(values = au_colors) +
@@ -176,22 +176,21 @@ p_stroke_cerebrovascular <- preds_stroke_cerebrovascular %>%
   theme_minimal() +
   theme(axis.line = element_line(color = "lightgray"))
 
-ggsave("figs/05_stroke_cerebrovascular_deaths_ixn_physiographic_region_inla.pdf",
-       p_stroke_cerebrovascular, width= 6, height=4)
+ggsave("figs/05_stroke_cerebrovascular_deaths_sensitivity_area_inla.pdf",
+       p_stroke_cerebrovascular_sensitivity_area, width= 6, height=4)
 
 # Diabetes
 
+preds_diabetes_sensitivity_area <- read_rds("/Volumes/Projects/usgs_cvd_wells_al/output/04_preds_diabetes_deaths_poisson_model_sensitivity_area_inla.rds")
 
-preds_diabetes <- read_rds("/Volumes/Projects/usgs_cvd_wells_al/output/04_preds_diabetes_deaths_poisson_model_ixn_physiographic_region_inla.rds")
-
-p_diabetes <- preds_diabetes %>% 
+p_diabetes_sensitivity_area <- preds_diabetes_sensitivity_area %>% 
   plot_inla() +
   labs(
     x = "Centered and scaled percent private well use",
     y = "", 
     title = "Diabetes deaths per 100,000",
-    color = "Physiographic region according to USGS",
-    fill = "Physiographic region according to USGS"
+    color = "Age group (years)",
+    fill = "Age group (years)"
   ) +
   scale_x_continuous(labels = c(paste0(m - 0.78 * s), paste0(m), paste0(m + s), paste0(m + 2 * s))) +
   scale_color_manual(values = au_colors) +
@@ -199,15 +198,11 @@ p_diabetes <- preds_diabetes %>%
   theme_minimal() +
   theme(axis.line = element_line(color = "lightgray"))
 
-ggsave("figs/05_diabetes_deaths_ixn_physiographic_region_inla.pdf",
-       p_diabetes, width= 6, height=4)
+ggsave("figs/05_diabetes_deaths_sensitivity_area_inla.pdf",
+       p_diabetes_sensitivity_area, width= 6, height=4)
 
-p <- p_hypertensive + p_ischemic + p_stroke_cerebrovascular + p_diabetes
-p
+p_sensitivity_area <- p_hypertensive_sensitivity_area + p_ischemic_sensitivity_area + p_stroke_cerebrovascular_sensitivity_area + p_diabetes_sensitivity_area
+p_sensitivity_area
 
-ggsave(filename = "figs/05_combined_plots_deaths_ixn_physiographic_region_inla.pdf", p, width= 12, height=5.5)
-
-
-
-
+ggsave(filename = "figs/05_combined_plots_sensitivity_area_inla.pdf", p_sensitivity_area, width= 12, height=5.5)
 
