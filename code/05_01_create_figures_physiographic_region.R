@@ -22,9 +22,10 @@ au_colors <- c("#ffc044", "#e86100", "#0093d2", "#0b2341", "#00a597")
 preds_hypertensive <- read_rds("/Volumes/Projects/usgs_cvd_wells_al/output/04_01_preds_hypertension_deaths_poisson_model_ixn_physiographic_region_inla.rds")
 
 p_hypertensive <- preds_hypertensive %>% 
+  filter(cat_age_group == "75 or over") %>%
   plot_inla() +
   labs(
-    x = "Centered and scaled percent private well use",
+    x = "Percentage private well use",
     y = "", 
     title = "Hypertensive deaths per 100,000",
     color = "Physiographic region according to USGS",
@@ -34,7 +35,8 @@ p_hypertensive <- preds_hypertensive %>%
   scale_color_manual(values = au_colors) +
   scale_fill_manual(values = au_colors) + 
   theme_minimal() +
-  theme(axis.line = element_line(color = "lightgray"))
+  theme(axis.line = element_line(color = "lightgray"),
+        legend.position = "none")
 
 ggsave("figs/05_01_hypertensive_deaths_ixn_physiographic_region_inla.pdf",
        p_hypertensive, width= 6, height=4)
@@ -44,9 +46,10 @@ ggsave("figs/05_01_hypertensive_deaths_ixn_physiographic_region_inla.pdf",
 preds_ischemic <- read_rds("/Volumes/Projects/usgs_cvd_wells_al/output/04_01_preds_ischemic_deaths_poisson_model_ixn_physiographic_region_inla.rds")
 
 p_ischemic <- preds_ischemic %>% 
+  filter(cat_age_group == "75 or over") %>%
   plot_inla() +
   labs(
-    x = "Centered and scaled percent private well use",
+    x = "Percentage private well use",
     y = "", 
     title = "Ischemic deaths per 100,000",
     color = "Physiographic region according to USGS",
@@ -56,7 +59,8 @@ p_ischemic <- preds_ischemic %>%
   scale_color_manual(values = au_colors) +
   scale_fill_manual(values = au_colors) + 
   theme_minimal() +
-  theme(axis.line = element_line(color = "lightgray"))
+  theme(axis.line = element_line(color = "lightgray"),
+        legend.position = "none")
 
 ggsave("figs/05_01_ischemic_deaths_ixn_physiographic_region_inla.pdf",
        p_ischemic, width= 6, height=4)
@@ -66,9 +70,10 @@ ggsave("figs/05_01_ischemic_deaths_ixn_physiographic_region_inla.pdf",
 preds_stroke_cerebrovascular <- read_rds("/Volumes/Projects/usgs_cvd_wells_al/output/04_01_preds_stroke_cerebrovascular_deaths_poisson_model_ixn_physiographic_region_inla.rds")
 
 p_stroke_cerebrovascular <- preds_stroke_cerebrovascular %>% 
+  filter(cat_age_group == "75 or over") %>%
   plot_inla() +
   labs(
-    x = "Centered and scaled percent private well use",
+    x = "Percentage private well use",
     y = "", 
     title = "Stroke/cerebrovascular deaths per 100,000",
     color = "Physiographic region according to USGS",
@@ -78,7 +83,8 @@ p_stroke_cerebrovascular <- preds_stroke_cerebrovascular %>%
   scale_color_manual(values = au_colors) +
   scale_fill_manual(values = au_colors) + 
   theme_minimal() +
-  theme(axis.line = element_line(color = "lightgray"))
+  theme(axis.line = element_line(color = "lightgray"),
+        legend.position = "none")
 
 ggsave("figs/05_01_stroke_cerebrovascular_deaths_ixn_physiographic_region_inla.pdf",
        p_stroke_cerebrovascular, width= 6, height=4)
@@ -89,9 +95,10 @@ ggsave("figs/05_01_stroke_cerebrovascular_deaths_ixn_physiographic_region_inla.p
 preds_diabetes <- read_rds("/Volumes/Projects/usgs_cvd_wells_al/output/04_01_preds_diabetes_deaths_poisson_model_ixn_physiographic_region_inla.rds")
 
 p_diabetes <- preds_diabetes %>% 
+  filter(cat_age_group == "75 or over") %>%
   plot_inla() +
   labs(
-    x = "Centered and scaled percent private well use",
+    x = "Percentage private well use",
     y = "", 
     title = "Diabetes deaths per 100,000",
     color = "Physiographic region according to USGS",
@@ -101,7 +108,8 @@ p_diabetes <- preds_diabetes %>%
   scale_color_manual(values = au_colors) +
   scale_fill_manual(values = au_colors) + 
   theme_minimal() +
-  theme(axis.line = element_line(color = "lightgray"))
+  theme(axis.line = element_line(color = "lightgray"),
+        legend.position = "none")
 
 ggsave("figs/05_01_diabetes_deaths_ixn_physiographic_region_inla.pdf",
        p_diabetes, width= 6, height=4)

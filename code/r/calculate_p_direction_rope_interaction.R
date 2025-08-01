@@ -1,14 +1,12 @@
 # calculate_p_direction_rope_interaction() function
-# input: a list of inla results for multiple imputation datasets
+# input: stacked_marginal (output of sample_posterior_parameter()) from a list of inla results for multiple imputation datasets
 # output: a tibble row vector with ROPE values for a condition
 
 
-calculate_p_direction_rope_interaction <- function(f_condition_inla, kind = c("p_direction", "rope"), range=c(-0.1, 0.1)){
+calculate_p_direction_rope_interaction <- function(stacked_marginals, kind = c("p_direction", "rope"), range=c(-0.1, 0.1)){
   
-  source("r/sample_posterior_parameter.R")
   
-  posterior <- f_condition_inla %>%
-    sample_posterior_parameter() %>%
+  posterior <- stacked_marginals %>%
     mutate(
     eff_AVR = amt_centered_scaled_mean_pct_wells_cbg,
     eff_CP  = eff_AVR + `amt_centered_scaled_mean_pct_wells_cbg:cat_physiographic_regionCumberland Plateau`,

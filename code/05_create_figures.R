@@ -118,9 +118,10 @@ ggsave(filename = "figs/05_combined_plots_inla_no_diabetes.png", p_no_diabetes, 
 preds_hypertensive_sensitivity_area <- read_rds("/Volumes/Projects/usgs_cvd_wells_al/output/04_preds_hypertension_deaths_poisson_model_sensitivity_area_inla.rds")
 
 p_hypertensive_sensitivity_area <- preds_hypertensive_sensitivity_area %>% 
+  filter(cat_age_group == "75 or over") %>%
   plot_inla() +
   labs(
-    x = "Centered and scaled percent private well use",
+    x = "Percentage private well use",
     y = "", 
     title = "Hypertensive deaths per 100,000",
     color = "Age group (years)",
@@ -130,7 +131,8 @@ p_hypertensive_sensitivity_area <- preds_hypertensive_sensitivity_area %>%
   scale_color_manual(values = au_colors) +
   scale_fill_manual(values = au_colors) + 
   theme_minimal() +
-  theme(axis.line = element_line(color = "lightgray"))
+  theme(axis.line = element_line(color = "lightgray"),
+        legend.position = "none")
 
 ggsave("figs/05_hypertensive_deaths_sensitivity_area_inla.pdf",
        p_hypertensive_sensitivity_area, width= 6, height=4)
@@ -140,9 +142,10 @@ ggsave("figs/05_hypertensive_deaths_sensitivity_area_inla.pdf",
 preds_ischemic_sensitivity_area <- read_rds("/Volumes/Projects/usgs_cvd_wells_al/output/04_preds_ischemic_deaths_poisson_model_sensitivity_area_inla.rds")
 
 p_ischemic_sensitivity_area <- preds_ischemic_sensitivity_area %>% 
+  filter(cat_age_group == "75 or over") %>%
   plot_inla() +
   labs(
-    x = "Centered and scaled percent private well use",
+    x = "Percentage private well use",
     y = "", 
     title = "Ischemic deaths per 100,000",
     color = "Age group (years)",
@@ -152,7 +155,8 @@ p_ischemic_sensitivity_area <- preds_ischemic_sensitivity_area %>%
   scale_color_manual(values = au_colors) +
   scale_fill_manual(values = au_colors) + 
   theme_minimal() +
-  theme(axis.line = element_line(color = "lightgray"))
+  theme(axis.line = element_line(color = "lightgray"),
+        legend.position = "none")
 
 ggsave("figs/05_ischemic_deaths_sensitivity_area_inla.pdf",
        p_ischemic_sensitivity_area, width= 6, height=4)
@@ -162,9 +166,10 @@ ggsave("figs/05_ischemic_deaths_sensitivity_area_inla.pdf",
 preds_stroke_cerebrovascular_sensitivity_area <- read_rds("/Volumes/Projects/usgs_cvd_wells_al/output/04_preds_stroke_cerebrovascular_deaths_poisson_model_sensitivity_area_inla.rds")
 
 p_stroke_cerebrovascular_sensitivity_area <- preds_stroke_cerebrovascular_sensitivity_area %>% 
+  filter(cat_age_group == "75 or over") %>%
   plot_inla() +
   labs(
-    x = "Centered and scaled percent private well use",
+    x = "Percentage private well use",
     y = "", 
     title = "Stroke/cerebrovascular deaths per 100,000",
     color = "Age group (years)",
@@ -174,7 +179,8 @@ p_stroke_cerebrovascular_sensitivity_area <- preds_stroke_cerebrovascular_sensit
   scale_color_manual(values = au_colors) +
   scale_fill_manual(values = au_colors) + 
   theme_minimal() +
-  theme(axis.line = element_line(color = "lightgray"))
+  theme(axis.line = element_line(color = "lightgray"),
+        legend.position = "none")
 
 ggsave("figs/05_stroke_cerebrovascular_deaths_sensitivity_area_inla.pdf",
        p_stroke_cerebrovascular_sensitivity_area, width= 6, height=4)
@@ -184,9 +190,10 @@ ggsave("figs/05_stroke_cerebrovascular_deaths_sensitivity_area_inla.pdf",
 preds_diabetes_sensitivity_area <- read_rds("/Volumes/Projects/usgs_cvd_wells_al/output/04_preds_diabetes_deaths_poisson_model_sensitivity_area_inla.rds")
 
 p_diabetes_sensitivity_area <- preds_diabetes_sensitivity_area %>% 
+  filter(cat_age_group == "75 or over") %>%
   plot_inla() +
   labs(
-    x = "Centered and scaled percent private well use",
+    x = "Percentage private well use",
     y = "", 
     title = "Diabetes deaths per 100,000",
     color = "Age group (years)",
@@ -196,7 +203,8 @@ p_diabetes_sensitivity_area <- preds_diabetes_sensitivity_area %>%
   scale_color_manual(values = au_colors) +
   scale_fill_manual(values = au_colors) + 
   theme_minimal() +
-  theme(axis.line = element_line(color = "lightgray"))
+  theme(axis.line = element_line(color = "lightgray"),
+        legend.position = "none")
 
 ggsave("figs/05_diabetes_deaths_sensitivity_area_inla.pdf",
        p_diabetes_sensitivity_area, width= 6, height=4)

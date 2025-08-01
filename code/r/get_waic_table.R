@@ -1,43 +1,31 @@
 # get_waic_table() function creates waic table data tibble
-# input: lists of full and red inla results for 4 conditions
+# input: waic vectors (output of extract_waic()) of full and red inla results for 4 conditions
 # output: a tibble with condition, each (index), waic_full, waic_red, waic_diff columns
 
 get_waic_table <- function(
-    f_hypertensive_full, f_hypertensive_red, 
-    f_ischemic_full, f_ischemic_red, 
-    f_stroke_cerebrovascular_full, f_stroke_cerebrovascular_red, 
-    f_diabetes_full, f_diabetes_red){
+    hypertensive_full, hypertensive_red, 
+    ischemic_full, ischemic_red, 
+    stroke_cerebrovascular_full, stroke_cerebrovascular_red, 
+    diabetes_full, diabetes_red) {
+  
   
   conditions <- c("hypertensive", "ischemic", "stroke_cerebrovascular", "diabetes")
   
-  extract_waic <- function(object_name) {
-    obj <- get(object_name)
-    sapply(seq_along(obj), function(i) obj[[i]]$waic$waic)
-  }
+  
+  waic_full_list <- list(hypertensive_full, ischemic_full, stroke_cerebrovascular_full, diabetes_full)
+  waic_red_list  <- list(hypertensive_red,  ischemic_red,  stroke_cerebrovascular_red,  diabetes_red)
   
   
+  waic_full_df <- purrr::map2_dfr(waic_full_list, conditions, 
+                                  ~ tibble(condition = .y, each = seq_along(.x), waic_full = .x)
+  )
   
-  waic_full <- lapply(conditions, function(condition) extract_waic(paste0("f_", condition, "_full")))
-  waic_red <- lapply(conditions, function(condition) extract_waic(paste0("f_", condition, "_red")))
+  waic_red_df <- purrr::map2_dfr(waic_red_list, conditions, 
+                                 ~ tibble(condition = .y, each = seq_along(.x), waic_red = .x)
+  )
   
   
-  waic_full <- do.call(rbind, lapply(seq_along(conditions), function(i) {
-    tibble(
-      condition = conditions[i],
-      each = seq_along(waic_full[[i]]),
-      waic_full = waic_full[[i]]
-    )
-  }))
-  
-  waic_red <- do.call(rbind, lapply(seq_along(conditions), function(i) {
-    tibble(
-      condition = conditions[i],
-      each = seq_along(waic_red[[i]]),
-      waic_red = waic_red[[i]]
-    )
-  }))
-  
-  waic_table <- left_join(waic_full, waic_red, by = c("condition", "each")) %>%
+  waic_table <- dplyr::left_join(waic_full_df, waic_red_df, by = c("condition", "each")) %>%
     mutate(waic_diff = waic_red - waic_full)
   
   return(waic_table)

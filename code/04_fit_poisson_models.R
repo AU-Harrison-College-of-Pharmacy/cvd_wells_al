@@ -6,7 +6,7 @@ library(INLA)
 
 source("r/pool_inla.R")
 source("r/sample_posterior_parameter.R")
-
+source("r/pool_predictions_inla.R")
 # Run this file in the Window remote desktop. 
 
 # Primary analysis
@@ -16,7 +16,7 @@ source("r/sample_posterior_parameter.R")
 # Check the covariate overlap of your models
 ####
 
-df <- read_rds("/Volumes/Projects/usgs_cvd_wells_al/data/clean/02_analysis_dataset.rds") %>%
+df <- read_rds("K:/Projects/usgs_cvd_wells_al/data/clean/02_analysis_dataset.rds") %>%
   dplyr::filter(is_included_in_analysis == 1)
 
 p_overlap_wells_area <- df %>%
@@ -78,13 +78,11 @@ f_hypertensive <- lapply(1:length(df_hypertensive$imputations), function(i){
   f <- inla(n_hypertensive_deaths ~ f(id_census_block_group, model = "iid") + cat_age_group + amt_centered_scaled_mean_pct_wells_cbg + amt_centered_scaled_area_land + offset(log(n_population_times_4)),
             data = df_hypertensive$imputations[[i]],
             family = "poisson",
-            control.compute = list(config = TRUE)
+            control.compute = list(config = TRUE, waic=TRUE)
   )
 })
 
-pool_inla(sample_posterior_parameter(f_hypertensive)) %>%
-  select(term, estimate, conf.low, conf.high) %>%
-  mutate(outcome = "Hypertensive death") %>%
+pool_inla(f_hypertensive) %>%
   write_rds("K:/Projects/usgs_cvd_wells_al/output/04_pool_hypertension_deaths_poisson_model_main_inla.rds")
 
 preds_hypertensive <- pool_predictions_inla(f_hypertensive, 
@@ -99,13 +97,11 @@ f_ischemic <- lapply(1:length(df_ischemic$imputations), function(i){
   f <- inla(n_ischemic_deaths ~ f(id_census_block_group, model = "iid") + cat_age_group + amt_centered_scaled_mean_pct_wells_cbg + amt_centered_scaled_area_land + offset(log(n_population_times_4)),
             data = df_ischemic$imputations[[i]],
             family = "poisson",
-            control.compute = list(config = TRUE)
+            control.compute = list(config = TRUE, waic=TRUE)
   )
 })
 
-pool_inla(sample_posterior_parameter(f_ischemic)) %>%
-  select(term, estimate, conf.low, conf.high) %>%
-  mutate(outcome = "Ischemic death") %>%
+pool_inla(f_ischemic) %>%
   write_rds("K:/Projects/usgs_cvd_wells_al/output/04_pool_ischemic_deaths_poisson_model_main_inla.rds")
 
 
@@ -121,13 +117,11 @@ f_stroke_cerebrovascular <- lapply(1:length(df_stroke_cerebrovascular$imputation
   f <- inla(n_stroke_cerebrovascular_deaths ~ f(id_census_block_group, model = "iid") + cat_age_group + amt_centered_scaled_mean_pct_wells_cbg + amt_centered_scaled_area_land + offset(log(n_population_times_4)),
             data = df_stroke_cerebrovascular$imputations[[i]],
             family = "poisson",
-            control.compute = list(config = TRUE)
+            control.compute = list(config = TRUE, waic=TRUE)
   )
 })
 
-pool_inla(sample_posterior_parameter(f_stroke_cerebrovascular)) %>%
-  select(term, estimate, conf.low, conf.high) %>%
-  mutate(outcome = "Stroke/cerebrovascular death") %>%
+pool_inla(f_stroke_cerebrovascular) %>%
   write_rds("K:/Projects/usgs_cvd_wells_al/output/04_pool_stroke_cerebrovascular_deaths_poisson_model_main_inla.rds")
 
 
@@ -144,13 +138,11 @@ f_diabetes <- lapply(1:length(df_diabetes$imputations), function(i){
   f <- inla(n_diabetes_deaths ~ f(id_census_block_group, model = "iid") + cat_age_group + amt_centered_scaled_mean_pct_wells_cbg + amt_centered_scaled_area_land + offset(log(n_population_times_4)),
             data = df_diabetes$imputations[[i]],
             family = "poisson",
-            control.compute = list(config = TRUE)
+            control.compute = list(config = TRUE, waic=TRUE)
   )
 })
 
-pool_inla(sample_posterior_parameter(f_diabetes)) %>%
-  select(term, estimate, conf.low, conf.high) %>%
-  mutate(outcome = "Diabetes death") %>%
+pool_inla(f_diabetes) %>%
   write_rds("K:/Projects/usgs_cvd_wells_al/output/04_pool_diabetes_deaths_poisson_model_main_inla.rds")
 
 
@@ -170,13 +162,11 @@ f_hypertensive_sensitivity_area <- lapply(1:length(df_hypertensive$imputations),
   f <- inla(n_hypertensive_deaths ~ f(id_census_block_group, model = "iid") + cat_age_group + amt_centered_scaled_mean_pct_wells_cbg + amt_centered_scaled_area_land + offset(log(n_population_times_4)),
             data = df_hypertensive$imputations[[i]] %>% filter(amt_centered_scaled_area_land >= -0.4228, amt_centered_scaled_area_land < 0.0508),
             family = "poisson",
-            control.compute = list(config = TRUE)
+            control.compute = list(config = TRUE, waic = TRUE)
   )
 })
 
-pool_inla(sample_posterior_parameter(f_hypertensive_sensitivity_area)) %>%
-  select(term, estimate, conf.low, conf.high) %>%
-  mutate(outcome = "Hypertensive death") %>%
+pool_inla(f_hypertensive_sensitivity_area) %>%
   write_rds("K:/Projects/usgs_cvd_wells_al/output/04_pool_hypertension_deaths_poisson_model_sensitivity_areal_inla.rds")
 
 
@@ -192,13 +182,11 @@ f_ischemic_sensitivity_area <- lapply(1:length(df_ischemic$imputations), functio
   f <- inla(n_ischemic_deaths ~ f(id_census_block_group, model = "iid") + cat_age_group + amt_centered_scaled_mean_pct_wells_cbg + amt_centered_scaled_area_land + offset(log(n_population_times_4)),
             data = df_ischemic$imputations[[i]] %>% filter(amt_centered_scaled_area_land >= -0.4228, amt_centered_scaled_area_land < 0.0508),
             family = "poisson",
-            control.compute = list(config = TRUE)
+            control.compute = list(config = TRUE, waic = TRUE)
   )
 })
 
-pool_inla(sample_posterior_parameter(f_ischemic_sensitivity_area)) %>%
-  select(term, estimate, conf.low, conf.high) %>%
-  mutate(outcome = "Ischemic death") %>%
+pool_inla(f_ischemic_sensitivity_area) %>%
   write_rds("K:/Projects/usgs_cvd_wells_al/output/04_pool_ischemic_deaths_poisson_model_sensitivity_areal_inla.rds")
 
 preds_ischemic_sensitivity_area <- pool_predictions_inla(f_ischemic_sensitivity_area, 
@@ -213,13 +201,11 @@ f_stroke_cerebrovascular_sensitivity_area <- lapply(1:length(df_stroke_cerebrova
   f <- inla(n_stroke_cerebrovascular_deaths ~ f(id_census_block_group, model = "iid") + cat_age_group + amt_centered_scaled_mean_pct_wells_cbg + amt_centered_scaled_area_land + offset(log(n_population_times_4)),
             data = df_stroke_cerebrovascular$imputations[[i]] %>% filter(amt_centered_scaled_area_land >= -0.4228, amt_centered_scaled_area_land < 0.0508),
             family = "poisson",
-            control.compute = list(config = TRUE)
+            control.compute = list(config = TRUE, waic = TRUE)
   )
 })
 
-pool_inla(sample_posterior_parameter(f_stroke_cerebrovascular_sensitivity_area)) %>%
-  select(term, estimate, conf.low, conf.high) %>%
-  mutate(outcome = "Stroke/cerebrovascular death") %>%
+pool_inla(f_stroke_cerebrovascular_sensitivity_area) %>%
   write_rds("K:/Projects/usgs_cvd_wells_al/output/04_pool_stroke_cerebrovascular_deaths_poisson_model_sensitivity_areal_inla.rds")
 
 preds_stroke_cerebrovascular_sensitivity_area <- pool_predictions_inla(f_stroke_cerebrovascular_sensitivity_area, 
@@ -234,13 +220,11 @@ f_diabetes_sensitivity_area <- lapply(1:length(df_diabetes$imputations), functio
   f <- inla(n_diabetes_deaths ~ f(id_census_block_group, model = "iid") + cat_age_group + amt_centered_scaled_mean_pct_wells_cbg + amt_centered_scaled_area_land + offset(log(n_population_times_4)),
             data = df_diabetes$imputations[[i]] %>% filter(amt_centered_scaled_area_land >= -0.4228, amt_centered_scaled_area_land < 0.0508),
             family = "poisson",
-            control.compute = list(config = TRUE)
+            control.compute = list(config = TRUE, waic = TRUE)
   )
 })
 
-pool_inla(sample_posterior_parameter(f_diabetes_sensitivity_area)) %>%
-  select(term, estimate, conf.low, conf.high) %>%
-  mutate(outcome = "Diabetes death") %>%
+pool_inla(f_diabetes_sensitivity_area) %>%
   write_rds("K:/Projects/usgs_cvd_wells_al/output/04_pool_diabetes_deaths_poisson_model_sensitivity_areal_inla.rds")
 
 preds_diabetes_sensitivity_area <- pool_predictions_inla(f_diabetes_sensitivity_area, 
