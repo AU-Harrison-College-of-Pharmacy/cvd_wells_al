@@ -61,6 +61,7 @@ df %>%
   geom_bar(stat = "identity") +
   facet_grid(cat_pct_aa_only ~ cat_centered_scaled_area_land, scales = "free_y")
 
+set.seed(4821)
 
 # dataset with imputation
 df_hypertensive <- read_rds("K:/Projects/usgs_cvd_wells_al/data/clean/03_imputed_hypertensive_deaths.rds")

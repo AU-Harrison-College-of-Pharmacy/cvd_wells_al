@@ -10,6 +10,8 @@ source("r/pool_predictions_inla.R")
 
 # Run this file in the Window remote desktop. 
 
+set.seed(2587)
+
 # dataset with imputation
 df_hypertensive <- read_rds("K:/Projects/usgs_cvd_wells_al/data/clean/03_imputed_hypertensive_deaths.rds")
 df_ischemic <- read_rds("K:/Projects/usgs_cvd_wells_al/data/clean/03_imputed_ischemic_deaths.rds")
