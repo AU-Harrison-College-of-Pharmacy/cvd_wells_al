@@ -1,8 +1,7 @@
 library(tidyverse)
 library(patchwork)
 library(broom.mixed)
-
-source("r/plot_inla.R")
+library(ggeffects)
 
 # Prediction plots
 
@@ -15,11 +14,17 @@ au_colors <- c("#ffc044", "#e86100", "#0093d2", "#0b2341", "#00a597")
 
 # Hypertension
 
-preds_hypertensive <- read_rds("/Volumes/Projects/usgs_cvd_wells_al/output/04_preds_hypertension_deaths_poisson_model_inla.rds")
+f_hypertensive <- read_rds("/Volumes/Projects/usgs_cvd_wells_al/output/04_hypertension_deaths_poisson_model_main.rds")
+
+preds_hypertensive <- pool_predictions(lapply(f_hypertensive, 
+                        predict_response, 
+                        terms = c("amt_centered_scaled_mean_pct_wells_cbg [-0.78:2.9]", "cat_age_group"),
+                        condition = c(n_population_times_4 = 100000)), 
+                      )
 
 p_hypertensive <- preds_hypertensive %>% 
-  filter(cat_age_group == "75 or over") %>%
-  plot_inla() +
+  filter(group == "75 or over") %>%
+  plot() +
   labs(
     x = "Percentage private well use",
     y = "", 
@@ -32,16 +37,22 @@ p_hypertensive <- preds_hypertensive %>%
   theme(axis.line = element_line(color = "lightgray"),
         legend.position = "none")
 
-ggsave("figs/05_hypertensive_deaths_inla.pdf",
+ggsave("../figs/05_hypertensive_deaths.pdf",
        p_hypertensive, width= 6, height=4)
 
 # Ischemic
 
-preds_ischemic <- read_rds("/Volumes/Projects/usgs_cvd_wells_al/output/04_preds_ischemic_deaths_poisson_model_inla.rds")
+f_ischemic <- read_rds("/Volumes/Projects/usgs_cvd_wells_al/output/04_ischemic_deaths_poisson_model_main.rds")
+
+preds_ischemic <- pool_predictions(lapply(f_ischemic, 
+                                              predict_response, 
+                                              terms = c("amt_centered_scaled_mean_pct_wells_cbg [-0.78:2.9]", "cat_age_group"),
+                                              condition = c(n_population_times_4 = 100000)), 
+)
 
 p_ischemic <- preds_ischemic %>% 
-  filter(cat_age_group == "75 or over") %>%
-  plot_inla() +
+  filter(group == "75 or over") %>%
+  plot() +
   labs(
     x = "Percentage private well use",
     y = "", 
@@ -54,18 +65,25 @@ p_ischemic <- preds_ischemic %>%
   theme(axis.line = element_line(color = "lightgray"),
         legend.position = "none")
 
-ggsave("figs/05_ischemic_deaths_inla.pdf",
+ggsave("../figs/05_ischemic_deaths.pdf",
        p_ischemic, width= 6, height=4)
 
 # Stroke/cerebrovascular
 
-preds_stroke_cerebrovascular <- read_rds("/Volumes/Projects/usgs_cvd_wells_al/output/04_preds_stroke_cerebrovascular_deaths_poisson_model_inla.rds")
+
+f_stroke_cerebrovascular <- read_rds("/Volumes/Projects/usgs_cvd_wells_al/output/04_stroke_cerebrovascular_deaths_poisson_model_main.rds")
+
+preds_stroke_cerebrovascular <- pool_predictions(lapply(f_stroke_cerebrovascular, 
+                                          predict_response, 
+                                          terms = c("amt_centered_scaled_mean_pct_wells_cbg [-0.78:2.9]", "cat_age_group"),
+                                          condition = c(n_population_times_4 = 100000)), 
+)
 
 p_stroke_cerebrovascular <- preds_stroke_cerebrovascular %>% 
-  filter(cat_age_group == "75 or over") %>%
-  plot_inla() +
+  filter(group == "75 or over") %>%
+  plot() +
   labs(
-    x = "Percent private well use",
+    x = "Percentage private well use",
     y = "", 
     title = "Stroke/cerebrovascular deaths per 100,000"
   ) +
@@ -76,18 +94,25 @@ p_stroke_cerebrovascular <- preds_stroke_cerebrovascular %>%
   theme(axis.line = element_line(color = "lightgray"),
         legend.position = "none")
 
-ggsave("figs/05_stroke_cerebrovascular_deaths_inla.pdf",
+ggsave("../figs/05_stroke_cerebrovascular_deaths.pdf",
        p_stroke_cerebrovascular, width= 6, height=4)
 
 # Diabetes
 
-preds_diabetes <- read_rds("/Volumes/Projects/usgs_cvd_wells_al/output/04_preds_diabetes_deaths_poisson_model_inla.rds")
+
+f_diabetes <- read_rds("/Volumes/Projects/usgs_cvd_wells_al/output/04_diabetes_deaths_poisson_model_main.rds")
+
+preds_diabetes <- pool_predictions(lapply(f_diabetes, 
+                                          predict_response, 
+                                          terms = c("amt_centered_scaled_mean_pct_wells_cbg [-0.78:2.9]", "cat_age_group"),
+                                          condition = c(n_population_times_4 = 100000)), 
+)
 
 p_diabetes <- preds_diabetes %>% 
-  filter(cat_age_group == "75 or over") %>%
-  plot_inla() +
+  filter(group == "75 or over") %>%
+  plot() +
   labs(
-    x = "Percent private well use",
+    x = "Percentage private well use",
     y = "", 
     title = "Diabetes deaths per 100,000"
   ) +
@@ -98,17 +123,8 @@ p_diabetes <- preds_diabetes %>%
   theme(axis.line = element_line(color = "lightgray"),
         legend.position = "none")
 
-ggsave("figs/05_diabetes_deaths_inla.pdf",
+ggsave("../figs/05_diabetes_deaths.pdf",
        p_diabetes, width= 6, height=4)
-
-p <- p_hypertensive + p_ischemic + p_stroke_cerebrovascular + p_diabetes
-p
-
-ggsave(filename = "figs/05_combined_plots_inla.pdf", p, width= 12, height=5.5)
-
-p_no_diabetes <- wrap_plots(list(p_hypertensive, p_ischemic, p_stroke_cerebrovascular), ncol = 2)
-ggsave(filename = "figs/05_combined_plots_inla_no_diabetes.png", p_no_diabetes, width= 6, height=4, dpi = 300)
-
 #########
 # Sensitivity analysis: restricting to second largest block groups
 #########
