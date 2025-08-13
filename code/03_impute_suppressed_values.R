@@ -10,28 +10,28 @@ df_hypertensive <- df %>%
   mutate(
     n_population_times_4 = n_population * 4
   ) %>%
-  select(id_census_block_group, cat_age_group, amt_centered_scaled_area_land, amt_area_water, n_population_times_4, amt_centered_scaled_mean_pct_wells_cbg, n_hypertensive_deaths, cat_physiographic_region, amt_centered_scaled_pct_aa_only)
+  select(id_census_block_group, cat_age_group, amt_centered_scaled_area_land, amt_area_water, n_population_times_4, amt_centered_scaled_mean_pct_wells_cbg, n_hypertensive_deaths, cat_physiographic_region, amt_centered_scaled_pct_aa_only, cat_ruca)
 
 df_ischemic <- df %>%
   filter(is_included_in_analysis == 1) %>%
   mutate(
     n_population_times_4 = n_population * 4,
   ) %>%
-  select(id_census_block_group, cat_age_group, amt_centered_scaled_area_land, amt_area_water, n_population_times_4, amt_centered_scaled_mean_pct_wells_cbg, n_ischemic_deaths, cat_physiographic_region, amt_centered_scaled_pct_aa_only)
+  select(id_census_block_group, cat_age_group, amt_centered_scaled_area_land, amt_area_water, n_population_times_4, amt_centered_scaled_mean_pct_wells_cbg, n_ischemic_deaths, cat_physiographic_region, amt_centered_scaled_pct_aa_only, cat_ruca)
 
 df_stroke_cerebrovascular <- df %>%
   filter(is_included_in_analysis == 1) %>%
   mutate(
     n_population_times_4 = n_population * 4,
   ) %>%
-  select(id_census_block_group, cat_age_group, amt_centered_scaled_area_land, amt_area_water, n_population_times_4, amt_centered_scaled_mean_pct_wells_cbg, n_stroke_cerebrovascular_deaths, cat_physiographic_region, amt_centered_scaled_pct_aa_only)
+  select(id_census_block_group, cat_age_group, amt_centered_scaled_area_land, amt_area_water, n_population_times_4, amt_centered_scaled_mean_pct_wells_cbg, n_stroke_cerebrovascular_deaths, cat_physiographic_region, amt_centered_scaled_pct_aa_only, cat_ruca)
 
 df_diabetes <- df %>%
   filter(is_included_in_analysis == 1) %>%
   mutate(
     n_population_times_4 = n_population * 4,
   ) %>%
-  select(id_census_block_group, cat_age_group, amt_centered_scaled_area_land, amt_area_water, n_population_times_4, amt_centered_scaled_mean_pct_wells_cbg, n_diabetes_deaths, cat_physiographic_region, amt_centered_scaled_pct_aa_only)
+  select(id_census_block_group, cat_age_group, amt_centered_scaled_area_land, amt_area_water, n_population_times_4, amt_centered_scaled_mean_pct_wells_cbg, n_diabetes_deaths, cat_physiographic_region, amt_centered_scaled_pct_aa_only, cat_ruca)
 
 # Impute datasets for each outcome
 imputation_boundaries <- matrix(c(7, 1, 5),
