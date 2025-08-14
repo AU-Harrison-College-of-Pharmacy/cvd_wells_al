@@ -1,6 +1,7 @@
 # calculate_p_direction_rope_interaction() function
 # input: stacked_marginal (output of sample_posterior_parameter()) from a list of inla results for multiple imputation datasets
 # output: a tibble row vector with ROPE values for a condition
+# only for physiographic region
 
 
 calculate_p_direction_rope_interaction <- function(stacked_marginals, kind = c("p_direction", "rope"), range=c(-0.1, 0.1)){

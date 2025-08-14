@@ -1,19 +1,12 @@
 # get_waic_table() function creates waic table data tibble
-# input: waic vectors (output of extract_waic()) of full and red inla results for 4 conditions
+# input: lists of waic vectors of full and red inla results for 4 conditions
 # output: a tibble with condition, each (index), waic_full, waic_red, waic_diff columns
 
 get_waic_table <- function(
-    hypertensive_full, hypertensive_red, 
-    ischemic_full, ischemic_red, 
-    stroke_cerebrovascular_full, stroke_cerebrovascular_red, 
-    diabetes_full, diabetes_red) {
+    waic_full_list, waic_red_list) {
   
   
-  conditions <- c("hypertensive", "ischemic", "stroke_cerebrovascular", "diabetes")
-  
-  
-  waic_full_list <- list(hypertensive_full, ischemic_full, stroke_cerebrovascular_full, diabetes_full)
-  waic_red_list  <- list(hypertensive_red,  ischemic_red,  stroke_cerebrovascular_red,  diabetes_red)
+  conditions <- c("Hypertensive", "Ischemic", "Stroke cerebrovascular", "Diabetes")
   
   
   waic_full_df <- purrr::map2_dfr(waic_full_list, conditions, 
