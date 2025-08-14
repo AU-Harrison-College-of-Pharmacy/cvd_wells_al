@@ -38,7 +38,7 @@ pool_inla(f_hypertensive_ixn_pct_aa) %>%
   write_rds("K:/Projects/usgs_cvd_wells_al/output/04_02_pool_hypertension_deaths_poisson_model_ixn_pct_aa_inla.rds")
 
 preds_hypertensive <- pool_predictions_inla(f_hypertensive_ixn_pct_aa, 
-                                            terms = c("amt_centered_scaled_mean_pct_wells_cbg [-0.78:2.9]", "amt_centered_scaled_pct_aa_only"),
+                                            terms = c("amt_centered_scaled_mean_pct_wells_cbg [-0.78:2.9]", "amt_centered_scaled_pct_aa_only", "cat_age_group"),
                                             condition = c(n_population_times_4 = 100000))
 
 write_rds(preds_hypertensive, "K:/Projects/usgs_cvd_wells_al/output/04_02_preds_hypertension_deaths_poisson_model_ixn_pct_aa_inla.rds")
@@ -57,7 +57,7 @@ pool_inla(f_ischemic_ixn_pct_aa) %>%
   write_rds("K:/Projects/usgs_cvd_wells_al/output/04_02_pool_ischemic_deaths_poisson_model_ixn_pct_aa_inla.rds")
 
 preds_ischemic <- pool_predictions_inla(f_ischemic_ixn_pct_aa, 
-                                        terms = c("amt_centered_scaled_mean_pct_wells_cbg [-0.78:2.9]", "amt_centered_scaled_pct_aa_only"),
+                                        terms = c("amt_centered_scaled_mean_pct_wells_cbg [-0.78:2.9]", "amt_centered_scaled_pct_aa_only", "cat_age_group"),
                                         condition = c(n_population_times_4 = 100000))
 
 write_rds(preds_ischemic, "K:/Projects/usgs_cvd_wells_al/output/04_02_preds_ischemic_deaths_poisson_model_ixn_pct_aa_inla.rds")
@@ -76,7 +76,7 @@ pool_inla(f_stroke_cerebrovascular_ixn_pct_aa) %>%
   write_rds("K:/Projects/usgs_cvd_wells_al/output/04_02_pool_stroke_cerebrovascular_deaths_poisson_model_ixn_pct_aa_inla.rds")
 
 preds_stroke_cerebrovascular <- pool_predictions_inla(f_stroke_cerebrovascular_ixn_pct_aa, 
-                                                      terms = c("amt_centered_scaled_mean_pct_wells_cbg [-0.78:2.9]", "amt_centered_scaled_pct_aa_only"),
+                                                      terms = c("amt_centered_scaled_mean_pct_wells_cbg [-0.78:2.9]", "amt_centered_scaled_pct_aa_only", "cat_age_group"),
                                                       condition = c(n_population_times_4 = 100000))
 
 write_rds(preds_stroke_cerebrovascular, "K:/Projects/usgs_cvd_wells_al/output/04_02_preds_stroke_cerebrovascular_deaths_poisson_model_ixn_pct_aa_inla.rds")
@@ -95,7 +95,7 @@ pool_inla(f_diabetes_ixn_pct_aa) %>%
   write_rds("K:/Projects/usgs_cvd_wells_al/output/04_02_pool_diabetes_deaths_poisson_model_ixn_pct_aa_inla.rds")
 
 preds_diabetes <- pool_predictions_inla(f_diabetes_ixn_pct_aa, 
-                                        terms = c("amt_centered_scaled_mean_pct_wells_cbg [-0.78:2.9]", "amt_centered_scaled_pct_aa_only"),
+                                        terms = c("amt_centered_scaled_mean_pct_wells_cbg [-0.78:2.9]", "amt_centered_scaled_pct_aa_only", "cat_age_group"),
                                         condition = c(n_population_times_4 = 100000))
 
 write_rds(preds_diabetes, "K:/Projects/usgs_cvd_wells_al/output/04_02_preds_diabetes_deaths_poisson_model_ixn_pct_aa_inla.rds")

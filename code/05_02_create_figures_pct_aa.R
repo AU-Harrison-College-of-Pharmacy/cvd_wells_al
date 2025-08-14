@@ -24,6 +24,7 @@ preds_hypertensive <- read_rds("/Volumes/Projects/usgs_cvd_wells_al/output/04_02
 p_hypertensive_ixn_pct_aa <- preds_hypertensive %>% 
   mutate(amt_centered_scaled_pct_aa_only = as.factor(amt_centered_scaled_pct_aa_only)) %>%
   filter(cat_age_group == "75 or over") %>%
+  select(-cat_age_group) %>%
   plot_inla() +
   labs(
     x = "Percentage private well use",
@@ -34,8 +35,7 @@ p_hypertensive_ixn_pct_aa <- preds_hypertensive %>%
   scale_color_manual(values = au_colors, name = "Centered/scaled percent AA only") +
   scale_fill_manual(values = au_colors, name = "Centered/scaled percent AA only") +
   theme_minimal() +
-  theme(axis.line = element_line(color = "lightgray"),
-        legend.position = "none") +
+  theme(axis.line = element_line(color = "lightgray")) +
   guides(
     color = guide_legend(reverse = TRUE),
     fill = guide_legend(reverse = TRUE)
@@ -51,6 +51,7 @@ preds_ischemic <- read_rds("/Volumes/Projects/usgs_cvd_wells_al/output/04_02_pre
 p_ischemic_ixn_pct_aa <- preds_ischemic %>% 
   mutate(amt_centered_scaled_pct_aa_only = as.factor(amt_centered_scaled_pct_aa_only)) %>%
   filter(cat_age_group == "75 or over") %>%
+  select(-cat_age_group) %>%
   plot_inla() +
   labs(
     x = "Percentage private well use",
@@ -61,8 +62,7 @@ p_ischemic_ixn_pct_aa <- preds_ischemic %>%
   scale_color_manual(values = au_colors, name = "Centered/scaled percent AA only") +
   scale_fill_manual(values = au_colors, name = "Centered/scaled percent AA only") +
   theme_minimal() +
-  theme(axis.line = element_line(color = "lightgray"),
-        legend.position = "none") +
+  theme(axis.line = element_line(color = "lightgray")) +
   guides(
     color = guide_legend(reverse = TRUE),
     fill = guide_legend(reverse = TRUE)
@@ -78,6 +78,7 @@ preds_stroke_cerebrovascular <- read_rds("/Volumes/Projects/usgs_cvd_wells_al/ou
 p_stroke_cerebrovascular_ixn_pct_aa <- preds_stroke_cerebrovascular %>% 
   mutate(amt_centered_scaled_pct_aa_only = as.factor(amt_centered_scaled_pct_aa_only)) %>%
   filter(cat_age_group == "75 or over") %>%
+  select(-cat_age_group) %>%
   plot_inla() +
   labs(
     x = "Percentage private well use",
@@ -88,8 +89,7 @@ p_stroke_cerebrovascular_ixn_pct_aa <- preds_stroke_cerebrovascular %>%
   scale_color_manual(values = au_colors, name = "Centered/scaled percent AA only") +
   scale_fill_manual(values = au_colors, name = "Centered/scaled percent AA only") +
   theme_minimal() +
-  theme(axis.line = element_line(color = "lightgray"),
-        legend.position = "none") +
+  theme(axis.line = element_line(color = "lightgray")) +
   guides(
     color = guide_legend(reverse = TRUE),
     fill = guide_legend(reverse = TRUE)
@@ -105,6 +105,7 @@ preds_diabetes <- read_rds("/Volumes/Projects/usgs_cvd_wells_al/output/04_02_pre
 p_diabetes_ixn_pct_aa <- preds_diabetes %>% 
   mutate(amt_centered_scaled_pct_aa_only = as.factor(amt_centered_scaled_pct_aa_only)) %>%
   filter(cat_age_group == "75 or over") %>%
+  select(-cat_age_group) %>%
   plot_inla() +
   labs(
     x = "Percentage private well use",
@@ -115,8 +116,7 @@ p_diabetes_ixn_pct_aa <- preds_diabetes %>%
   scale_color_manual(values = au_colors, name = "Centered/scaled percent AA only") +
   scale_fill_manual(values = au_colors, name = "Centered/scaled percent AA only") +
   theme_minimal() +
-  theme(axis.line = element_line(color = "lightgray"),
-        legend.position = "none") +
+  theme(axis.line = element_line(color = "lightgray")) +
   guides(
     color = guide_legend(reverse = TRUE),
     fill = guide_legend(reverse = TRUE)

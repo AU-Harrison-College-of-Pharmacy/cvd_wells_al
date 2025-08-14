@@ -2,6 +2,9 @@
 # generate new dataset to predict response with mean_reference as in ggeffects::predict_response()
 # input: an inla output for one imputation dataset, terms, condition
 # output: newdata as tibble format  
+# Each imputation dataset has difference only at outcome (n_hypertensive_deaths, unused for prediction).
+# Thus we don't have to repeat generate_newdata() to generate predictors for prediction for each imputation.
+# So, We will run generate_newdata() once per each inla output for 24 imputations.
 
 generate_newdata <- function(f_condition_inla_each, terms, condition = list()) {
   

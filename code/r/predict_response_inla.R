@@ -31,7 +31,9 @@ predict_response_inla <- function(f_condition_inla_each, terms, condition = list
     as.formula()
   
   # match contrasts for ordered factor variable 
-  contrasts(newdata_each$cat_age_group) <- contr.poly(4)
+  if ("cat_age_group" %in% names(newdata_each)) {
+    contrasts(newdata_each$cat_age_group) <- contr.poly(4)
+  }
   
   X <- model.matrix(formula, data = newdata_each)
   
