@@ -139,8 +139,10 @@ df <- left_join(cbgs, adph_primary,
   mutate(
     cat_age_group = as_factor(cat_age_group, order) %>% fct_relevel("45 - 54 yrs", "55 - 64 yrs", "65 - 74 yrs") %>% as.ordered()
   ) %>%
+  mutate(id_census_tract = str_sub(id_census_block_group, start = 1, end = 11)) %>%
   var_labels(
     id_census_block_group = "Census block group FIPS according to 2020 Census",
+    id_census_tract = "Census tract FIPS according to 2020 Census",
     amt_area_land = "Area of CBG that is land (m^2)",
     amt_area_water = "Are of CBG that is water (m^2)",
     cat_age_group = "Age group (years)",
@@ -169,7 +171,16 @@ df %>% filter(is.na(amt_area_land))
 # Test whether any of the geometries are empty. This test should return a dataset with 0 rows.
 df %>% filter(st_is_empty(geometry))
 
-write_rds(df, file = "/Volumes/Projects/usgs_cvd_wells_al/data/clean/01_clean_adph_census_primary_cod.rds")
+# Import the RUCA codes and join with dataset
+df_ruca <- read_csv("/Volumes/Projects/usgs_cvd_wells_al/data/raw/RUCA-codes-2020-tract.csv") %>%
+  rename(id_census_tract = TractFIPS20,
+         cat_ruca = PrimaryRUCA) %>%
+  mutate(cat_rural = if_else(cat_ruca <= 6, "Urban", "Rural")) %>%
+  select(id_census_tract, cat_ruca, cat_rural) %>%
+  filter(cat_ruca != 99)  # filter out census tracts that are entirely in coastal or inland water bodies, with zero population and zero land area (https://www.ers.usda.gov/data-products/rural-urban-commuting-area-codes/documentation)
 
+df_final <- left_join(df,
+                      df_ruca,
+                      by = "id_census_tract")
 
-# Dataset of >= 75 years for Helen
+write_rds(df_final, file = "/Volumes/Projects/usgs_cvd_wells_al/data/clean/01_clean_adph_census_primary_cod.rds")
