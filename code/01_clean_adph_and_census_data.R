@@ -137,7 +137,7 @@ df <- left_join(cbgs, adph_primary,
     )
   ) %>%
   mutate(
-    cat_age_group = as_factor(cat_age_group, order) %>% fct_relevel("45 - 54 yrs", "55 - 64 yrs", "65 - 74 yrs") %>% as.ordered()
+    cat_age_group = as_factor(cat_age_group, order) %>% fct_relevel("45 - 54 yrs", "55 - 64 yrs", "65 - 74 yrs")
   ) %>%
   mutate(id_census_tract = str_sub(id_census_block_group, start = 1, end = 11)) %>%
   var_labels(

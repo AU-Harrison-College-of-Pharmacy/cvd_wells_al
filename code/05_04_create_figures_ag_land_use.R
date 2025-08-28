@@ -13,16 +13,16 @@ s <- sd(df$amt_mean_pct_wells_cbg, na.rm = TRUE) %>% round(1)
 au_colors <- c("#ffc044", "#e86100", "#0093d2", "#0b2341", "#00a597")
 
 #########
-# Interaction with physiographic region
+# Percent agricultural land use
 #########
 
 # Hypertension
 
-f_hypertensive <- read_rds("/Volumes/Projects/usgs_cvd_wells_al/output/04_01_preds_hypertension_deaths_poisson_model_ixn_physiographic_region.rds")
+f_hypertensive <- read_rds("/Volumes/Projects/usgs_cvd_wells_al/output/04_hypertension_deaths_poisson_model_ixn_ag_land_use.rds")
 
 preds_hypertensive <- pool_predictions(lapply(f_hypertensive, 
                                               predict_response, 
-                                              terms = c("amt_centered_scaled_mean_pct_wells_cbg [-0.78:2.9]", "cat_physiographic_region", "cat_age_group"),
+                                              terms = c("amt_centered_scaled_mean_pct_wells_cbg [-0.78:2.9]", "amt_percent_agricultural_land_use_centered_scaled [-1, 0, 1]", "cat_age_group"),
                                               condition = c(n_population_times_4 = 100000)), 
 )
 
@@ -35,25 +35,17 @@ p_hypertensive <- preds_hypertensive %>%
     title = "Hypertensive deaths per 100,000",
   ) +
   scale_x_continuous(labels = c(paste0(m - 0.78 * s), paste0(m), paste0(m + s), paste0(m + 2 * s))) +
-  scale_color_manual(values = au_colors, name = "Physiographic region") +
-  scale_fill_manual(values = au_colors, name = "Physiographic region") + 
+  scale_color_manual(values = au_colors, name = "Percent ag land use") +
+  scale_fill_manual(values = au_colors, name = "Percent ag land use") + 
   theme_minimal() +
   theme(axis.line = element_line(color = "lightgray")) +
   guides(
-    color = guide_legend(),
-    fill = guide_legend()
+    color = guide_legend(reverse = TRUE),
+    fill = guide_legend(reverse = TRUE)
   )
 
-ggsave("figs/05_01_hypertensive_deaths_ixn_physiographic_region.pdf",
+ggsave("figs/05_04_hypertensive_deaths_ixn_ag_land_use.pdf",
        p_hypertensive, width= 6, height=4)
-
-preds_hypertensive %>%
-  as_tibble() %>%
-  filter(facet == "75 or over") %>%
-  ggplot(aes(x = x, y = predicted)) +
-  geom_line() +
-  geom_ribbon(aes(ymin = conf.low, ymax = conf.high), alpha = 0.2) +
-  facet_wrap(~ group)
 
 ## Obtain estimates - estimates the ratio of the rate ratios among the physiographic regions. If the are near 1, then the rate ratios for the association with well percentage is similar across all physiographic regions
 mice::pool(f_hypertensive) %>% 
@@ -63,18 +55,20 @@ mice::pool(f_hypertensive) %>%
   mutate(
     rr = exp(estimate),
     rr.low = exp(estimate - 2 * std.error),
-    rr.high = exp(estimate + 2 * std.error)
+    rr.high = exp(estimate + 2 * std.error),
+    estimate.low = estimate - 2 * std.error,
+    estimate.high = estimate + 2 * std.error
   ) %>%
-  select(term, contains("rr"))
+  select(term, contains("rr"), contains("estimate"))
 
 # Ischemic
 
-f_ischemic <- read_rds("/Volumes/Projects/usgs_cvd_wells_al/output/04_01_preds_ischemic_deaths_poisson_model_ixn_physiographic_region.rds")
+f_ischemic <- read_rds("/Volumes/Projects/usgs_cvd_wells_al/output/04_ischemic_deaths_poisson_model_ixn_ag_land_use.rds")
 
 preds_ischemic <- pool_predictions(lapply(f_ischemic, 
-                                              predict_response, 
-                                              terms = c("amt_centered_scaled_mean_pct_wells_cbg [-0.78:2.9]", "cat_physiographic_region", "cat_age_group"),
-                                              condition = c(n_population_times_4 = 100000)), 
+                                          predict_response, 
+                                          terms = c("amt_centered_scaled_mean_pct_wells_cbg [-0.78:2.9]", "amt_percent_agricultural_land_use_centered_scaled [-1, 0, 1]", "cat_age_group"),
+                                          condition = c(n_population_times_4 = 100000)), 
 )
 
 p_ischemic <- preds_ischemic %>% 
@@ -88,25 +82,17 @@ p_ischemic <- preds_ischemic %>%
     fill = "Physiographic region according to USGS"
   ) +
   scale_x_continuous(labels = c(paste0(m - 0.78 * s), paste0(m), paste0(m + s), paste0(m + 2 * s))) +
-  scale_color_manual(values = au_colors, name = "Physiographic region") +
-  scale_fill_manual(values = au_colors, name = "Physiographic region") + 
+  scale_color_manual(values = au_colors, name = "Percent ag land use") +
+  scale_fill_manual(values = au_colors, name = "Percent ag land use") + 
   theme_minimal() +
   theme(axis.line = element_line(color = "lightgray")) +
   guides(
-    color = guide_legend(),
-    fill = guide_legend()
+    color = guide_legend(reverse = TRUE),
+    fill = guide_legend(reverse = TRUE)
   )
 
-ggsave("figs/05_01_ischemic_deaths_ixn_physiographic_region.pdf",
+ggsave("figs/05_04_ischemic_deaths_ixn_ag_land_use.pdf",
        p_ischemic, width= 6, height=4)
-
-preds_ischemic %>%
-  as_tibble() %>%
-  filter(facet == "75 or over") %>%
-  ggplot(aes(x = x, y = predicted)) +
-  geom_line() +
-  geom_ribbon(aes(ymin = conf.low, ymax = conf.high), alpha = 0.2) +
-  facet_wrap(~ group)
 
 ## Obtain estimates - estimates the ratio of the rate ratios among the physiographic regions. If the are near 1, then the rate ratios for the association with well percentage is similar across all physiographic regions
 mice::pool(f_ischemic) %>% 
@@ -116,18 +102,20 @@ mice::pool(f_ischemic) %>%
   mutate(
     rr = exp(estimate),
     rr.low = exp(estimate - 2 * std.error),
-    rr.high = exp(estimate + 2 * std.error)
+    rr.high = exp(estimate + 2 * std.error),
+    estimate.low = estimate - 2 * std.error,
+    estimate.high = estimate + 2 * std.error
   ) %>%
-  select(term, contains("rr"))
+  select(term, contains("rr"), contains("estimate"))
 
 # Stroke/cerebrovascular
 
-f_stroke_cerebrovascular <- read_rds("/Volumes/Projects/usgs_cvd_wells_al/output/04_01_preds_stroke_cerebrovascular_deaths_poisson_model_ixn_physiographic_region.rds")
+f_stroke_cerebrovascular <- read_rds("/Volumes/Projects/usgs_cvd_wells_al/output/04_stroke_cerebrovascular_deaths_poisson_model_ixn_ag_land_use.rds")
 
 preds_stroke_cerebrovascular <- pool_predictions(lapply(f_stroke_cerebrovascular, 
-                                          predict_response, 
-                                          terms = c("amt_centered_scaled_mean_pct_wells_cbg [-0.78:2.9]", "cat_physiographic_region", "cat_age_group"),
-                                          condition = c(n_population_times_4 = 100000)), 
+                                                        predict_response, 
+                                                        terms = c("amt_centered_scaled_mean_pct_wells_cbg [-0.78:2.9]", "amt_percent_agricultural_land_use_centered_scaled [-1, 0, 1]", "cat_age_group"),
+                                                        condition = c(n_population_times_4 = 100000)), 
 )
 
 p_stroke_cerebrovascular <- preds_stroke_cerebrovascular %>% 
@@ -141,25 +129,17 @@ p_stroke_cerebrovascular <- preds_stroke_cerebrovascular %>%
     fill = "Physiographic region according to USGS"
   ) +
   scale_x_continuous(labels = c(paste0(m - 0.78 * s), paste0(m), paste0(m + s), paste0(m + 2 * s))) +
-  scale_color_manual(values = au_colors, name = "Physiographic region") +
-  scale_fill_manual(values = au_colors, name = "Physiographic region") + 
+  scale_color_manual(values = au_colors, name = "Percent ag land use") +
+  scale_fill_manual(values = au_colors, name = "Percent ag land use") + 
   theme_minimal() +
   theme(axis.line = element_line(color = "lightgray")) +
   guides(
-    color = guide_legend(),
-    fill = guide_legend()
+    color = guide_legend(reverse = TRUE),
+    fill = guide_legend(reverse = TRUE)
   )
 
-ggsave("figs/05_01_stroke_cerebrovascular_deaths_ixn_physiographic_region.pdf",
+ggsave("figs/05_04_stroke_cerebrovascular_deaths_ixn_ag_land_use.pdf",
        p_stroke_cerebrovascular, width= 6, height=4)
-
-preds_stroke_cerebrovascular %>%
-  as_tibble() %>%
-  filter(facet == "75 or over") %>%
-  ggplot(aes(x = x, y = predicted)) +
-  geom_line() +
-  geom_ribbon(aes(ymin = conf.low, ymax = conf.high), alpha = 0.2) +
-  facet_wrap(~ group)
 
 ## Obtain estimates - estimates the ratio of the rate ratios among the physiographic regions. If the are near 1, then the rate ratios for the association with well percentage is similar across all physiographic regions
 mice::pool(f_stroke_cerebrovascular) %>% 
@@ -170,17 +150,16 @@ mice::pool(f_stroke_cerebrovascular) %>%
     rr = exp(estimate),
     rr.low = exp(estimate - 2 * std.error),
     rr.high = exp(estimate + 2 * std.error)
-  ) %>%
-  select(term, contains("rr"))
+  )
 
 # Diabetes
 
-f_diabetes <- read_rds("/Volumes/Projects/usgs_cvd_wells_al/output/04_01_preds_diabetes_deaths_poisson_model_ixn_physiographic_region.rds")
+f_diabetes <- read_rds("/Volumes/Projects/usgs_cvd_wells_al/output/04_diabetes_deaths_poisson_model_ixn_ag_land_use.rds")
 
 preds_diabetes <- pool_predictions(lapply(f_diabetes, 
-                                                        predict_response, 
-                                                        terms = c("amt_centered_scaled_mean_pct_wells_cbg [-0.78:2.9]", "cat_physiographic_region", "cat_age_group"),
-                                                        condition = c(n_population_times_4 = 100000)), 
+                                          predict_response, 
+                                          terms = c("amt_centered_scaled_mean_pct_wells_cbg [-0.78:2.9]", "amt_percent_agricultural_land_use_centered_scaled [-1, 0, 1]", "cat_age_group"),
+                                          condition = c(n_population_times_4 = 100000)), 
 )
 
 p_diabetes <- preds_diabetes %>% 
@@ -194,26 +173,17 @@ p_diabetes <- preds_diabetes %>%
     fill = "Physiographic region according to USGS"
   ) +
   scale_x_continuous(labels = c(paste0(m - 0.78 * s), paste0(m), paste0(m + s), paste0(m + 2 * s))) +
-  scale_color_manual(values = au_colors, name = "Physiographic region") +
-  scale_fill_manual(values = au_colors, name = "Physiographic region") + 
+  scale_color_manual(values = au_colors, name = "Percent ag land use") +
+  scale_fill_manual(values = au_colors, name = "Percent ag land use") + 
   theme_minimal() +
   theme(axis.line = element_line(color = "lightgray")) +
   guides(
-    color = guide_legend(),
-    fill = guide_legend()
+    color = guide_legend(reverse = TRUE),
+    fill = guide_legend(reverse = TRUE)
   )
 
-ggsave("figs/05_01_diabetes_deaths_ixn_physiographic_region.pdf",
+ggsave("figs/05_04_diabetes_deaths_ixn_ag_land_use.pdf",
        p_diabetes, width= 6, height=4)
-
-preds_diabetes %>%
-  as_tibble() %>%
-  filter(facet == "75 or over") %>%
-  ggplot(aes(x = x, y = predicted)) +
-  geom_line() +
-  geom_ribbon(aes(ymin = conf.low, ymax = conf.high), alpha = 0.2) +
-  facet_wrap(~ group) +
-  labs(title = "Diabetes")
 
 ## Obtain estimates - estimates the ratio of the rate ratios among the physiographic regions. If the are near 1, then the rate ratios for the association with well percentage is similar across all physiographic regions
 mice::pool(f_diabetes) %>% 
@@ -224,20 +194,19 @@ mice::pool(f_diabetes) %>%
     rr = exp(estimate),
     rr.low = exp(estimate - 2 * std.error),
     rr.high = exp(estimate + 2 * std.error)
-  ) %>%
-  select(term, contains("rr"))
+  )
 
 # Combine plots
 
 p <- wrap_plots(p_hypertensive + theme(legend.position = "left"), p_ischemic + theme(legend.position = "none"), p_stroke_cerebrovascular  + theme(legend.position = "none"), p_diabetes  + theme(legend.position = "none"))
 
-ggsave("figs/05_01_combined_plots_ixn_physiographic_region.pdf",
+ggsave("figs/05_04_combined_plots_ixn_ag_land_use.pdf",
        p,
        width = 11, height = 5)
 
 p_no_diabetes <- wrap_plots(p_hypertensive + theme(legend.position = "left"), p_ischemic + theme(legend.position = "none"), p_stroke_cerebrovascular  + theme(legend.position = "none"),
                             nrow = 2)
 
-ggsave("figs/05_01_combined_plots_ixn_physiographic_region_no_diabetes.pdf",
+ggsave("figs/05_04_combined_plots_ixn_ag_land_use_no_diabetes.pdf",
        p_no_diabetes,
        width = 11, height = 5)

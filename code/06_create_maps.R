@@ -50,6 +50,7 @@ tmap_options(component.autoscale = TRUE)
 
 tmap_save(p_overall, "figs/06_covariate_maps.png", width = 10, height = 10, units = "in")
 
+###
 
 
 
@@ -179,7 +180,7 @@ p_cbgs <- df %>%
               fill.scale = tm_scale_intervals(n = 5, 
                                               style = "fixed",
                                               breaks = c(0, 20, 40, 60, 80, 100)),
-              fill.legend = tm_legend("Percentage on private wells", text.size = 3, title.size = 3)
+              fill.legend = tm_legend_hide()
   ) +
   tm_basemap("Esri.NatGeoWorldMap")
 

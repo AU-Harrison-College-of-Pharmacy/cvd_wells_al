@@ -58,7 +58,18 @@ df_pr <- left_join(df, pr, by = "id_census_block_group")
 # Test that the counts of physiographic regions are the same in the pr dataset and in this joined df_pr dataset. This test should return a Boolean vector of length 6 with all values equal to `TRUE`.
 count(pr, cat_physiographic_region) %>% pull(n) == count(df_pr, cat_physiographic_region) %>% pull(n) / 4  # We divide by 4 because this larger dataset repeats the physiographic region four times for each CBG, since there are 4 different rows of age groups for each CBG
 
+# Join agricultural land use dataset
+ag <- read_csv("/Volumes/Projects/usgs_cvd_wells_al/data/raw/per_ag_for_cbgs.csv") %>%
+  rename(id_census_block_group = GEOID,
+         amt_percent_agricultural_land_use = Per_Ag) %>%
+  mutate(
+    amt_percent_agricultural_land_use_centered_scaled = scale(amt_percent_agricultural_land_use) %>% as.vector()
+  ) %>%
+  select(id_census_block_group, amt_percent_agricultural_land_use, amt_percent_agricultural_land_use_centered_scaled)
+
+df_pr_ag <- left_join(df_pr, ag, by = "id_census_block_group")
+
 # Write out the dataset
 
-write_rds(df_pr,
+write_rds(df_pr_ag,
           file = "/Volumes/Projects/usgs_cvd_wells_al/data/clean/02_analysis_dataset.rds")
