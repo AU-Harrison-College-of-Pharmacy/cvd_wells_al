@@ -11,7 +11,7 @@ cbgs_table <- df %>%
   slice(1) %>%
   ungroup() %>%
   mutate(cat_quartiles_well_use = Hmisc::cut2(amt_mean_pct_wells_cbg, g = 4, digits = 2)) %>%
-  select(amt_pct_aa_only, amt_population_density_per_km2_per_age_group, cat_quartiles_well_use, cat_physiographic_region) %>%
+  select(amt_pct_aa_only, cat_rural, cat_quartiles_well_use, cat_physiographic_region, amt_median_nitrate_concentration, amt_percent_agricultural_land_use) %>%
   tbl_summary(by = cat_quartiles_well_use,
               label = list(amt_population_density_per_km2_per_age_group = "Population density per 1 km^2 (among 45 - 54 year olds)")) %>%
   add_overall() %>%
