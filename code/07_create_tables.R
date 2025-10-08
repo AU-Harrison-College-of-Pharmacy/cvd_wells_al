@@ -34,5 +34,6 @@ df %>%
 events_table <- df %>%
   select(cat_age_group, n_population,  cat_hypertensive_deaths, cat_ischemic_deaths, cat_stroke_cerebrovascular_deaths, cat_diabetes_deaths) %>%
   tbl_summary(by = cat_age_group) %>%
+  add_overall() %>%
   as_gt() %>%
   gtsave("code/07_events_table.docx")

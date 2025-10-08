@@ -2,6 +2,7 @@ library(tidyverse)
 library(patchwork)
 library(broom.mixed)
 library(ggeffects)
+library(sf)
 
 # Prediction plots
 
