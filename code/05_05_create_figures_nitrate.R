@@ -35,8 +35,8 @@ p_hypertensive <- preds_hypertensive %>%
     title = "Hypertensive deaths per 100,000",
   ) +
   scale_x_continuous(labels = c(paste0(m - 0.78 * s), paste0(m), paste0(m + s), paste0(m + 2 * s))) +
-  scale_color_manual(values = au_colors, name = "Percent ag land use") +
-  scale_fill_manual(values = au_colors, name = "Percent ag land use") + 
+  scale_color_manual(values = au_colors, name = "Nitrate concentration (scaled)") +
+  scale_fill_manual(values = au_colors, name = "Nitrate concentration (scaled)") + 
   theme_minimal() +
   theme(axis.line = element_line(color = "lightgray")) +
   guides(
@@ -82,8 +82,8 @@ p_ischemic <- preds_ischemic %>%
     fill = "Physiographic region according to USGS"
   ) +
   scale_x_continuous(labels = c(paste0(m - 0.78 * s), paste0(m), paste0(m + s), paste0(m + 2 * s))) +
-  scale_color_manual(values = au_colors, name = "Percent ag land use") +
-  scale_fill_manual(values = au_colors, name = "Percent ag land use") + 
+  scale_color_manual(values = au_colors, name = "Nitrate concentration (scaled)") +
+  scale_fill_manual(values = au_colors, name = "Nitrate concentration (scaled)") + 
   theme_minimal() +
   theme(axis.line = element_line(color = "lightgray")) +
   guides(
@@ -129,8 +129,8 @@ p_stroke_cerebrovascular <- preds_stroke_cerebrovascular %>%
     fill = "Physiographic region according to USGS"
   ) +
   scale_x_continuous(labels = c(paste0(m - 0.78 * s), paste0(m), paste0(m + s), paste0(m + 2 * s))) +
-  scale_color_manual(values = au_colors, name = "Percent ag land use") +
-  scale_fill_manual(values = au_colors, name = "Percent ag land use") + 
+  scale_color_manual(values = au_colors, name = "Nitrate concentration (scaled)") +
+  scale_fill_manual(values = au_colors, name = "Nitrate concentration (scaled)") + 
   theme_minimal() +
   theme(axis.line = element_line(color = "lightgray")) +
   guides(
@@ -173,8 +173,8 @@ p_diabetes <- preds_diabetes %>%
     fill = "Physiographic region according to USGS"
   ) +
   scale_x_continuous(labels = c(paste0(m - 0.78 * s), paste0(m), paste0(m + s), paste0(m + 2 * s))) +
-  scale_color_manual(values = au_colors, name = "Percent ag land use") +
-  scale_fill_manual(values = au_colors, name = "Percent ag land use") + 
+  scale_color_manual(values = au_colors, name = "Nitrate concentration (scaled)") +
+  scale_fill_manual(values = au_colors, name = "Nitrate concentration (scaled)") + 
   theme_minimal() +
   theme(axis.line = element_line(color = "lightgray")) +
   guides(
