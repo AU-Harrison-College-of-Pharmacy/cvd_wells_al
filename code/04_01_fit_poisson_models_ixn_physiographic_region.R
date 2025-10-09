@@ -3,8 +3,6 @@ library(Amelia)
 library(lme4)
 library(sf)
 
-# Run this file in the Window remote desktop. 
-
 set.seed(1934)
 
 # dataset with imputation

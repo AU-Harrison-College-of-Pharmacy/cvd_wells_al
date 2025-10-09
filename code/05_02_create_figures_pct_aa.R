@@ -36,8 +36,8 @@ p_hypertensive <- preds_hypertensive %>%
     title = "Hypertensive deaths per 100,000",
   ) +
   scale_x_continuous(labels = c(paste0(m - 0.78 * s), paste0(m), paste0(m + s), paste0(m + 2 * s))) +
-  scale_color_manual(values = au_colors, name = "Percent African American") +
-  scale_fill_manual(values = au_colors, name = "Percent African American") + 
+  scale_color_manual(values = au_colors, name = "Percent African American\n(standardized)") +
+  scale_fill_manual(values = au_colors, name = "Percent African American\n(standardized)") + 
   theme_minimal() +
   theme(axis.line = element_line(color = "lightgray")) +
   guides(
@@ -57,8 +57,7 @@ mice::pool(f_hypertensive) %>%
     rr = exp(estimate),
     rr.low = exp(estimate - 2 * std.error),
     rr.high = exp(estimate + 2 * std.error)
-  ) %>%
-  select(term, contains("rr"))
+  )
 
 # Ischemic
 
@@ -79,8 +78,8 @@ p_ischemic <- preds_ischemic %>%
     title = "Ischemic deaths per 100,000"
   ) +
   scale_x_continuous(labels = c(paste0(m - 0.78 * s), paste0(m), paste0(m + s), paste0(m + 2 * s))) +
-  scale_color_manual(values = au_colors, name = "Percent African American") +
-  scale_fill_manual(values = au_colors, name = "Percent African American") + 
+  scale_color_manual(values = au_colors, name = "Percent African American\n(standardized)") +
+  scale_fill_manual(values = au_colors, name = "Percent African American\n(standardized)") + 
   theme_minimal() +
   theme(axis.line = element_line(color = "lightgray")) +
   guides(
@@ -100,8 +99,7 @@ mice::pool(f_ischemic) %>%
     rr = exp(estimate),
     rr.low = exp(estimate - 2 * std.error),
     rr.high = exp(estimate + 2 * std.error)
-  ) %>%
-  select(term, contains("rr"))
+  )
 
 # Stroke/cerebrovascular
 
@@ -122,8 +120,8 @@ p_stroke_cerebrovascular <- preds_stroke_cerebrovascular %>%
     title = "Stroke/cerebrovascular deaths per 100,000"
   ) +
   scale_x_continuous(labels = c(paste0(m - 0.78 * s), paste0(m), paste0(m + s), paste0(m + 2 * s))) +
-  scale_color_manual(values = au_colors, name = "Percent African American") +
-  scale_fill_manual(values = au_colors, name = "Percent African American") + 
+  scale_color_manual(values = au_colors, name = "Percent African American\n(standardized)") +
+  scale_fill_manual(values = au_colors, name = "Percent African American\n(standardized)") + 
   theme_minimal() +
   theme(axis.line = element_line(color = "lightgray")) +
   guides(
@@ -165,8 +163,8 @@ p_diabetes <- preds_diabetes %>%
     title = "Diabetes deaths per 100,000"
   ) +
   scale_x_continuous(labels = c(paste0(m - 0.78 * s), paste0(m), paste0(m + s), paste0(m + 2 * s))) +
-  scale_color_manual(values = au_colors, name = "Percent African American") +
-  scale_fill_manual(values = au_colors, name = "Percent African American") + 
+  scale_color_manual(values = au_colors, name = "Percent African American\n(standardized)") +
+  scale_fill_manual(values = au_colors, name = "Percent African American\n(standardized)") + 
   theme_minimal() +
   theme(axis.line = element_line(color = "lightgray")) +
   guides(
@@ -195,4 +193,11 @@ p <- wrap_plots(p_hypertensive + theme(legend.position = "left"), p_ischemic + t
 
 ggsave("figs/05_02_combined_plots_ixn_pct_aa.pdf",
        p,
+       width = 11, height = 5)
+
+p_no_diabetes <- wrap_plots(p_hypertensive + theme(legend.position = "left"), p_ischemic + theme(legend.position = "none"), p_stroke_cerebrovascular  + theme(legend.position = "none"),
+                            nrow = 2)
+
+ggsave("figs/05_04_combined_plots_ixn_pct_aa_no_diabetes.pdf",
+       p_no_diabetes,
        width = 11, height = 5)
