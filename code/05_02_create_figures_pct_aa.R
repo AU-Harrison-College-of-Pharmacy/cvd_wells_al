@@ -13,10 +13,6 @@ s <- sd(df$amt_mean_pct_wells_cbg, na.rm = TRUE) %>% round(1)
 
 au_colors <- c("#ffc044", "#e86100", "#0093d2", "#0b2341", "#00a597")
 
-#########
-# Interaction with physiographic region
-#########
-
 # Hypertension
 
 f_hypertensive <- read_rds("/Volumes/Projects/usgs_cvd_wells_al/output/04_02_preds_hypertension_deaths_poisson_model_ixn_pct_aa.rds")
@@ -48,7 +44,6 @@ p_hypertensive <- preds_hypertensive %>%
 ggsave("figs/05_02_hypertensive_deaths_ixn_pct_aa.pdf",
        p_hypertensive, width= 6, height=4)
 
-## Obtain estimates - estimates the ratio of the rate ratios among the physiographic regions. If the are near 1, then the rate ratios for the association with well percentage is similar across all physiographic regions
 mice::pool(f_hypertensive) %>% 
   broom::tidy() %>%
   as_tibble() %>%
@@ -90,7 +85,6 @@ p_ischemic <- preds_ischemic %>%
 ggsave("figs/05_02_ischemic_deaths_ixn_pct_aa.pdf",
        p_ischemic, width= 6, height=4)
 
-## Obtain estimates - estimates the ratio of the rate ratios among the physiographic regions. If the are near 1, then the rate ratios for the association with well percentage is similar across all physiographic regions
 mice::pool(f_ischemic) %>% 
   broom::tidy() %>%
   as_tibble() %>%
@@ -132,7 +126,6 @@ p_stroke_cerebrovascular <- preds_stroke_cerebrovascular %>%
 ggsave("figs/05_02_stroke_cerebrovascular_deaths_ixn_pct_aa.pdf",
        p_stroke_cerebrovascular, width= 6, height=4)
 
-## Obtain estimates - estimates the ratio of the rate ratios among the physiographic regions. If the are near 1, then the rate ratios for the association with well percentage is similar across all physiographic regions
 mice::pool(f_stroke_cerebrovascular) %>% 
   broom::tidy() %>%
   as_tibble() %>%
@@ -175,7 +168,6 @@ p_diabetes <- preds_diabetes %>%
 ggsave("figs/05_02_diabetes_deaths_ixn_pct_aa.pdf",
        p_diabetes, width= 6, height=4)
 
-## Obtain estimates - estimates the ratio of the rate ratios among the physiographic regions. If the are near 1, then the rate ratios for the association with well percentage is similar across all physiographic regions
 mice::pool(f_diabetes) %>% 
   broom::tidy() %>%
   as_tibble() %>%
@@ -199,5 +191,9 @@ p_no_diabetes <- wrap_plots(p_hypertensive + theme(legend.position = "left"), p_
                             nrow = 2)
 
 ggsave("figs/05_04_combined_plots_ixn_pct_aa_no_diabetes.pdf",
+       p_no_diabetes,
+       width = 11, height = 5)
+
+ggsave("figs/05_04_combined_plots_ixn_pct_aa_no_diabetes.png",
        p_no_diabetes,
        width = 11, height = 5)
