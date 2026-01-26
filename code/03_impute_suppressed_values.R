@@ -1,5 +1,6 @@
 library(tidyverse)
 library(Amelia)
+library(sf)
 
 set.seed(876234)
 
