@@ -187,3 +187,21 @@ p_cbgs <- df %>%
 p_county_and_cbgs <- tmap_arrange(p_county, p_cbgs)
 
 tmap_save(p_county_and_cbgs, filename = "figs/06_well_means.png", width = 4, height = 4, units = "in", dpi = 300, outer.margins = NA)
+
+# create map just of mobile and baldwin
+p_cbgs <- df %>%
+  filter(str_starts(id_census_block_group, "01003|01097")) %>%
+  group_by(id_census_block_group) %>%
+  slice(1) %>%
+  st_as_sf() %>%
+  tm_shape() +
+  tm_polygons(fill = "amt_mean_pct_wells_cbg",
+              fill.scale = tm_scale_intervals(
+                n = 5, 
+                style = "fixed",
+                breaks = c(0, 20, 40, 60, 80, 100)),
+              fill.legend = tm_legend("Percentage on private wells", text.size = 3, title.size = 3)
+  ) +
+  tm_basemap("Esri.NatGeoWorldMap")
+
+tmap_save(p_cbgs, filename = "../figs/06_well_means_mobile_baldwin.png", width = 4, height = 4, units = "in", dpi = 300, outer.margins = NA)
