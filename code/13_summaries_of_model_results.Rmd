@@ -1,0 +1,168 @@
+---
+title: "Tables of modeling results"
+output: html_document
+date: "`r Sys.Date()`"
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+```{r}
+library(tidyverse)
+library(patchwork)
+library(broom.mixed)
+library(ggeffects)
+
+# Prediction plots
+
+df <- read_rds("/Volumes/Projects/usgs_cvd_wells_al/data/clean/02_analysis_dataset.rds")
+```
+
+# Main analysis
+
+## Hypertension
+```{r}
+f_hypertensive <- read_rds("/Volumes/Projects/usgs_cvd_wells_al/output/04_hypertension_deaths_poisson_model_main.rds")
+
+mice::pool(f_hypertensive) %>% 
+  broom::tidy() %>%
+  as_tibble() %>%
+  filter(str_detect(term, "well")) %>%
+  mutate(
+    rr = exp(estimate),
+    rr.low = exp(estimate - 2 * std.error),
+    rr.high = exp(estimate + 2 * std.error)
+  ) %>%
+  select(term, contains("rr"))
+```
+
+## Ischemic
+
+```{r}
+f_ischemic <- read_rds("/Volumes/Projects/usgs_cvd_wells_al/output/04_ischemic_deaths_poisson_model_main.rds")
+
+mice::pool(f_ischemic) %>% 
+  broom::tidy() %>%
+  as_tibble() %>%
+  filter(str_detect(term, "well")) %>%
+  mutate(
+    rr = exp(estimate),
+    rr.low = exp(estimate - 2 * std.error),
+    rr.high = exp(estimate + 2 * std.error)
+  ) %>%
+  select(term, contains("rr"))
+```
+
+## Stroke/cerebrovascular
+
+```{r}
+f_stroke_cerebrovascular <- read_rds("/Volumes/Projects/usgs_cvd_wells_al/output/04_stroke_cerebrovascular_deaths_poisson_model_main.rds")
+
+mice::pool(f_stroke_cerebrovascular) %>% 
+  broom::tidy() %>%
+  as_tibble() %>%
+  filter(str_detect(term, "well")) %>%
+  mutate(
+    rr = exp(estimate),
+    rr.low = exp(estimate - 2 * std.error),
+    rr.high = exp(estimate + 2 * std.error)
+  ) %>%
+  select(term, contains("rr"))
+```
+
+## Combined
+```{r}
+bind_rows(mice::pool(f_hypertensive) %>% 
+  broom::tidy() %>%
+  as_tibble() %>%
+  filter(str_detect(term, "well")) %>%
+  mutate(
+    rr = exp(estimate),
+    rr.low = exp(estimate - 2 * std.error),
+    rr.high = exp(estimate + 2 * std.error)
+  ) %>%
+  select(term, contains("rr")) %>%
+    mutate(outcome = "Hypertensive heart disease"),
+  
+  mice::pool(f_ischemic) %>% 
+  broom::tidy() %>%
+  as_tibble() %>%
+  filter(str_detect(term, "well")) %>%
+  mutate(
+    rr = exp(estimate),
+    rr.low = exp(estimate - 2 * std.error),
+    rr.high = exp(estimate + 2 * std.error)
+  ) %>%
+  select(term, contains("rr")) %>%
+    mutate(outcome = "Ischemic heart disease"),
+  
+  mice::pool(f_stroke_cerebrovascular) %>% 
+  broom::tidy() %>%
+  as_tibble() %>%
+  filter(str_detect(term, "well")) %>%
+  mutate(
+    rr = exp(estimate),
+    rr.low = exp(estimate - 2 * std.error),
+    rr.high = exp(estimate + 2 * std.error)
+  ) %>%
+  select(term, contains("rr")) %>%
+    mutate(outcome = "Stroke/cerebrovascular diseases")
+  ) %>%
+  mutate(
+    stat = paste0(round(rr, digits = 2), " (", round(rr.low, digits = 2), " to ", round(rr.high, digits = 2), ")", sep = "")
+  ) %>%
+  select(outcome, stat)
+```
+
+# Interaction with physiographic region
+
+## Hypertension
+
+```{r}
+f_hypertensive <- read_rds("/Volumes/Projects/usgs_cvd_wells_al/output/04_01_preds_hypertension_deaths_poisson_model_ixn_physiographic_region.rds")
+
+# This shows the mean pvalue of the wald type II tests of the interaction between physiographic region and private well percentage. If it is non-significant, then it doesn't make sense to calculate estimates and confidence intervals for each physiographic region - we have no evidence that the rate ratios are different among physiographic region. These pvalues are also *smaller* than they should be because they do not take into account the variation across imputations according to Rubin's rules. They are liberal pvalues/anticonservative.
+map(f_hypertensive, ~car::Anova(.)[5, 3]) %>% unlist() %>% mean()
+```
+
+## Ischemic
+
+```{r}
+f_ischemic <- read_rds("/Volumes/Projects/usgs_cvd_wells_al/output/04_01_preds_ischemic_deaths_poisson_model_ixn_physiographic_region.rds")
+
+# This shows the mean pvalue of the wald type II tests of the interaction between physiographic region and private well percentage. If it is non-significant, then it doesn't make sense to calculate estimates and confidence intervals for each physiographic region - we have no evidence that the rate ratios are different among physiographic region. These pvalues are also *smaller* than they should be because they do not take into account the variation across imputations according to Rubin's rules. They are liberal pvalues/anticonservative.
+map(f_ischemic, ~car::Anova(.)[5, 3]) %>% unlist() %>% mean()
+```
+
+## Stroke/cerebrovascular diseases
+
+```{r}
+f_stroke_cerebrovascular <- read_rds("/Volumes/Projects/usgs_cvd_wells_al/output/04_01_preds_stroke_cerebrovascular_deaths_poisson_model_ixn_physiographic_region.rds")
+
+# This shows the mean pvalue of the wald type II tests of the interaction between physiographic region and private well percentage. If it is non-significant, then it doesn't make sense to calculate estimates and confidence intervals for each physiographic region - we have no evidence that the rate ratios are different among physiographic region. These pvalues are also *smaller* than they should be because they do not take into account the variation across imputations according to Rubin's rules. They are liberal pvalues/anticonservative.
+map(f_stroke_cerebrovascular, ~car::Anova(.)[5, 3]) %>% unlist() %>% mean()
+```
+
+# By nitrate
+
+## Hypertension
+```{r}
+f_hypertensive <- read_rds("/Volumes/Projects/usgs_cvd_wells_al/output/04_hypertension_deaths_poisson_model_ixn_nitrate.rds")
+
+
+
+mice::pool(f_hypertensive) %>% 
+  broom::tidy() %>%
+  as_tibble() %>%
+  filter(str_detect(term, "well")) %>%
+  mutate(
+    rr = exp(estimate),
+    rr.low = exp(estimate - 2 * std.error),
+    rr.high = exp(estimate + 2 * std.error),
+    estimate.low = estimate - 2 * std.error,
+    estimate.high = estimate + 2 * std.error
+  ) %>%
+  select(term, p.value, contains("rr"), contains("estimate"))
+```
+
