@@ -32,7 +32,7 @@ p_hypertensive <- preds_hypertensive %>%
   theme(axis.line = element_line(color = "lightgray"),
         legend.position = "none")
 
-ggsave("figs/05_hypertensive_deaths_inla.pdf",
+ggsave("../figs/05_hypertensive_deaths_inla.pdf",
        p_hypertensive, width= 6, height=4)
 
 # Ischemic
@@ -54,7 +54,7 @@ p_ischemic <- preds_ischemic %>%
   theme(axis.line = element_line(color = "lightgray"),
         legend.position = "none")
 
-ggsave("figs/05_ischemic_deaths_inla.pdf",
+ggsave("../figs/05_ischemic_deaths_inla.pdf",
        p_ischemic, width= 6, height=4)
 
 # Stroke/cerebrovascular
@@ -76,7 +76,7 @@ p_stroke_cerebrovascular <- preds_stroke_cerebrovascular %>%
   theme(axis.line = element_line(color = "lightgray"),
         legend.position = "none")
 
-ggsave("figs/05_stroke_cerebrovascular_deaths_inla.pdf",
+ggsave("../figs/05_stroke_cerebrovascular_deaths_inla.pdf",
        p_stroke_cerebrovascular, width= 6, height=4)
 
 # Diabetes
@@ -98,16 +98,16 @@ p_diabetes <- preds_diabetes %>%
   theme(axis.line = element_line(color = "lightgray"),
         legend.position = "none")
 
-ggsave("figs/05_diabetes_deaths_inla.pdf",
+ggsave("../figs/05_diabetes_deaths_inla.pdf",
        p_diabetes, width= 6, height=4)
 
 p <- p_hypertensive + p_ischemic + p_stroke_cerebrovascular + p_diabetes
 p
 
-ggsave(filename = "figs/05_combined_plots_inla.pdf", p, width= 12, height=5.5)
+ggsave(filename = "../figs/05_combined_plots_inla.pdf", p, width= 12, height=5.5)
 
 p_no_diabetes <- wrap_plots(list(p_hypertensive, p_ischemic, p_stroke_cerebrovascular), ncol = 2)
-ggsave(filename = "figs/05_combined_plots_inla_no_diabetes.png", p_no_diabetes, width= 6, height=4, dpi = 300)
+ggsave(filename = "../figs/05_combined_plots_inla_no_diabetes.png", p_no_diabetes, width= 6, height=4, dpi = 300)
 
 #########
 # Sensitivity analysis: restricting to second largest block groups
@@ -134,7 +134,7 @@ p_hypertensive_sensitivity_area <- preds_hypertensive_sensitivity_area %>%
   theme(axis.line = element_line(color = "lightgray"),
         legend.position = "none")
 
-ggsave("figs/05_hypertensive_deaths_sensitivity_area_inla.pdf",
+ggsave("../figs/05_hypertensive_deaths_sensitivity_area_inla.pdf",
        p_hypertensive_sensitivity_area, width= 6, height=4)
 
 # Ischemic
@@ -158,7 +158,7 @@ p_ischemic_sensitivity_area <- preds_ischemic_sensitivity_area %>%
   theme(axis.line = element_line(color = "lightgray"),
         legend.position = "none")
 
-ggsave("figs/05_ischemic_deaths_sensitivity_area_inla.pdf",
+ggsave("../figs/05_ischemic_deaths_sensitivity_area_inla.pdf",
        p_ischemic_sensitivity_area, width= 6, height=4)
 
 # Stroke/cerebrovascular
@@ -182,7 +182,7 @@ p_stroke_cerebrovascular_sensitivity_area <- preds_stroke_cerebrovascular_sensit
   theme(axis.line = element_line(color = "lightgray"),
         legend.position = "none")
 
-ggsave("figs/05_stroke_cerebrovascular_deaths_sensitivity_area_inla.pdf",
+ggsave("../figs/05_stroke_cerebrovascular_deaths_sensitivity_area_inla.pdf",
        p_stroke_cerebrovascular_sensitivity_area, width= 6, height=4)
 
 # Diabetes
@@ -206,11 +206,11 @@ p_diabetes_sensitivity_area <- preds_diabetes_sensitivity_area %>%
   theme(axis.line = element_line(color = "lightgray"),
         legend.position = "none")
 
-ggsave("figs/05_diabetes_deaths_sensitivity_area_inla.pdf",
+ggsave("../figs/05_diabetes_deaths_sensitivity_area_inla.pdf",
        p_diabetes_sensitivity_area, width= 6, height=4)
 
 p_sensitivity_area <- p_hypertensive_sensitivity_area + p_ischemic_sensitivity_area + p_stroke_cerebrovascular_sensitivity_area + p_diabetes_sensitivity_area
 p_sensitivity_area
 
-ggsave(filename = "figs/05_combined_plots_sensitivity_area_inla.pdf", p_sensitivity_area, width= 12, height=5.5)
+ggsave(filename = "../figs/05_combined_plots_sensitivity_area_inla.pdf", p_sensitivity_area, width= 12, height=5.5)
 

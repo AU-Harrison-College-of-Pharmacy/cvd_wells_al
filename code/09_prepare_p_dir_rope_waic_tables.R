@@ -2,6 +2,7 @@ library(tidyverse)
 library(INLA)
 library(bayestestR)
 library(gt)
+library(gtsummary)
 
 source("r/sample_posterior_parameter.R")
 source("r/calculate_p_direction_rope_interaction.R")

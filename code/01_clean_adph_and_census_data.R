@@ -175,7 +175,7 @@ df %>% filter(st_is_empty(geometry))
 df_ruca <- read_csv("/Volumes/Projects/usgs_cvd_wells_al/data/raw/RUCA-codes-2020-tract.csv") %>%
   rename(id_census_tract = TractFIPS20,
          cat_ruca = PrimaryRUCA) %>%
-  mutate(cat_rural = if_else(cat_ruca <= 6, "Urban", "Rural")) %>%
+  mutate(cat_rural = if_else(cat_ruca <= 6, "Urban", "Rural") %>% as_factor()) %>%
   select(id_census_tract, cat_ruca, cat_rural) %>%
   filter(cat_ruca != 99)  # filter out census tracts that are entirely in coastal or inland water bodies, with zero population and zero land area (https://www.ers.usda.gov/data-products/rural-urban-commuting-area-codes/documentation)
 

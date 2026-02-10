@@ -41,7 +41,7 @@ p_hypertensive_ixn_pct_aa <- preds_hypertensive %>%
     fill = guide_legend(reverse = TRUE)
   )
 
-ggsave("figs/05_02_hypertensive_deaths_ixn_pct_aa_inla.pdf",
+ggsave("../figs/05_02_hypertensive_deaths_ixn_pct_aa_inla.pdf",
        p_hypertensive_ixn_pct_aa, width= 6, height=4)
 
 # Ischemic
@@ -68,7 +68,7 @@ p_ischemic_ixn_pct_aa <- preds_ischemic %>%
     fill = guide_legend(reverse = TRUE)
   )
 
-ggsave("figs/05_02_ischemic_deaths_ixn_pct_aa.pdf",
+ggsave("../figs/05_02_ischemic_deaths_ixn_pct_aa.pdf",
        p_ischemic_ixn_pct_aa, width= 6, height=4)
 
 # Stroke/cerebrovascular
@@ -95,7 +95,7 @@ p_stroke_cerebrovascular_ixn_pct_aa <- preds_stroke_cerebrovascular %>%
     fill = guide_legend(reverse = TRUE)
   )
 
-ggsave("figs/05_02_stroke_cerebrovascular_deaths_ixn_pct_aa.pdf",
+ggsave("../figs/05_02_stroke_cerebrovascular_deaths_ixn_pct_aa.pdf",
        p_stroke_cerebrovascular_ixn_pct_aa, width= 6, height=4)
 
 # Diabetes
@@ -122,14 +122,14 @@ p_diabetes_ixn_pct_aa <- preds_diabetes %>%
     fill = guide_legend(reverse = TRUE)
   )
 
-ggsave("figs/05_02_diabetes_deaths_ixn_pct_aa.pdf",
+ggsave("../figs/05_02_diabetes_deaths_ixn_pct_aa.pdf",
        p_diabetes_ixn_pct_aa, width= 6, height=4) 
 
 p <- p_hypertensive_ixn_pct_aa + p_ischemic_ixn_pct_aa + p_stroke_cerebrovascular_ixn_pct_aa + p_diabetes_ixn_pct_aa
 p
 
-ggsave(filename = "figs/05_02_combined_plots_deaths_ixn_pct_aa_inla.pdf", p, width= 12, height=5.5)
+ggsave(filename = "../figs/05_02_combined_plots_deaths_ixn_pct_aa_inla.pdf", p, width= 12, height=5.5)
 
 p_no_diabetes <- wrap_plots(list(p_hypertensive_ixn_pct_aa, p_ischemic_ixn_pct_aa), ncol = 1)
 
-ggsave(filename = "figs/05_02_combined_plots_deaths_ixn_pct_aa_inla_no_diabetes.png", p_no_diabetes, width= 5, height=4, dpi = 300)
+ggsave(filename = "../figs/05_02_combined_plots_deaths_ixn_pct_aa_inla_no_diabetes.png", p_no_diabetes, width= 5, height=4, dpi = 300)

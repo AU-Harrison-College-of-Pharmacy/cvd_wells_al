@@ -38,7 +38,7 @@ p_hypertensive <- preds_hypertensive %>%
   theme_minimal() +
   theme(axis.line = element_line(color = "lightgray"))
 
-ggsave("figs/05_01_hypertensive_deaths_ixn_physiographic_region_inla.pdf",
+ggsave("../figs/05_01_hypertensive_deaths_ixn_physiographic_region_inla.pdf",
        p_hypertensive, width= 6, height=4)
 
 # Ischemic
@@ -62,7 +62,7 @@ p_ischemic <- preds_ischemic %>%
   theme_minimal() +
   theme(axis.line = element_line(color = "lightgray"))
 
-ggsave("figs/05_01_ischemic_deaths_ixn_physiographic_region_inla.pdf",
+ggsave("../figs/05_01_ischemic_deaths_ixn_physiographic_region_inla.pdf",
        p_ischemic, width= 6, height=4)
 
 # Stroke/cerebrovascular
@@ -86,7 +86,7 @@ p_stroke_cerebrovascular <- preds_stroke_cerebrovascular %>%
   theme_minimal() +
   theme(axis.line = element_line(color = "lightgray"))
 
-ggsave("figs/05_01_stroke_cerebrovascular_deaths_ixn_physiographic_region_inla.pdf",
+ggsave("../figs/05_01_stroke_cerebrovascular_deaths_ixn_physiographic_region_inla.pdf",
        p_stroke_cerebrovascular, width= 6, height=4)
 
 # Diabetes
@@ -111,10 +111,10 @@ p_diabetes <- preds_diabetes %>%
   theme_minimal() +
   theme(axis.line = element_line(color = "lightgray"))
 
-ggsave("figs/05_01_diabetes_deaths_ixn_physiographic_region_inla.pdf",
+ggsave("../figs/05_01_diabetes_deaths_ixn_physiographic_region_inla.pdf",
        p_diabetes, width= 6, height=4)
 
 p <- p_hypertensive + p_ischemic + p_stroke_cerebrovascular + p_diabetes
 p
 
-ggsave(filename = "figs/05_01_combined_plots_deaths_ixn_physiographic_region_inla.pdf", p, width= 12, height=5.5)
+ggsave(filename = "../figs/05_01_combined_plots_deaths_ixn_physiographic_region_inla.pdf", p, width= 12, height=5.5)
