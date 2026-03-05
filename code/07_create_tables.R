@@ -36,3 +36,42 @@ events_table <- df %>%
   tbl_summary(by = cat_age_group) %>%
   as_gt() %>%
   gtsave("code/07_events_table.docx")
+
+
+## Event rate of each outcome by age group
+df_imp_hyper <- df <- read_rds(file = "/Volumes/Projects/usgs_cvd_wells_al/data/clean/03_imputed_hypertensive_deaths.rds")$imputations[[1]] %>%
+  as_tibble()
+
+df_imp_hyper %>%
+  ungroup() %>%
+  group_by(cat_age_group) %>%
+  summarize(
+    n_hyper = sum(n_hypertensive_deaths),
+    n_pop = sum(n_population_times_4),
+    hyper_rate = sum(n_hypertensive_deaths) / sum(n_population_times_4) * 100000
+  )
+
+df_imp_ischemic <- df <- read_rds(file = "/Volumes/Projects/usgs_cvd_wells_al/data/clean/03_imputed_ischemic_deaths.rds")$imputations[[1]] %>%
+  as_tibble()
+
+df_imp_ischemic %>%
+  ungroup() %>%
+  group_by(cat_age_group) %>%
+  summarize(
+    n_isch = sum(n_ischemic_deaths),
+    n_pop = sum(n_population_times_4),
+    isch_rate = sum(n_ischemic_deaths) / sum(n_population_times_4) * 100000
+  )
+
+df_imp_stroke <- df <- read_rds(file = "/Volumes/Projects/usgs_cvd_wells_al/data/clean/03_imputed_stroke_cerebrovascular_deaths.rds")$imputations[[1]] %>%
+  as_tibble()
+
+df_imp_stroke %>%
+  ungroup() %>%
+  group_by(cat_age_group) %>%
+  summarize(
+    n_stroke = sum(n_stroke_cerebrovascular_deaths),
+    n_pop = sum(n_population_times_4),
+    stroke_rate = sum(n_stroke_cerebrovascular_deaths) / sum(n_population_times_4) * 100000
+  )
+

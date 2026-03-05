@@ -32,14 +32,14 @@ p_hypertensive_ixn_pct_aa <- preds_hypertensive %>%
     title = "Hypertensive deaths per 100,000"
   ) +
   scale_x_continuous(labels = c(paste0(m - 0.78 * s), paste0(m), paste0(m + s), paste0(m + 2 * s))) +
-  scale_color_manual(values = au_colors, name = "Centered/scaled percent AA only") +
-  scale_fill_manual(values = au_colors, name = "Centered/scaled percent AA only") +
+  scale_color_manual(values = au_colors, name = "", labels = c("-1 SD percent AA", "Mean percent AA", "+1 SD percent AA")) +
+  scale_fill_manual(values = au_colors, name = "", labels = c("-1 SD percent AA", "Mean percent AA", "+1 SD percent AA")) +
   theme_minimal() +
-  theme(axis.line = element_line(color = "lightgray")) +
-  guides(
-    color = guide_legend(reverse = TRUE),
-    fill = guide_legend(reverse = TRUE)
-  )
+  theme(axis.line = element_line(color = "lightgray")) #+
+  #guides(
+    #color = guide_legend(reverse = TRUE),
+    #fill = guide_legend(reverse = TRUE)
+  #)
 
 ggsave("../figs/05_02_hypertensive_deaths_ixn_pct_aa_inla.pdf",
        p_hypertensive_ixn_pct_aa, width= 6, height=4)
@@ -130,6 +130,6 @@ p
 
 ggsave(filename = "../figs/05_02_combined_plots_deaths_ixn_pct_aa_inla.pdf", p, width= 12, height=5.5)
 
-p_no_diabetes <- wrap_plots(list(p_hypertensive_ixn_pct_aa, p_ischemic_ixn_pct_aa), ncol = 1)
+p_no_diabetes <- wrap_plots(list(p_hypertensive_ixn_pct_aa + theme(legend.position = "top"), p_ischemic_ixn_pct_aa+ theme(legend.position = "none"), p_stroke_cerebrovascular_ixn_pct_aa + theme(legend.position = "none")), ncol = 1)
 
-ggsave(filename = "../figs/05_02_combined_plots_deaths_ixn_pct_aa_inla_no_diabetes.png", p_no_diabetes, width= 5, height=4, dpi = 300)
+ggsave(filename = "../figs/05_02_combined_plots_deaths_ixn_pct_aa_inla_no_diabetes.png", p_no_diabetes, width= 5, height=6, dpi = 300)

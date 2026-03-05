@@ -48,8 +48,11 @@ p_overall <- tmap_arrange(p_physio, p_wells, p_area_land, p_pct_aa, p_hypertensi
 
 tmap_options(component.autoscale = TRUE)
 
-tmap_save(p_overall, "figs/06_covariate_maps.png", width = 10, height = 10, units = "in")
+tmap_save(p_overall, "../figs/06_covariate_maps.png", width = 10, height = 10, units = "in")
 
+tmap_save(p_pct_aa, "../figs/06_covariate_map_pct_aa.png", width = 5, height = 7, units = "in", dpi = 300)
+
+tmap_save(p_wells, "../figs/06_covariate_map_p_wells.png", width = 5, height = 7, units = "in", dpi = 300)
 
 
 
@@ -78,9 +81,9 @@ p_high <- ggplot(data = counties_al) +
   geom_sf(data = high_wells_high_aa, aes(fill = ">75% African American"), color = "grey", size = 0.1) +
   geom_sf(data = high_wells_low_aa, aes(fill = "<25% African American"), color = "grey", size = 0.1) +
   labs(
-    title = "Well use percentage > 1 SD above the mean"
+    title = "CBGs with high well use"
   ) +
-  scale_fill_manual(values = c(">75% African American" = "blue", "<25% African American" = "yellow"),
+  scale_fill_manual(values = c(">75% African American" = "#0094CE", "<25% African American" = "#FFBF56"),
                     name = "",
                     labels = c("<25% African American", ">75% African American")) +  # WARNING: This is so weird. The legend basically got the order wrong, so I had to manually switch the `labels` argument to get the colors labelled correctly.
   theme(legend.position = "bottom")
@@ -101,8 +104,8 @@ low_wells_low_aa <- df %>%
 p_low <- ggplot(data = counties_al) +
   geom_sf(fill = "white") +
   theme_void() +
-  geom_sf(data = low_wells_high_aa, fill = "blue") +
-  geom_sf(data = low_wells_low_aa, fill = "yellow") +
+  geom_sf(data = low_wells_high_aa, fill = "#0093d2", alpha = 0.2) +
+  geom_sf(data = low_wells_low_aa, fill = "#ffc044", alpha = 0.2) +
   labs(
     title = "Well use percentage less than mean"
   )
@@ -113,6 +116,12 @@ p_overall <- p_low + p_high
 p_overall
 
 ggsave(filename = "figs/06_maps_high_low_wells_high_low_aa.png", p_overall, width = 9, height = 7, units = "in")
+
+#### Make plot with slightly different colors for poster
+
+ggsave(filename = "../figs/06_maps_high_wells_high_low_aa.pdf", 
+       p_high, 
+       width = 5, height = 7 )
 
 ## zoom in on birmingham area
 
